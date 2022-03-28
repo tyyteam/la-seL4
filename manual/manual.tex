@@ -1,0 +1,186 @@
+%
+% Copyright 2014, General Dynamics C4 Systems
+%
+% SPDX-License-Identifier: GPL-2.0-only
+%
+
+\documentclass[english,a4paper,11pt,twoside]{report}
+\usepackage{sel4}
+\usepackage[authoryear]{natbib}
+\def\cite{\citep}
+
+\newif \ifxeightsix   \xeightsixtrue
+
+\usepackage{url}
+
+% Setting this to true turns on the `draft' watermark
+\newif \ifDraft \Draftfalse
+%\Drafttrue
+
+\ifDraft
+  \usepackage{draftwatermark}
+  \SetWatermarkLightness{0.9}
+  \newcommand{\Comment}[1]{\textbf{\textsl{#1}}}
+  \newcommand{\FIXME}[1]{\textbf{\textsl{FIXME: #1}}}
+  \date{}
+\else
+  \newcommand{\Comment}[1]{\relax}
+  \newcommand{\FIXME}[1]{\relax}
+  \date{}
+\fi
+
+ \pagestyle{fancyplain}
+ \lhead[\fancyplain{}{\thepage}]{\fancyplain{}{\rightmark}}
+ \chead{}
+ \rhead[\fancyplain{}{\leftmark}]{\fancyplain{}{\thepage}}
+ \lfoot[\fancyplain{\thepage}{}]{}
+ \cfoot{}
+ \rfoot[]{\fancyplain{\thepage}{}}
+
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{verbatim}
+\usepackage[small,bf,up,width=0.75\textwidth]{caption}
+\usepackage[htt]{hyphenat}
+\renewcommand{\captionfont}{\small}
+
+\renewcommand{\chapterautorefname}{Chapter}
+\renewcommand{\sectionautorefname}{Section}
+\renewcommand{\subsectionautorefname}{Section}
+\renewcommand{\subsubsectionautorefname}{Section}
+\renewcommand{\appendixautorefname}{Appendix}
+\renewcommand{\Hfootnoteautorefname}{Footnote}
+\newcommand{\Htextbf}[1]{\textbf{\hyperpage{#1}}}
+\urlstyle{rm}
+
+% If statements
+\usepackage{ifthen}
+
+% Numbered subsubsections
+\setcounter{secnumdepth}{5}
+
+% Subsubsections it table of contents
+\setcounter{tocdepth}{5}
+
+% API functions / Kernel Objects
+\newcommand{\obj}[1]{\textsf{\small #1}}
+\newcommand{\apifunc}[2]{\hyperref[api:#2]{\texttt{#1()}}}
+\newcommand{\enummem}[1]{\texttt{#1}}
+\newcommand{\ipcbloc}[1]{\texttt{#1}}
+\newcommand{\reg}[1]{\texttt{#1}}
+
+\newcommand{\version}{\input{VERSION}}
+
+\newcommand{\rtm}{\textsuperscript{\textregistered}}
+
+% Read information about the repository.
+\input{env}
+
+\begin{document}
+
+  \title{seL4\\ Reference Manual}
+  \subtitle{Version \version}
+
+  \author{seL4 Foundation}
+  \email{https://sel4.systems}
+  \date{\commitdate}
+
+  \maketitle
+
+  \urlstyle{sf}
+  \thispagestyle{empty}
+
+  \vfill
+
+  % Don't indent paragraphs; instead, just leave some vertical space.
+  \parindent 0pt\parskip 6pt
+
+  \copyright\ the seL4 authors and contributors.\\
+  \textsc{All rights reserved}.
+
+  \vspace{2ex}
+  % SPDX statement on its own line silences license checker warnings
+  \texttt{%
+  SPDX-License-Identifier: GPL-2.0-only
+  }\\
+  You may use this manual and its sources under the terms of the GPL license, version 2.
+
+  \vspace{2ex}
+  seL4\rtm\ is a trademark of LF Projects, LLC.\\
+  Arm\rtm\ is a registered trademark of Arm Limited.\\
+  RISC-V\rtm\ is a registered trademark of RISC-V International.
+
+  % Acknowledgements
+  \thispagestyle{empty}
+  \vfill
+  \renewcommand{\abstractname}{Acknowledgements}
+  \begin{abstract}
+% This list of contributors is based on the hg log. If you make commits please
+% add your name in alphabetical order.
+The primary authors of this document are Matthew Grosvenor and Adam Walker,
+with contributions from
+Adrian Danis,
+Andrew Boyton,
+Anna Lyons,
+Axel Heider,
+Branden Robinson,
+David Greenaway,
+Etienne Le~Sueur,
+Gernot Heiser,
+Gerwin Klein,
+Godfrey van der Linden,
+Jimmy Brush,
+Kevin Elphinstone,
+Matthew Fernandez,
+Matthias Daum,
+Michael von Tessin,
+Nick Spinale,
+Peter Chubb,
+Simon Winwood,
+Thomas Sewell,
+Timothy Bourke, and
+Toby Murray.
+
+The authors and contributors can be contacted via the seL4 Developer Mailing
+List or the seL4 Discourse Forums. See \url{https://sel4.systems/contact.html}
+for details.
+  \end{abstract}
+  \thispagestyle{empty}
+
+  \cleardoublepage
+  \setcounter{page}{1}
+  \tableofcontents
+  \listoftables
+  \listoffigures
+
+  \cleardoublepage
+  \setcounter{page}{1}
+  \pagenumbering{arabic}
+
+  % Introduction
+  \input{parts/intro}
+
+  % Chapters
+  \input{parts/objects}
+  \input{parts/cspace}
+  \input{parts/ipc}
+  \input{parts/notifications}
+  \input{parts/threads}
+  \input{parts/vspace}
+  \input{parts/io}
+  \input{parts/bootup}
+
+  % API Reference
+  \chapter{seL4 API Reference}
+  \label{sec:api_reference}
+  \input{parts/api}
+
+  % Bibliography
+  \cleardoublepage
+  \bibliographystyle{plainnat}
+  \bibliography{references}
+
+\end{document}
