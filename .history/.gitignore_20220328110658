@@ -24,7 +24,6 @@ manual/manual.pdf
 manual/stage
 manual/doxygen-output
 manual/generated
-.vscode
 
 # Emacs backups
 *~
