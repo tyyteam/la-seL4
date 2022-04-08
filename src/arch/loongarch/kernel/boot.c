@@ -13,7 +13,7 @@
 #include <model/statedata.h>
 #include <object/interrupt.h>
 /*CY 以上头文件应该是平台无关的，在include/下 */
-#include <arch/machine.h>
+#include <arch/machine.h>  /*CY 这下面的#include <model/statedata.h> -> #include <object/structures.h>会把include进libsel4的一些架构相关的宏定义*/
 #include <arch/kernel/boot.h>
 #include <arch/kernel/vspace.h>
 #include <arch/benchmark.h>
