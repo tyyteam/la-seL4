@@ -29,16 +29,15 @@
 #define seL4_TCBBits            10
 #endif
 
-/* Sv39/Sv48 pages/ptes sizes */
-#define seL4_PageTableEntryBits 3
-#define seL4_PageTableIndexBits 9
+/* pages/ptes sizes */
+#define seL4_PageTableEntryBits 3  /*CY pte size */
+#define seL4_PageTableIndexBits 11
 
-#define seL4_PageBits          12
-#define seL4_LargePageBits     21
-#define seL4_HugePageBits      30
-#define seL4_TeraPageBits      39
-#define seL4_PageTableBits     12
-#define seL4_VSpaceBits        seL4_PageTableBits
+#define seL4_PageBits          14
+#define seL4_LargePageBits     25
+#define seL4_HugePageBits      36
+#define seL4_PageTableBits     14
+#define seL4_VSpaceBits        seL4_PageTableBits  /*CY ? */
 
 #define seL4_NumASIDPoolsBits   7
 #define seL4_ASIDPoolIndexBits  9
