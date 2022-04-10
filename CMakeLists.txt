@@ -140,9 +140,7 @@ elseif(KernelArchRiscV)
 elseif(KernelArchLoongarch)
 
     # set(arm_march "${KernelArmArmV}${KernelArmMachFeatureModifiers}")
-    string(APPEND c_common_flags " -march=${arm_march}")
-    string(APPEND asm_common_flags " -march=${arm_march}")
-
+    string(APPEND common_flags " -march=loongarch64 -mabi=lp64")
     if(KernelSel4ArchLoongarch64)
         # nothing special
     else()
@@ -253,7 +251,6 @@ KernelCommonFlags(
     # generated automatically when gcc wraps the linking step and invokes ld.
     -nostdlib -fno-pic -fno-pie
 )
-
 if(KernelFWholeProgram)
     # KernelFWholeProgram is still an experimental feature and disabled by
     # default. Clarify if the linker step via GCC actually cares about this
@@ -302,7 +299,6 @@ elseif(KernelArchRiscV)
 
 elseif(KernelArchLoongarch)
     # KernelCommonFlags(-mcmodel=medany)
-
 else()
     message(FATAL_ERROR "unknown KernelArch '${KernelArch}'")
 endif()
@@ -373,7 +369,6 @@ add_custom_target(kernel_headers DEPENDS kernel_config_headers)
 get_generated_files(gen_files_list kernel_autoconf_Gen)
 get_generated_files(gen_files2 kernel_Gen)
 list(APPEND gen_files_list "${gen_files2}")
-
 #
 # C source generation
 #

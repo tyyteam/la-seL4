@@ -16,9 +16,9 @@ if(KernelPlatform3A5000)
     config_set(KernelLoongarchPlatform Loongarch_PLAT "3A5000")
     config_set(KernelPlatformFirstHartID FIRST_HART_ID 0)
     config_set(KernelOpenSBIPlatform OPENSBI_PLATFORM "generic")
-    # if(KernelSel4ArchLoongarch64)
-        # list(APPEND KernelDTSList "tools/dts/3A5000.dts")
-    # endif()
+    if(KernelSel4ArchLoongarch64)
+        list(APPEND KernelDTSList "tools/dts/3A5000.dts")
+    endif()
 
     declare_default_headers(
         TIMER_FREQUENCY 10000000 PLIC_MAX_NUM_INT 0

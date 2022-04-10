@@ -108,6 +108,45 @@ class RISCVConfig(Config):
             return self.MEGAPAGE_BITS_RV64
         raise ValueError('Unsupported sel4arch "{}" specified.'.format(self.sel4arch))
 
+class LoongarchConfig(Config):
+    ''' Config class for Loongarch '''
+    arch = 'loongarch'
+    MEGAPAGE_BITS_RV32 = 22  # 2^22 = 4 MiByte
+    MEGAPAGE_BITS_RV64 = 21  # 2^21 = 2 MiByte
+    MEGA_PAGE_SIZE_RV64 = 2**MEGAPAGE_BITS_RV64
+
+    def get_bootloader_reserve(self) -> int:
+        ''' OpenSBI reserved the first 2 MiByte of physical memory on rv64,
+        which is exactly a megapage. For rv32 we use the same value for now, as
+        this seems to work nicely - even if this is just half of the 4 MiByte
+        magepages that exist there. '''
+        return self.MEGA_PAGE_SIZE_RV64
+
+    def align_memory(self, regions: Set[Region]) -> List[Region]:
+        ''' Currently the RISC-V port expects physBase to be the address that the
+        bootloader is loaded at. To be generalised in the future. '''
+        ret = sorted(regions)
+        extra_reserved = set()
+
+        physBase = ret[0].base
+
+        resv = Region(ret[0].base, self.get_bootloader_reserve())
+        extra_reserved.add(resv)
+        ret[0].base += self.get_bootloader_reserve()
+        ret[0].size -= self.get_bootloader_reserve()
+
+        return ret, extra_reserved, physBase
+
+    def get_device_page_bits(self) -> int:
+        ''' Get page size in bits for mapping devices for this arch '''
+        if (self.sel4arch == 'riscv32'):
+            # 4MiB device pages
+            return self.MEGAPAGE_BITS_RV32
+        elif (self.sel4arch == 'riscv64'):
+            # 2MiB device pages for sv39 and sv48
+            return self.MEGAPAGE_BITS_RV64
+        raise ValueError('Unsupported sel4arch "{}" specified.'.format(self.sel4arch))        
+
 
 def get_arch_config(sel4arch: str, addrspace_max: int) -> Config:
     ''' Return an appropriate Config object for the given architecture '''
@@ -115,5 +154,7 @@ def get_arch_config(sel4arch: str, addrspace_max: int) -> Config:
         return ARMConfig(sel4arch, addrspace_max)
     elif sel4arch in ['riscv32', 'riscv64']:
         return RISCVConfig(sel4arch, addrspace_max)
+    elif sel4arch in ['loongarch64']:
+        return LoongarchConfig(sel4arch, addrspace_max)
     else:
         raise ValueError('Unsupported sel4arch "{}" specified.'.format(sel4arch))
