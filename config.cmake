@@ -45,11 +45,12 @@ set_property(
         user_data_C
         user_data_device_C
 )
-
 # These options are now set in seL4Config.cmake
 if(DEFINED CALLED_declare_default_headers)
     # calculate the irq cnode size based on MAX_NUM_IRQ
     if("${KernelArch}" STREQUAL "riscv")
+        math(EXPR MAX_NUM_IRQ "${CONFIGURE_PLIC_MAX_NUM_INT} + 2")
+    elseif("${KernelArch}" STREQUAL "loongarch")
         math(EXPR MAX_NUM_IRQ "${CONFIGURE_PLIC_MAX_NUM_INT} + 2")
     else()
         if(

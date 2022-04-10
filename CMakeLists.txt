@@ -137,6 +137,18 @@ elseif(KernelArchRiscV)
 
     string(APPEND common_flags " -march=${_riscv_march} -mabi=${_riscv_mabi}")
 
+elseif(KernelArchLoongarch)
+
+    # set(arm_march "${KernelArmArmV}${KernelArmMachFeatureModifiers}")
+    string(APPEND c_common_flags " -march=${arm_march}")
+    string(APPEND asm_common_flags " -march=${arm_march}")
+
+    if(KernelSel4ArchLoongarch64)
+        # nothing special
+    else()
+        message(FATAL_ERROR "unknown Loongarch KernelSel4Arch '${KernelSel4Arch}'")
+    endif()
+
 else()
     message(FATAL_ERROR "unknown KernelArch '${KernelArch}'")
 endif()
@@ -287,6 +299,9 @@ elseif(KernelArchARM)
 
 elseif(KernelArchRiscV)
     KernelCommonFlags(-mcmodel=medany)
+
+elseif(KernelArchLoongarch)
+    # KernelCommonFlags(-mcmodel=medany)
 
 else()
     message(FATAL_ERROR "unknown KernelArch '${KernelArch}'")
