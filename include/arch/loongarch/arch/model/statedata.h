@@ -22,17 +22,18 @@ NODE_STATE_BEGIN(archNodeState)
 NODE_STATE_DECLARE(word_t, ipiReschedulePending);
 NODE_STATE_END(archNodeState);
 
+/*CY 待修改 */
 extern asid_pool_t *riscvKSASIDTable[BIT(asidHighBits)];
 
 /* Kernel Page Tables */
-extern pte_t kernel_root_pageTable[BIT(PT_INDEX_BITS)] VISIBLE;
+extern word_t kernel_level0_pd[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
 
 /* We need to introduce a level2 pagetable in order to map OpenSBI to a separate
  * page entry to avoid PMP exception. */
-#if __riscv_xlen != 32
-extern pte_t kernel_image_level2_pt[BIT(PT_INDEX_BITS)];
-extern pte_t kernel_image_level2_dev_pt[BIT(PT_INDEX_BITS)];
-#elif defined(CONFIG_KERNEL_LOG_BUFFER)
-extern pte_t kernel_image_level2_log_buffer_pt[BIT(PT_INDEX_BITS)];
-#endif
+// #if __riscv_xlen != 32
+extern word_t kernel_level1_pd[BIT(PT_INDEX_BITS * 2)] ALIGN_BSS(BIT(seL4_PageTableBits));
+extern pte_t kernel_pt[BIT(PT_INDEX_BITS * 3)] ALIGN_BSS(BIT(seL4_PageTableBits));
+// #elif defined(CONFIG_KERNEL_LOG_BUFFER)
+// extern pte_t kernel_image_level2_log_buffer_pt[BIT(PT_INDEX_BITS)];
+// #endif
 

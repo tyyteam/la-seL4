@@ -50,10 +50,10 @@
 #define RISCV_GET_LVL_PGSIZE_BITS(n) (((PT_INDEX_BITS) * (((CONFIG_PT_LEVELS) - 1) - (n))) + seL4_PageBits)
 #define RISCV_GET_LVL_PGSIZE(n)      BIT(RISCV_GET_LVL_PGSIZE_BITS((n)))
 */
-/*CY CONFIG_PT_LEVELS定义？ */
+/*CY CONFIG_PT_LEVELS定义？ ==3 */
 #define LA_GET_PT_INDEX(addr, n)  (((addr) >> (((PT_INDEX_BITS) * (((CONFIG_PT_LEVELS) - 1) - (n))) + seL4_PageBits)) & MASK(PT_INDEX_BITS))
 #define LA_GET_LVL_PGSIZE_BITS(n) (((PT_INDEX_BITS) * (((CONFIG_PT_LEVELS) - 1) - (n))) + seL4_PageBits)
-#define LA_GET_LVL_PGSIZE(n)      BIT(RISCV_GET_LVL_PGSIZE_BITS((n)))
+#define LA_GET_LVL_PGSIZE(n)      BIT(LA_GET_LVL_PGSIZE_BITS((n)))
 /*
  * These values are defined in RISC-V priv-1.10 manual, they represent the
  * exception codes saved in scause register (by the hardware) on traps.

@@ -8,7 +8,7 @@
 
 #include <util.h>
 
-// #if CONFIG_PT_LEVELS == 3
+#if CONFIG_PT_LEVELS == 3
 
 /*CY seL4_UserTop哪里来的？ */
 /* last accessible virtual address in user space */
@@ -20,10 +20,10 @@
 
 /* The base address in virtual memory to use for the 1:1 physical memory
  * mapping */
-#define PPTR_BASE UL_CONST(0x0000900000000000)
+#define PPTR_BASE UL_CONST(0x9FFF000000000000)
 
 /* Top of the physical memory window */
-#define PPTR_TOP UL_CONST(0x000090FF80000000)
+#define PPTR_TOP UL_CONST(0xA000000000000000)
 
 /* The physical memory address to use for mapping the kernel ELF */
 /* This represents the physical address that the kernel image will be linked to. This needs to
@@ -37,15 +37,17 @@
 
 /* The base address in virtual memory to use for the kernel device
  * mapping region. These are mapped in the kernel page table. */
-#define KDEV_BASE UL_CONST(0x000090FFC0000000)
+#define KDEV_BASE UL_CONST(0xA000000040000000)
 
 /* Place the kernel log buffer at the end of the kernel device page table */
 /*CY 但是没考虑这个，暂定这个数 */
-#define KS_LOG_PPTR UL_CONST(0x000090FFFFE00000)
+#define KS_LOG_PPTR UL_CONST(0xA00000007FE00000)
 
-// #else
-// #error Only PT_LEVELS == 3 is supported
-// #endif
+#else
+#error Only PT_LEVELS == 3 is supported
+#endif
 
+/*rv
 #define LOAD  ld
 #define STORE sd
+*/

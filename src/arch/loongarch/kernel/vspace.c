@@ -27,6 +27,11 @@
 #include <kernel/stack.h>
 #include <util.h>
 
+enum PTE_TYPE {
+    PTE_BASIC,
+    PTE_LARGE;
+};
+
 struct resolve_ret {
     paddr_t frameBase;
     vm_page_size_t frameSize;
@@ -60,9 +65,14 @@ static inline bool_t isPTEPageTable(pte_t *pte)
  *
  * Maps all pages with full RWX and supervisor perms by default.
  */
-static pte_t pte_next(word_t phys_addr, bool_t is_leaf)
+/*CY 根据自动生成的pte_next函数，待改 */
+static pte_t pte_next(word_t phys_addr, bool_t is_leaf, PTE_TYPE pte_type)
 {
+
     word_t ppn = (word_t)(phys_addr >> 12);
+    if (pte_type) {
+        ppn >>= 12;
+    }
 
     uint8_t read = is_leaf ? 1 : 0;
     uint8_t write = read;
@@ -107,59 +117,27 @@ BOOT_CODE VISIBLE void map_kernel_window(void)
 {
     /* mapping of KERNEL_ELF_BASE (virtual address) to kernel's
      * KERNEL_ELF_PHYS_BASE  */
-    //rv assert(CONFIG_PT_LEVELS > 1 && CONFIG_PT_LEVELS <= 4);
+    rv assert(CONFIG_PT_LEVELS > 1 && CONFIG_PT_LEVELS <= 4);
 
-    /* kernel window starts at PPTR_BASE */
-    word_t pptr = PPTR_BASE;
-
-    /* first we map in memory from PADDR_BASE */
-    word_t paddr = PADDR_BASE;
-    while (pptr < PPTR_TOP) {
-        assert(IS_ALIGNED(pptr, RISCV_GET_LVL_PGSIZE_BITS(0)));
-        assert(IS_ALIGNED(paddr, RISCV_GET_LVL_PGSIZE_BITS(0)));
-
-        kernel_root_pageTable[RISCV_GET_PT_INDEX(pptr, 0)] = pte_next(paddr, true);
-
-        pptr += RISCV_GET_LVL_PGSIZE(0);
-        paddr += RISCV_GET_LVL_PGSIZE(0);
-    }
     /* now we should be mapping the 1GiB kernel base */
-    assert(pptr == PPTR_TOP);
-    pptr = ROUND_DOWN(KERNEL_ELF_BASE, RISCV_GET_LVL_PGSIZE_BITS(0));
-    paddr = ROUND_DOWN(KERNEL_ELF_PADDR_BASE, RISCV_GET_LVL_PGSIZE_BITS(0));
-
-#if __riscv_xlen == 32
-    kernel_root_pageTable[RISCV_GET_PT_INDEX(pptr, 0)] = pte_next(paddr, true);
-    pptr += RISCV_GET_LVL_PGSIZE(0);
-    paddr += RISCV_GET_LVL_PGSIZE(0);
-#ifdef CONFIG_KERNEL_LOG_BUFFER
-    kernel_root_pageTable[RISCV_GET_PT_INDEX(KS_LOG_PPTR, 0)] =
-        pte_next(kpptr_to_paddr(kernel_image_level2_log_buffer_pt), false);
-#endif
-#else
-    word_t index = 0;
-    /* The kernel image is mapped twice, locating the two indexes in the
-     * root page table, pointing them to the same second level page table.
-     */
-    kernel_root_pageTable[RISCV_GET_PT_INDEX(KERNEL_ELF_PADDR_BASE + PPTR_BASE_OFFSET, 0)] =
-        pte_next(kpptr_to_paddr(kernel_image_level2_pt), false);
-    kernel_root_pageTable[RISCV_GET_PT_INDEX(pptr, 0)] =
-        pte_next(kpptr_to_paddr(kernel_image_level2_pt), false);
-    while (pptr < PPTR_TOP + RISCV_GET_LVL_PGSIZE(0)) {
-        kernel_image_level2_pt[index] = pte_next(paddr, true);
-        index++;
-        pptr += RISCV_GET_LVL_PGSIZE(1);
-        paddr += RISCV_GET_LVL_PGSIZE(1);
+    /*CY 让pptr指向PPTR_TOP，下面映射Kernel ELF的页表*/
+    word_t pptr = ROUND_DOWN(KERNEL_ELF_BASE, 30);
+    word_t paddr = ROUND_DOWN(KERNEL_ELF_PADDR_BASE, 30);
+    while (pptr < KDEV_BASE) {
+        kernel_level0_pd[LA_GET_PT_INDEX(pptr, 0)] = kpptr_to_paddr(&kernel_level1_pd[LA_GET_PT_INDEX(pptr, 1)]);
+        for (int i = 0; pptr - PPTR_BASE < LA_GET_LVL_PGSIZE(1) * i; ++i) {
+            kernel_level1_pd[LA_GET_PT_INDEX(pptr, 1) * (LA_GET_PT_INDEX(pptr, 0) + 1)] = kpptr_to_paddr(&kernel_level3_pageTable[LA_GET_PT_INDEX(pptr, 2) * (LA_GET_PT_INDEX(pptr, 1) + 1) * (LA_GET_PT_INDEX(pptr, 0) + 1)]);
+            for (int j = 0; pptr - PPTR_BASE < LA_GET_LVL_PGSIZE(2) * j; ++j) {
+                kernel_pt[LA_GET_PT_INDEX(pptr, 2)] = pte_next(paddr, true, PTE_BASIC);
+                pptr += LA_GET_LVL_PGSIZE(2);
+                paddr += LA_GET_LVL_PGSIZE(2);
+            }
+        }
     }
-
-    /* Map kernel device page table */
-    kernel_root_pageTable[RISCV_GET_PT_INDEX(KDEV_BASE, 0)] =
-        pte_next(kpptr_to_paddr(kernel_image_level2_dev_pt), false);
-#endif
 
     /* There should be 1GiB free where we put device mapping */
-    assert(pptr == UINTPTR_MAX - RISCV_GET_LVL_PGSIZE(0) + 1);
-    map_kernel_devices();
+    assert(pptr == KDEV_BASE);
+    map_kernel_devices();  /*CY 这个还没管 */
 }
 
 BOOT_CODE void map_it_pt_cap(cap_t vspace_cap, cap_t pt_cap)
