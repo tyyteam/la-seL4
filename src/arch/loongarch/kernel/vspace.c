@@ -95,7 +95,7 @@ static pte_t pte_next(word_t phys_addr, bool_t is_leaf, PTE_TYPE pte_type)
 
 BOOT_CODE void map_kernel_frame(paddr_t paddr, pptr_t vaddr, vm_rights_t vm_rights)
 {
-#if __riscv_xlen == 32
+#if __loongarch_xlen == 32
     paddr = ROUND_DOWN(paddr, RISCV_GET_LVL_PGSIZE_BITS(0));
     assert((paddr % RISCV_GET_LVL_PGSIZE(0)) == 0);
     kernel_root_pageTable[RISCV_GET_PT_INDEX(vaddr, 0)] = pte_next(paddr, true);
@@ -1191,7 +1191,7 @@ exception_t benchmark_arch_map_logBuffer(word_t frame_cptr)
 
     ksUserLogBuffer = pptr_to_paddr((void *) frame_pptr);
 
-#if __riscv_xlen == 32
+#if __loongarch_xlen == 32
     paddr_t physical_address = ksUserLogBuffer;
     for (word_t i = 0; i < BIT(PT_INDEX_BITS); i += 1) {
         kernel_image_level2_log_buffer_pt[i] = pte_next(physical_address, true);
