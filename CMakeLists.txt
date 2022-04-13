@@ -140,7 +140,7 @@ elseif(KernelArchRiscV)
 elseif(KernelArchLoongarch)
 
     # set(arm_march "${KernelArmArmV}${KernelArmMachFeatureModifiers}")
-    string(APPEND common_flags " -march=loongarch64 -mabi=lp64")
+    string(APPEND common_flags " -march=loongarch64 -mabi=lp64s -mtune=loongarch64")
     if(KernelSel4ArchLoongarch64)
         # nothing special
     else()
