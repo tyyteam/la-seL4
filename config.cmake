@@ -180,7 +180,6 @@ if(DEFINED KernelDTSList AND (NOT "${KernelDTSList}" STREQUAL ""))
         # Generate devices_gen header based on DTB
         message(STATUS "${device_dest} is out of date. Regenerating from DTB...")
         file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gen_headers/plat/machine/")
-        # message(FATAL_ERROR "Invalid PLATFORM \"${KernelPaddrUserTop}\"")
         execute_process(
             COMMAND
                 ${PYTHON3} "${HARDWARE_GEN_PATH}" --dtb "${KernelDTBPath}" --compat-strings
