@@ -117,7 +117,7 @@ BOOT_CODE VISIBLE void map_kernel_window(void)
 {
     /* mapping of KERNEL_ELF_BASE (virtual address) to kernel's
      * KERNEL_ELF_PHYS_BASE  */
-    rv assert(CONFIG_PT_LEVELS > 1 && CONFIG_PT_LEVELS <= 4);
+    assert(CONFIG_PT_LEVELS > 1 && CONFIG_PT_LEVELS <= 4);
 
     /* now we should be mapping the 1GiB kernel base */
     /*CY 让pptr指向PPTR_TOP，下面映射Kernel ELF的页表*/

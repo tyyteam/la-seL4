@@ -19,7 +19,7 @@
 #include <arch/benchmark.h>
 #include <linker.h> /*CY 平台无关，include/下 */
 #include <plat/machine/hardware.h> /*CY ？？？在include/下 */
-#include <machine.h> /*CY 平台无关，include/下 */
+#include <machine.h> /*CY 平台无关，include/下。这里会include machine/registerset.h（通用的一些寄存器操作 get/set） 然后再include arch/machine/registerset.h（平台相关的寄存器宏定义）*/
 
 #ifdef ENABLE_SMP_SUPPORT
 BOOT_BSS static volatile word_t node_boot_lock;
@@ -127,7 +127,9 @@ BOOT_CODE static void init_cpu(void)
 {
 
     activate_kernel_vspace();
-    /* Write trap entry address to stvec */
+    setup_pw();
+    init_tlb();
+    /* TODO Write trap entry address to stvec */
     write_stvec((word_t)trap_entry);
     initLocalIRQController();
 #ifndef CONFIG_KERNEL_MCS

@@ -47,6 +47,17 @@ BOOT_CODE void map_kernel_devices(void)
     }
 }
 
+BOOT_CODE void setup_pw(void)
+{
+    csr_writeq(INIT_CSR_PWCL, LOONGARCH_CSR_PWCL);
+    csr_writeq(INIT_CSR_PWCH, LOONGARCH_CSR_PWCH);
+}
+
+BOOT_CODE void init_tlb(void)
+{
+    write_csr_pagesize();
+}
+
 /*
  * The following assumes familiarity with RISC-V interrupt delivery and the PLIC.
  * See the RISC-V privileged specification v1.10 and the comment in
