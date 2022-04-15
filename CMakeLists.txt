@@ -324,6 +324,11 @@ if(KernelArchARM)
         "include/arch/arm/armv/${KernelArmArmV}/${KernelWordSize}"
     )
 endif()
+if(KernelArchLoongarch)
+    include_directories(
+        "/opt/cross-tools/lib/gcc/loongarch64-unknown-linux-gnu/12.0.0/include"
+    )
+endif()
 
 if(KernelArmMach STREQUAL "exynos")
     include_directories("include/plat/exynos_common/")
