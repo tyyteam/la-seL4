@@ -1074,6 +1074,95 @@ static inline void write_csr_tlbrefill_pagesize(unsigned int size)
 #define write_csr_perfctrl3(val)	__dcsrwr(val, LOONGARCH_CSR_PERFCTRL3)
 #define write_csr_perfcntr3(val)	__dcsrwr(val, LOONGARCH_CSR_PERFCNTR3)
 
+/* Values for PageSize register */
+#define PS_4K		0x0000000c
+#define PS_8K		0x0000000d
+#define PS_16K		0x0000000e
+#define PS_32K		0x0000000f
+#define PS_64K		0x00000010
+#define PS_128K		0x00000011
+#define PS_256K		0x00000012
+#define PS_512K		0x00000013
+#define PS_1M		0x00000014
+#define PS_2M		0x00000015
+#define PS_4M		0x00000016
+#define PS_8M		0x00000017
+#define PS_16M		0x00000018
+#define PS_32M		0x00000019
+#define PS_64M		0x0000001a
+#define PS_256M		0x0000001c
+#define PS_1G		0x0000001e
+
+#define PS_MASK		0x3f000000
+#define PS_SHIFT	24
+
+/* Default page size for a given kernel configuration */
+#define PS_DEFAULT_SIZE PS_16K
+
+/* Default huge tlb size for a given kernel configuration */
+// #ifdef CONFIG_PAGE_SIZE_4KB
+// #define PS_HUGE_SIZE   PS_1M
+// #elif defined(CONFIG_PAGE_SIZE_16KB)
+// #define PS_HUGE_SIZE   PS_16M
+// #elif defined(CONFIG_PAGE_SIZE_64KB)
+// #define PS_HUGE_SIZE   PS_256M
+// #else
+// #error Bad page size configuration for hugetlbfs!
+// #endif
+
+/* ExStatus.ExcCode */
+#define EXCCODE_RSV		0	/* Reserved */
+#define EXCCODE_TLBL		1	/* TLB miss on a load */
+#define EXCCODE_TLBS		2	/* TLB miss on a store */
+#define EXCCODE_TLBI		3	/* TLB miss on a ifetch */
+#define EXCCODE_TLBM		4	/* TLB modified fault */
+#define EXCCODE_TLBNR		5	/* TLB Read-Inhibit exception */
+#define EXCCODE_TLBNX		6	/* TLB Execution-Inhibit exception */
+#define EXCCODE_TLBPE		7	/* TLB Privilege Error */
+#define EXCCODE_ADE		8	/* Address Error */
+	#define EXSUBCODE_ADEF		0	/* Fetch Instruction */
+	#define EXSUBCODE_ADEM		1	/* Access Memory*/
+#define EXCCODE_ALE		9	/* Unalign Access */
+#define EXCCODE_OOB		10	/* Out of bounds */
+#define EXCCODE_SYS		11	/* System call */
+#define EXCCODE_BP		12	/* Breakpoint */
+#define EXCCODE_INE		13	/* Inst. Not Exist */
+#define EXCCODE_IPE		14	/* Inst. Privileged Error */
+#define EXCCODE_FPDIS		15	/* FPU Disabled */
+#define EXCCODE_LSXDIS		16	/* LSX Disabled */
+#define EXCCODE_LASXDIS		17	/* LASX Disabled */
+#define EXCCODE_FPE		18	/* Floating Point Exception */
+	#define EXCSUBCODE_FPE		0	/* Floating Point Exception */
+	#define EXCSUBCODE_VFPE		1	/* Vector Exception */
+#define EXCCODE_WATCH		19	/* Watch address reference */
+#define EXCCODE_BTDIS		20	/* Binary Trans. Disabled */
+#define EXCCODE_BTE		21	/* Binary Trans. Exception */
+#define EXCCODE_PSI		22	/* Guest Privileged Error */
+#define EXCCODE_HYP		23	/* Hypercall */
+#define EXCCODE_GCM		24	/* Guest CSR modified */
+	#define EXCSUBCODE_GCSC		0	/* Software caused */
+	#define EXCSUBCODE_GCHC		1	/* Hardware caused */
+#define EXCCODE_SE		25	/* Security */
+
+#define EXCCODE_INT_START   64
+#define EXCCODE_SIP0        64
+#define EXCCODE_SIP1        65
+#define EXCCODE_IP0         66
+#define EXCCODE_IP1         67
+#define EXCCODE_IP2         68
+#define EXCCODE_IP3         69
+#define EXCCODE_IP4         70
+#define EXCCODE_IP5         71
+#define EXCCODE_IP6         72
+#define EXCCODE_IP7         73
+#define EXCCODE_PMC         74 /* Performance Counter */
+#define EXCCODE_TIMER       75
+#define EXCCODE_IPI         76
+#define EXCCODE_NMI         77
+#define EXCCODE_INT_END     78
+#define EXCCODE_INT_NUM	    (EXCCODE_INT_END - EXCCODE_INT_START)
+
+
 static inline void setVSpaceRoot(paddr_t addr, asid_t asid)
 {
     /*CY 设置页表寄存器PGDH */
@@ -1085,6 +1174,5 @@ static inline void setVSpaceRoot(paddr_t addr, asid_t asid)
 
 void map_kernel_devices(void);
 void setup_pw(void);
-void init_tlb(void);
 
 #endif // !__ASSEMBLER__

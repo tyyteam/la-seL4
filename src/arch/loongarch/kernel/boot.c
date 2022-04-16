@@ -16,6 +16,7 @@
 #include <arch/machine.h>  /*CY 这下面的#include <model/statedata.h> -> #include <object/structures.h>会把include进libsel4的一些架构相关的宏定义*/
 #include <arch/kernel/boot.h>
 #include <arch/kernel/vspace.h>
+#include <arch/machine/tlb.h>
 #include <arch/benchmark.h>
 #include <linker.h> /*CY 平台无关，include/下 */
 #include <plat/machine/hardware.h> /*CY ？？？在include/下 */

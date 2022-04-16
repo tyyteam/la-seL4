@@ -9,38 +9,10 @@
 
 #include <config.h>
 #include <util.h>
+#include <types.h>
 
-static inline void arch_c_entry_hook(void)
-{
-    /* Nothing architecture specific to be done. */
-}
+#define VECSIZE 0x200
 
-static inline void arch_c_exit_hook(void)
-{
-    /* Nothing architecture specific to be done. */
-}
-
-#ifdef CONFIG_KERNEL_MCS
-void c_handle_fastpath_reply_recv(word_t cptr, word_t msgInfo, word_t reply)
-#else
-void c_handle_fastpath_reply_recv(word_t cptr, word_t msgInfo)
-#endif
-VISIBLE NORETURN;
-
-void c_handle_fastpath_call(word_t cptr, word_t msgInfo)
-VISIBLE NORETURN;
-
-void c_handle_syscall(word_t cptr, word_t msgInfo, syscall_t syscall)
-VISIBLE NORETURN;
-
-void c_handle_interrupt(void)
-VISIBLE NORETURN;
-
-void c_handle_exception(void)
-VISIBLE NORETURN;
-
-void restore_user_context(void)
-VISIBLE NORETURN;
-
-void handle_exception(void);
-
+unsigned long eentry;
+unsigned long tlbrentry;
+long exception_handlers[VECSIZE * 128 / sizeof(long)] ALIGN(SZ_64K);
