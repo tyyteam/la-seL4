@@ -111,23 +111,23 @@ class RISCVConfig(Config):
 class LoongarchConfig(Config):
     ''' Config class for Loongarch '''
     arch = 'loongarch'
-    SUPERSECTION_BITS = 24  # 2^24 = 16 MiByte
+    RESERVED_SPACE = 2**26  # 2^26= 64 MiByte
 
-    def get_kernel_phys_align(self) -> int:
-        return self.SUPERSECTION_BITS
+    def get_bootloader_reserve(self) -> int:
+        return self.RESERVED_SPACE
 
     def align_memory(self, regions: Set[Region]) -> List[Region]:
         ''' loongarch wants physBase to be the physical load address of the kernel. '''
         ret = sorted(regions)
         extra_reserved = set()
 
-        new = ret[0].align_base(self.get_kernel_phys_align())
-        resv = Region(ret[0].base, new.base - ret[0].base)
-        extra_reserved.add(resv)
-        ret[0] = new
-
         physBase = ret[0].base
 
+        resv = Region(ret[0].base, self.get_bootloader_reserve())
+        extra_reserved.add(resv)
+        ret[0].base += self.get_bootloader_reserve()
+        ret[0].size -= self.get_bootloader_reserve()
+        
         return ret, extra_reserved, physBase   
 
 
