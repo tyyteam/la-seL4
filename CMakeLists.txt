@@ -139,7 +139,6 @@ elseif(KernelArchRiscV)
 
 elseif(KernelArchLoongarch)
 
-    # set(arm_march "${KernelArmArmV}${KernelArmMachFeatureModifiers}")
     string(APPEND common_flags " -march=loongarch64 -mabi=lp64s -mtune=loongarch64")
     if(KernelSel4ArchLoongarch64)
         # nothing special
@@ -298,7 +297,7 @@ elseif(KernelArchRiscV)
     KernelCommonFlags(-mcmodel=medany)
 
 elseif(KernelArchLoongarch)
-    # KernelCommonFlags(-mcmodel=medany)
+    # do nothing
 else()
     message(FATAL_ERROR "unknown KernelArch '${KernelArch}'")
 endif()
@@ -322,11 +321,6 @@ if(KernelArchARM)
     include_directories(
         "include/arch/arm/armv/${KernelArmArmV}"
         "include/arch/arm/armv/${KernelArmArmV}/${KernelWordSize}"
-    )
-endif()
-if(KernelArchLoongarch)
-    include_directories(
-        "/opt/cross-tools/lib/gcc/loongarch64-unknown-linux-gnu/12.0.0/include"
     )
 endif()
 
@@ -649,6 +643,8 @@ if(KernelArchARM)
     set(linker_source "src/arch/arm/common_arm.lds")
 elseif(KernelArchRiscV)
     set(linker_source "src/arch/riscv/common_riscv.lds")
+    elseif(KernelArchLoongarch)
+    set(linker_source "src/arch/loongarch/common_loongarch.lds")
 else()
     set(linker_source "src/plat/${KernelPlatform}/linker.lds")
 endif()

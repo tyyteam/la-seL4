@@ -6,7 +6,7 @@
      SPDX-License-Identifier: BSD-2-Clause
 -->
 
-<api name="ObjectApiRISCV" label_prefix="riscv_">
+<api name="ObjectApiLOONGARCH" label_prefix="loongarch_">
 
     <struct name="seL4_UserContext">
             <member name="pc"/>
@@ -42,21 +42,21 @@
             <member name="t6"/>
             <member name="tp"/>
     </struct>
-    <interface name="seL4_RISCV_PageTable" manual_name="Page Table" cap_description="Capability to the page table to invoke.">
-        <method id="RISCVPageTableMap" name="Map" manual_label="pagetable_map">
+    <interface name="seL4_LOONGARCH_PageTable" manual_name="Page Table" cap_description="Capability to the page table to invoke.">
+        <method id="LOONGARCHPageTableMap" name="Map" manual_label="pagetable_map">
             <brief>
                 Map a page table at a specific virtual address.
             </brief>
             <description>
                 Starting from the VSpace, map the page table object at any unpopulated level for the provided virtual address. If all paging structures and mappings are present for this virtual address, return an seL4_DeleteFirst error.
             </description>
-            <param dir="in" name="vspace" type="seL4_RISCV_PageTable">
+            <param dir="in" name="vspace" type="seL4_LOONGARCH_PageTable">
                 <description>VSpace to map the lower-level page table into.</description>
             </param>
             <param dir="in" name="vaddr" type="seL4_Word">
                 <description>Virtual address at which to map the page table.</description>
             </param>
-            <param dir="in" name="attr" type="seL4_RISCV_VMAttributes">
+            <param dir="in" name="attr" type="seL4_LOONGARCH_VMAttributes">
             <description>
                 VM Attributes for the mapping. <docref>Possible values for this type are given
                 in <autoref label="ch:vspace"/>.</docref>
@@ -91,7 +91,7 @@
                 </description>
             </error>
         </method>
-        <method id="RISCVPageTableUnmap" name="Unmap" manual_label="pagetable_unmap">
+        <method id="LOONGARCHPageTableUnmap" name="Unmap" manual_label="pagetable_unmap">
             <brief>
                 Unmap a page table.
             </brief>
@@ -116,8 +116,8 @@
             </error>
         </method>
     </interface>
-    <interface name="seL4_RISCV_Page" manual_name="Page" cap_description="Capability to the page to invoke.">
-        <method id="RISCVPageMap" name="Map">
+    <interface name="seL4_LOONGARCH_Page" manual_name="Page" cap_description="Capability to the page to invoke.">
+        <method id="LOONGARCHPageMap" name="Map">
             <brief>
                 Map a page into a page table.
             </brief>
@@ -128,7 +128,7 @@
                 If the required paging structures are not present
                 this operation will fail, returning a seL4_FailedLookup error.
             </description>
-            <param dir="in" name="vspace" type="seL4_RISCV_PageTable">
+            <param dir="in" name="vspace" type="seL4_LOONGARCH_PageTable">
                 <description>VSpace to map the page into.</description>
             </param>
             <param dir="in" name="vaddr" type="seL4_Word">
@@ -139,7 +139,7 @@
                     Rights for the mapping. <docref>Possible values for this type are given in <autoref label="sec:cap_rights"/>.</docref>
                 </description>
             </param>
-            <param dir="in" name="attr" type="seL4_RISCV_VMAttributes">
+            <param dir="in" name="attr" type="seL4_LOONGARCH_VMAttributes">
             <description>
                 VM Attributes for the mapping. <docref>Possible values for this type are given
                 in <autoref label="ch:vspace"/>.</docref>
@@ -181,7 +181,7 @@
                 </description>
             </error>
         </method>
-        <method id="RISCVPageUnmap" name="Unmap">
+        <method id="LOONGARCHPageUnmap" name="Unmap">
             <brief>
                Unmap a page.
             </brief>
@@ -199,7 +199,7 @@
                 </description>
             </error>
         </method>
-        <method id="RISCVPageGetAddress" name="GetAddress">
+        <method id="LOONGARCHPageGetAddress" name="GetAddress">
             <brief>
                 Get the physical address of a page.
             </brief>
@@ -207,7 +207,7 @@
                 <docref>See <autoref label="ch:vspace"/>.</docref>
             </description>
             <return>
-                A <texttt text='seL4_RISCV_Page_GetAddress_t'/> struct that contains a
+                A <texttt text='seL4_LOONGARCH_Page_GetAddress_t'/> struct that contains a
                 <texttt text='seL4_Word paddr'/>, which holds the physical address of the page,
                 and <texttt text='int error'/>. <docref>See <autoref label='sec:errors'/> for a description
                 of the message register and tag contents upon error.</docref>
@@ -225,9 +225,9 @@
             </error>
         </method>
     </interface>
-    <interface name="seL4_RISCV_ASIDControl" manual_name="ASID Control"
+    <interface name="seL4_LOONGARCH_ASIDControl" manual_name="ASID Control"
         cap_description="The master ASIDControl capability to invoke.">
-        <method id="RISCVASIDControlMakePool" name="MakePool">
+        <method id="LOONGARCHASIDControlMakePool" name="MakePool">
            <brief>
                 Create an ASID Pool.
             </brief>
@@ -281,9 +281,9 @@
             </error>
         </method>
     </interface>
-    <interface name="seL4_RISCV_ASIDPool" manual_name="ASID Pool"
+    <interface name="seL4_LOONGARCH_ASIDPool" manual_name="ASID Pool"
         cap_description="The ASID Pool capability to invoke, which must be to an ASID pool that is not full.">
-        <method id="RISCVASIDPoolAssign" name="Assign">
+        <method id="LOONGARCHASIDPoolAssign" name="Assign">
             <brief>
                 Assign an ASID Pool.
             </brief>
@@ -317,7 +317,7 @@
     </interface>
     <interface name="seL4_IRQControl" manual_name="IRQ Control" cap_description="An IRQControl capability. This gives you the authority to make this call.">
 
-       <method id="RISCVIRQIssueIRQHandlerTrigger" name="GetTrigger" manual_name="GetTrigger"
+       <method id="LOONGARCHIRQIssueIRQHandlerTrigger" name="GetTrigger" manual_name="GetTrigger"
            manual_label="irq_controlgettrigger">
             <brief>
                 Create an IRQ handler capability and specify the trigger method (edge or level).
