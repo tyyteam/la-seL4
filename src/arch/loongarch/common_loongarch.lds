@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: GPL-2.0-only
  */
 
-OUTPUT_ARCH(riscv)
+OUTPUT_ARCH(loongarch64)
 ENTRY(_start)
 
 #include <config.h>
@@ -49,7 +49,6 @@ SECTIONS
     /* Start of data section */
     _sdata = .;
     .sdata : {
-        __global_pointer$ = . + 0x800;
         *(.sdata*)
     }
     .srodata : {
