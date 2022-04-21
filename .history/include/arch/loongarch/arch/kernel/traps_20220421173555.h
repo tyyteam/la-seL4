@@ -12,7 +12,6 @@
 #include <types.h>
 
 /* This file contains some error handler statements*/
-
 extern asmlinkage void handle_ade(void);
 extern asmlinkage void handle_ale(void);
 extern asmlinkage void handle_sys(void);
