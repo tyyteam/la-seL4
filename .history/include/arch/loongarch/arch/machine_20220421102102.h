@@ -9,7 +9,6 @@
 #include <util.h>
 #ifndef __ASSEMBLER__
 #include <larchintrin.h>
-#include <arch/machine/hardware.h>
 
 /* CSR */
 static inline uint32_t csr_readl(uint32_t reg)
@@ -1178,28 +1177,7 @@ void setup_pw(void);
 
 
 
-/* irq related macro definitions, variables and functions during bootstrapping*/
-#define VECSIZE 0x200
-
-unsigned long eentry;
-unsigned long tlbrentry;
-long exception_handlers[VECSIZE * 128 / sizeof(long)] ALIGN(SZ_64K);
-
-void setup_vint_size(unsigned int);
-void configure_exception_vector(void);
-void set_handler(unsigned long, void *, unsigned long);
-
-static inline void local_irq_disable(void)
-{
-	/*clear CSR_CRMD_IE*/
-	__uint32_t flags = 0;
-	__asm__ __volatile__(
-		"csrxchg %[val], %[mask], %[reg]\n\t"
-		: [val] "+r" (flags)
-		: [mask] "r" (CSR_CRMD_IE), [reg] "i" (LOONGARCH_CSR_CRMD)
-		: "memory");
-}
-
+/*irq related functions*/
 
 
 

@@ -12,7 +12,6 @@
 #include <machine/timer.h>
 #include <arch/machine.h>
 #include <arch/smp/ipi.h>
-#include <math.h>
 
 #ifndef CONFIG_KERNEL_MCS
 #define RESET_CYCLES ((TIMER_CLOCK_HZ / MS_IN_S) * CONFIG_TIMER_TICK_MS)
@@ -278,34 +277,14 @@ static inline void handleSpuriousIRQ(void)
 }
 
 /* set the vs size of LOONGARCH_CSR_ECFG*/
-BOOT_CODE void setup_vint_size(unsigned int size)
+static inline void setup_vint_size(unsigned int size)
 {
 	unsigned int vs;
 
-    vs=(int)log2((double)size/4);
+	vs = ilog2(size/4);//QT size=0x200,vs=7=0b0111
 
-    if (vs == 0 || vs > 7)
-		printf("vint_size %d Not support yet", vs);
-
-    assert(vs != 0 && vs <= 7);
-
-    csr_xchgl(vs<<CSR_ECFG_VS_SHIFT, CSR_ECFG_VS, LOONGARCH_CSR_ECFG);
-}
-
-/*configure the entry of exception*/
-BOOT_CODE void set_exception_vector(void)
-{
-	eentry    = (unsigned long)exception_handlers;
-	tlbrentry = (unsigned long)exception_handlers + 80*VECSIZE;
-
-	csr_writeq(eentry, LOONGARCH_CSR_EENTRY);
-	csr_writeq(eentry, LOONGARCH_CSR_MERRENTRY);
-	csr_writeq(tlbrentry, LOONGARCH_CSR_TLBRENTRY);
-}
-
-/* Install CPU exception handler */
-void set_handler(unsigned long offset, void *addr, unsigned long size)
-{
-	memcpy((void *)(eentry + offset), addr, size);
-	local_flush_icache_range(eentry + offset, eentry + offset + size);
+	if (vs == 0 || vs > 7)
+		panic("vint_size %d Not support yet", vs);
+	/*QT LOONGARCH_CSR_ECFG的vs域设为7，即中断和例外之间的入口地址间距是2^7*/
+	csr_xchgl(vs<<CSR_ECFG_VS_SHIFT, CSR_ECFG_VS, LOONGARCH_CSR_ECFG);
 }

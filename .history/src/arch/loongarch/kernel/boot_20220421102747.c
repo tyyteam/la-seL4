@@ -129,16 +129,9 @@ BOOT_CODE static void init_cpu(void)
 
     activate_kernel_vspace();
     setup_pw();
-
-
-    /* TODO QT irq related*/
-    setup_vint_size(VECSIZE);
-    configure_exception_vector();
-    for (i = 0; i < 64; i++)
-        set_handler(i * VECSIZE, handle_reserved, VECSIZE);
-        
     init_tlb();
-
+    /* TODO Write trap entry address to stvec */
+    write_stvec((word_t)trap_entry);
     initLocalIRQController();
 #ifndef CONFIG_KERNEL_MCS
     initTimer();

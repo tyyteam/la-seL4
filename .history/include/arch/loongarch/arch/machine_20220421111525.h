@@ -1178,16 +1178,10 @@ void setup_pw(void);
 
 
 
-/* irq related macro definitions, variables and functions during bootstrapping*/
+/* irq related macro definitions and functions*/
 #define VECSIZE 0x200
 
-unsigned long eentry;
-unsigned long tlbrentry;
-long exception_handlers[VECSIZE * 128 / sizeof(long)] ALIGN(SZ_64K);
-
 void setup_vint_size(unsigned int);
-void configure_exception_vector(void);
-void set_handler(unsigned long, void *, unsigned long);
 
 static inline void local_irq_disable(void)
 {

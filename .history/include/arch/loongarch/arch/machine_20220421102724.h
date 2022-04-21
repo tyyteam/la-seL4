@@ -9,7 +9,6 @@
 #include <util.h>
 #ifndef __ASSEMBLER__
 #include <larchintrin.h>
-#include <arch/machine/hardware.h>
 
 /* CSR */
 static inline uint32_t csr_readl(uint32_t reg)
@@ -1178,17 +1177,7 @@ void setup_pw(void);
 
 
 
-/* irq related macro definitions, variables and functions during bootstrapping*/
-#define VECSIZE 0x200
-
-unsigned long eentry;
-unsigned long tlbrentry;
-long exception_handlers[VECSIZE * 128 / sizeof(long)] ALIGN(SZ_64K);
-
-void setup_vint_size(unsigned int);
-void configure_exception_vector(void);
-void set_handler(unsigned long, void *, unsigned long);
-
+/* irq related functions*/
 static inline void local_irq_disable(void)
 {
 	/*clear CSR_CRMD_IE*/
@@ -1198,6 +1187,11 @@ static inline void local_irq_disable(void)
 		: [val] "+r" (flags)
 		: [mask] "r" (CSR_CRMD_IE), [reg] "i" (LOONGARCH_CSR_CRMD)
 		: "memory");
+		/*QT csrxchg见手册4.2
+		+,表示读写。放入通用寄存器中。
+		mask取CSR_CRMD_IE中的值=2，并分配一个寄存器，
+		该汇编将LOONGARCH_CSR_CRMD的IE清零，LOONGARCH_CSR_CRMD的旧值读入flags		
+		*/
 }
 
 
