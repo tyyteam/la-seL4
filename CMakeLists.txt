@@ -321,6 +321,12 @@ if(KernelArchARM)
     include_directories(
         "include/arch/arm/armv/${KernelArmArmV}"
         "include/arch/arm/armv/${KernelArmArmV}/${KernelWordSize}"
+    )   
+endif()
+
+if(KernelArchLoongarch)
+    include_directories(
+        "${CMAKE_C_COMPILER}/../../lib/gcc/loongarch64-unknown-linux-gnu/12.0.0/include"
     )
 endif()
 
