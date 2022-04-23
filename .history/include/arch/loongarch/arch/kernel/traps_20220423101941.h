@@ -12,7 +12,6 @@
 #include <types.h>
 
 /* This file contains some error handler statements*/
-
 //refer to genex.S for definitions
 extern asmlinkage void handle_ade(void);
 extern asmlinkage void handle_ale(void);

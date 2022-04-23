@@ -139,7 +139,7 @@ BOOT_CODE static void init_cpu(void)
         
     init_tlb();
 
-    initLocalIRQController();
+    initLocalIRQController();//考虑删去
 #ifndef CONFIG_KERNEL_MCS
     initTimer();
 #endif

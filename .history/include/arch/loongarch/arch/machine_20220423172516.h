@@ -6,10 +6,7 @@
 
 #pragma once
 
-#include <util.h>
-#include <arch/machine/hardware.h>
-
-#ifndef __ASSEMBLER__
+#ifndef __ASSEMBLY__
 #include <larchintrin.h>
 
 /*
@@ -60,9 +57,9 @@ static inline u32 read_cpucfg(u32 reg)
 	return __cpucfg(reg);
 }
 
-#endif /* !__ASSEMBLER__ */
+#endif /* !__ASSEMBLY__ */
 
-#ifdef __ASSEMBLER__
+#ifdef __ASSEMBLY__
 
 /* LoongArch Registers */
 #define REG_RA 0x1
@@ -99,10 +96,12 @@ static inline u32 read_cpucfg(u32 reg)
 #define REG_S7 0x1e
 #define REG_S8 0x1f
 
-#endif /* __ASSEMBLER__ */
+#endif /* __ASSEMBLY__ */
 
-
+#include <util.h>
 #ifndef __ASSEMBLER__
+#include <larchintrin.h>
+#include <arch/machine/hardware.h>
 
 /* CSR */
 static inline uint32_t csr_readl(uint32_t reg)

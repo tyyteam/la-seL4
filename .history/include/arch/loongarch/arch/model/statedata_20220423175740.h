@@ -35,5 +35,5 @@ extern word_t kernel_level1_pd[BIT(PT_INDEX_BITS * 2)] ALIGN_BSS(BIT(seL4_PageTa
 extern pte_t kernel_pt[BIT(PT_INDEX_BITS * 3)] ALIGN_BSS(BIT(seL4_PageTableBits));
 // #elif defined(CONFIG_KERNEL_LOG_BUFFER)
 // extern pte_t kernel_image_level2_log_buffer_pt[BIT(PT_INDEX_BITS)];
-#endif
+// #endif
 

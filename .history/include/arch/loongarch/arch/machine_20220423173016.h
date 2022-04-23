@@ -104,6 +104,7 @@ static inline u32 read_cpucfg(u32 reg)
 
 #ifndef __ASSEMBLER__
 
+
 /* CSR */
 static inline uint32_t csr_readl(uint32_t reg)
 {

@@ -22,7 +22,7 @@ asid_pool_t *riscvKSASIDTable[BIT(asidHighBits)];
 word_t kernel_level0_pd[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
 
 /*rv
-#if __loongarch_xlen != 32
+#if __riscv_xlen != 32
 pte_t kernel_image_level2_pt[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
 pte_t kernel_image_level2_dev_pt[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
 #elif defined(CONFIG_KERNEL_LOG_BUFFER)

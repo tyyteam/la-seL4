@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Modified:header file #include<machine.h>
+ * 
  *
  * Derived from MIPS:
  * Copyright (C) 2020-2021 Loongson Technology Corporation Limited
@@ -11,7 +11,7 @@
  */
 #include <asm/asm.h>
 #include <asm/asmmacro.h>
-#include <machine.h>// Some files may be missing due to difference from seL4 and Linux
+#include <asm/machine.h>// Some files may be missing due to difference from seL4 and Linux
 #include <asm/regdef.h>
 #include <asm/fpregdef.h>
 #include <asm/stackframe.h>
