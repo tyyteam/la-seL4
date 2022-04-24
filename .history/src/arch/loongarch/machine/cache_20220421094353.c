@@ -12,9 +12,3 @@ void local_flush_icache_range(unsigned long start, unsigned long end)
 {
 	asm volatile ("\tibar 0\n"::);
 }
-
-void cache_error_setup(void)
-{
-	extern char __weak except_vec_cex;
-	set_merr_handler(0x0, &except_vec_cex, 0x80);
-}

@@ -331,40 +331,7 @@ BOOT_CODE void trap_init(void)
 	set_handler(EXCCODE_BTDIS * VECSIZE, handle_lbt, VECSIZE);
 	set_handler(EXCCODE_WATCH * VECSIZE, handle_watch, VECSIZE);
 
-	cache_error_setup();
+	cache_error_setup();//cache error exception，唯一在uncached下运行的
 
 	local_flush_icache_range(eentry, eentry + 0x400);
-}
-
-BOOT_CODE void init_IRQ(void)
-{
-	/*int i, r, ipi_irq;//QT ipi 处理器间中断
-	static int ipi_dummy_dev;
-	unsigned int order = get_order(IRQ_STACK_SIZE);//order=0*/
-
-	clear_csr_ecfg(ECFG0_IM);
-	clear_csr_estat(ESTATF_IP);
-
-	setup_IRQ();//看不懂,TODO，需要看
-#ifdef CONFIG_SMP
-	ipi_irq = get_ipi_irq();
-	irq_set_percpu_devid(ipi_irq);
-	r = request_percpu_irq(ipi_irq, loongson3_ipi_interrupt, "IPI", &ipi_dummy_dev);
-	if (r < 0)
-		panic("IPI IRQ request failed\n");
-#endif
-
-	for (i = 0; i < NR_IRQS; i++)
-		irq_set_noprobe(i);
-
-	for_each_possible_cpu(i) {
-		void *s = (void *)__get_free_pages(GFP_KERNEL, order);
-
-		per_cpu(irq_stack, i) = (unsigned long)s;
-		pr_debug("CPU%d IRQ stack at 0x%lx - 0x%lx\n", i,
-			per_cpu(irq_stack, i), per_cpu(irq_stack, i) + IRQ_STACK_SIZE);
-	}
-
-	set_csr_ecfg(ECFGF_IP0 | ECFGF_IP1 | ECFGF_IP2 | ECFGF_IPI | ECFGF_PMC);
-	//QT 1<<2|1<<3|1<<4|1<<12 核间中断|1<<10的ecfg位置设置为1
 }

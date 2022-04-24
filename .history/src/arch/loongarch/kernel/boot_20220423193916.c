@@ -141,8 +141,6 @@ BOOT_CODE static void init_cpu(void)
 
     trap_init();
 
-    init_IRQ();
-
     initLocalIRQController();//考虑删去
 #ifndef CONFIG_KERNEL_MCS
     initTimer();

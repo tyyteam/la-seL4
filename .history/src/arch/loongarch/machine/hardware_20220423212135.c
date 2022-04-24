@@ -336,14 +336,14 @@ BOOT_CODE void trap_init(void)
 	local_flush_icache_range(eentry, eentry + 0x400);
 }
 
-BOOT_CODE void init_IRQ(void)
+void __init init_IRQ(void)
 {
-	/*int i, r, ipi_irq;//QT ipi 处理器间中断
+	int i, r, ipi_irq;//QT ipi 处理器间中断
 	static int ipi_dummy_dev;
-	unsigned int order = get_order(IRQ_STACK_SIZE);//order=0*/
+	unsigned int order = get_order(IRQ_STACK_SIZE);//order=0
 
-	clear_csr_ecfg(ECFG0_IM);
-	clear_csr_estat(ESTATF_IP);
+	clear_csr_ecfg(ECFG0_IM);//ECFG0_IM=0x00001fff，关闭中断使能0～13位
+	clear_csr_estat(ESTATF_IP);//ESTATF_IP=0x00001fff，清除中断位
 
 	setup_IRQ();//看不懂,TODO，需要看
 #ifdef CONFIG_SMP

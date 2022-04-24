@@ -99,11 +99,6 @@ static inline u32 read_cpucfg(u32 reg)
 #define REG_S7 0x1e
 #define REG_S8 0x1f
 
-#define set_csr_estat(val)	\
-	__dcsrxchg(val, val, LOONGARCH_CSR_ESTAT)
-#define clear_csr_estat(val)	\
-	__dcsrxchg(~(val), val, LOONGARCH_CSR_ESTAT)
-
 #endif /* __ASSEMBLER__ */
 
 
@@ -1261,57 +1256,6 @@ static inline void write_csr_tlbrefill_pagesize(unsigned int size)
 #define EXCCODE_INT_END     78
 #define EXCCODE_INT_NUM	    (EXCCODE_INT_END - EXCCODE_INT_START)
 
-/*
- * Manipulate bits in a register.
- */
-#define __BUILD_CSR_COMMON(name)				\
-static inline unsigned long					\
-set_##name(unsigned long set)					\
-{								\
-	unsigned long res, new;					\
-								\
-	res = read_##name();					\
-	new = res | set;					\
-	write_##name(new);					\
-								\
-	return res;						\
-}								\
-								\
-static inline unsigned long					\
-clear_##name(unsigned long clear)				\
-{								\
-	unsigned long res, new;					\
-								\
-	res = read_##name();					\
-	new = res & ~clear;					\
-	write_##name(new);					\
-								\
-	return res;						\
-}								\
-								\
-static inline unsigned long					\
-change_##name(unsigned long change, unsigned long val)		\
-{								\
-	unsigned long res, new;					\
-								\
-	res = read_##name();					\
-	new = res & ~change;					\
-	new |= (val & change);					\
-	write_##name(new);					\
-								\
-	return res;						\
-}
-
-#define __BUILD_CSR_OP(name)	__BUILD_CSR_COMMON(csr_##name)
-
-__BUILD_CSR_OP(euen)
-__BUILD_CSR_OP(ecfg)
-__BUILD_CSR_OP(tlbidx)
-
-#define set_csr_estat(val)	\
-	__dcsrxchg(val, val, LOONGARCH_CSR_ESTAT)
-#define clear_csr_estat(val)	\
-	__dcsrxchg(~(val), val, LOONGARCH_CSR_ESTAT)
 
 static inline void setVSpaceRoot(paddr_t addr, asid_t asid)
 {
