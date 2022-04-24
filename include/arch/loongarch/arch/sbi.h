@@ -84,11 +84,11 @@ static inline int sbi_console_getchar(void)
 
 static inline void sbi_set_timer(unsigned long long stime_value)
 {
-#if __loongarch_xlen == 32
-    SBI_CALL_2(SBI_SET_TIMER, stime_value, stime_value >> 32);
-#else
-    SBI_CALL_1(SBI_SET_TIMER, stime_value);
-#endif
+//#if __loongarch_xlen == 32
+SBI_CALL_2(SBI_SET_TIMER, stime_value, stime_value >> 32);
+//#else
+//SBI_CALL_1(SBI_SET_TIMER, stime_value);
+//#endif
 }
 
 static inline void sbi_shutdown(void)

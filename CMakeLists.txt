@@ -139,7 +139,7 @@ elseif(KernelArchRiscV)
 
 elseif(KernelArchLoongarch)
 
-    string(APPEND common_flags " -march=loongarch64 -mabi=lp64s -mtune=loongarch64")
+    string(APPEND common_flags " -march=loongarch64 -mabi=lp64d -mtune=loongarch64")
     if(KernelSel4ArchLoongarch64)
         # nothing special
     else()
@@ -306,7 +306,7 @@ endif()
 list(SORT c_sources)
 # Add the domain schedule now that its sorted
 list(APPEND c_sources "${KernelDomainSchedule}")
-
+string(REPLACE "bin/loongarch64-unknown-linux-gnu-gcc" "lib/gcc/loongarch64-unknown-linux-gnu/12.0.0/include" loongarch_H_file ${CMAKE_C_COMPILER})
 # Add static header includes
 include_directories(
     "include"
@@ -317,6 +317,7 @@ include_directories(
     "include/plat/${KernelPlatform}/plat/${KernelWordSize}"
 )
 
+
 if(KernelArchARM)
     include_directories(
         "include/arch/arm/armv/${KernelArmArmV}"
@@ -324,11 +325,7 @@ if(KernelArchARM)
     )   
 endif()
 
-if(KernelArchLoongarch)
-    include_directories(
-        "${CMAKE_C_COMPILER}/../../lib/gcc/loongarch64-unknown-linux-gnu/12.0.0/include"
-    )
-endif()
+
 
 if(KernelArmMach STREQUAL "exynos")
     include_directories("include/plat/exynos_common/")

@@ -12,7 +12,7 @@
 #include <machine/timer.h>
 #include <arch/machine.h>
 #include <arch/smp/ipi.h>
-#include <math.h>
+//#include <math.h> //leon exegesis just for ninja debug
 
 #ifndef CONFIG_KERNEL_MCS
 #define RESET_CYCLES ((TIMER_CLOCK_HZ / MS_IN_S) * CONFIG_TIMER_TICK_MS)
@@ -282,8 +282,8 @@ BOOT_CODE void setup_vint_size(unsigned int size)
 {
 	unsigned int vs;
 
-    vs=(int)log2((double)size/4);
-
+    //vs=(int)log2((double)size/4); 
+    vs = 5;//ly just for ninja debug
     if (vs == 0 || vs > 7)
 		printf("vint_size %d Not support yet", vs);
 
