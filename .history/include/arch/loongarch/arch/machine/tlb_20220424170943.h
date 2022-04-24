@@ -163,7 +163,7 @@ static inline void invtlb_info(uint32_t op, uint32_t info, uint64_t addr)
 		);
 }
 
-static inline void invtlb_all(uint32_t op, uint32_t info, uint64_t addr)
+static inline void invtlb_all(uint32_t op, uint32_t info, u64 addr)
 {
 	__asm__ __volatile__(
 		".word ((0x6498000) | (0 << 10) | (0 << 5) | %0)\n\t"

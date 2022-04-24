@@ -13,7 +13,6 @@
 #include <arch/machine.h>
 #include <arch/smp/ipi.h>
 
-
 #ifndef CONFIG_KERNEL_MCS
 #define RESET_CYCLES ((TIMER_CLOCK_HZ / MS_IN_S) * CONFIG_TIMER_TICK_MS)
 #endif /* !CONFIG_KERNEL_MCS */
@@ -282,14 +281,9 @@ BOOT_CODE void setup_vint_size(unsigned int size)
 {
 	unsigned int vs;
 
-<<<<<<< HEAD
-    //vs=(int)log2((double)size/4); 
-    vs = 5;//ly just for ninja debug
-=======
     if (size == 0x200)
-        vs = CSR_ECFG_VS_OF_VECSIZE_0X200;
+        vs = CSR_ECFG_VS_OF_0X200;
 
->>>>>>> 243e161fd94985d04862762b34544fa843dd9993
     if (vs == 0 || vs > 7)
 		printf("vint_size %d Not support yet", vs);
 
@@ -315,8 +309,6 @@ BOOT_CODE void set_handler(unsigned long offset, void *addr, unsigned long size)
 	memcpy((void *)(eentry + offset), addr, size);
 	local_flush_icache_range(eentry + offset, eentry + offset + size);
 }
-<<<<<<< HEAD
-=======
 
 BOOT_CODE void trap_init(void)
 {
@@ -376,4 +368,3 @@ BOOT_CODE void init_IRQ(void)
 	set_csr_ecfg(ECFGF_IP0 | ECFGF_IP1 | ECFGF_IP2 | ECFGF_IPI | ECFGF_PMC);
 	//QT 1<<2|1<<3|1<<4|1<<12 核间中断|1<<10的ecfg位置设置为1
 }
->>>>>>> 243e161fd94985d04862762b34544fa843dd9993

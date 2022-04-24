@@ -55,7 +55,7 @@ __asm__(".macro	parse_r var r\n\t"
 #undef _IFC_REG
 
 /* CPUCFG */
-static inline uint32_t read_cpucfg(uint32_t reg)
+static inline u32 read_cpucfg(u32 reg)
 {
 	return __cpucfg(reg);
 }
@@ -98,11 +98,6 @@ static inline uint32_t read_cpucfg(uint32_t reg)
 #define REG_S6 0x1d
 #define REG_S7 0x1e
 #define REG_S8 0x1f
-
-#define set_csr_estat(val)	\
-	__dcsrxchg(val, val, LOONGARCH_CSR_ESTAT)
-#define clear_csr_estat(val)	\
-	__dcsrxchg(~(val), val, LOONGARCH_CSR_ESTAT)
 
 #endif /* __ASSEMBLER__ */
 
@@ -1067,7 +1062,7 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 static inline uint64_t drdtime(void)
 {
 	int rID = 0;
-	uint64_t val = 0;
+	u64 val = 0;
 
 	__asm__ __volatile__(
 		"rdtime.d %0, %1 \n\t"
@@ -1261,57 +1256,6 @@ static inline void write_csr_tlbrefill_pagesize(unsigned int size)
 #define EXCCODE_INT_END     78
 #define EXCCODE_INT_NUM	    (EXCCODE_INT_END - EXCCODE_INT_START)
 
-/*
- * Manipulate bits in a register.
- */
-#define __BUILD_CSR_COMMON(name)				\
-static inline unsigned long					\
-set_##name(unsigned long set)					\
-{								\
-	unsigned long res, new;					\
-								\
-	res = read_##name();					\
-	new = res | set;					\
-	write_##name(new);					\
-								\
-	return res;						\
-}								\
-								\
-static inline unsigned long					\
-clear_##name(unsigned long clear)				\
-{								\
-	unsigned long res, new;					\
-								\
-	res = read_##name();					\
-	new = res & ~clear;					\
-	write_##name(new);					\
-								\
-	return res;						\
-}								\
-								\
-static inline unsigned long					\
-change_##name(unsigned long change, unsigned long val)		\
-{								\
-	unsigned long res, new;					\
-								\
-	res = read_##name();					\
-	new = res & ~change;					\
-	new |= (val & change);					\
-	write_##name(new);					\
-								\
-	return res;						\
-}
-
-#define __BUILD_CSR_OP(name)	__BUILD_CSR_COMMON(csr_##name)
-
-__BUILD_CSR_OP(euen)
-__BUILD_CSR_OP(ecfg)
-__BUILD_CSR_OP(tlbidx)
-
-#define set_csr_estat(val)	\
-	__dcsrxchg(val, val, LOONGARCH_CSR_ESTAT)
-#define clear_csr_estat(val)	\
-	__dcsrxchg(~(val), val, LOONGARCH_CSR_ESTAT)
 
 static inline void setVSpaceRoot(paddr_t addr, asid_t asid)
 {
@@ -1329,7 +1273,6 @@ void setup_pw(void);
 
 /* irq related macro definitions, variables and functions during bootstrapping*/
 #define VECSIZE 0x200
-#define CSR_ECFG_VS_OF_VECSIZE_0X200 7
 
 unsigned long eentry;
 unsigned long tlbrentry;

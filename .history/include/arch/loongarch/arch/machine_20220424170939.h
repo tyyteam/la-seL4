@@ -1329,7 +1329,6 @@ void setup_pw(void);
 
 /* irq related macro definitions, variables and functions during bootstrapping*/
 #define VECSIZE 0x200
-#define CSR_ECFG_VS_OF_VECSIZE_0X200 7
 
 unsigned long eentry;
 unsigned long tlbrentry;
