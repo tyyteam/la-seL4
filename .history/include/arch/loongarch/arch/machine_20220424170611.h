@@ -55,7 +55,7 @@ __asm__(".macro	parse_r var r\n\t"
 #undef _IFC_REG
 
 /* CPUCFG */
-static inline uint32_t read_cpucfg(uint32_t reg)
+static inline seL4_Uint32 read_cpucfg(seL4_Uint32 reg)
 {
 	return __cpucfg(reg);
 }
@@ -1067,7 +1067,7 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 static inline uint64_t drdtime(void)
 {
 	int rID = 0;
-	uint64_t val = 0;
+	u64 val = 0;
 
 	__asm__ __volatile__(
 		"rdtime.d %0, %1 \n\t"

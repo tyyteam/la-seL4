@@ -1067,7 +1067,7 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 static inline uint64_t drdtime(void)
 {
 	int rID = 0;
-	uint64_t val = 0;
+	u64 val = 0;
 
 	__asm__ __volatile__(
 		"rdtime.d %0, %1 \n\t"
