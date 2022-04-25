@@ -61,7 +61,7 @@ typedef struct seL4_UserContext_ {
 } seL4_UserContext;
 
 typedef enum {
-    seL4_RISCV_ExecuteNever = 0x1,
-    seL4_RISCV_Default_VMAttributes = 0,
-    SEL4_FORCE_LONG_ENUM(seL4_RISCV_VMAttributes)
-} seL4_RISCV_VMAttributes;
+    seL4_LOONGARCH_ExecuteNever = 0x1,
+    seL4_LOONGARCH_Default_VMAttributes = 0,
+    SEL4_FORCE_LONG_ENUM(seL4_LOONGARCH_VMAttributes)
+} seL4_LOONGARCH_VMAttributes;
