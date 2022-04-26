@@ -306,7 +306,7 @@ endif()
 list(SORT c_sources)
 # Add the domain schedule now that its sorted
 list(APPEND c_sources "${KernelDomainSchedule}")
-string(REPLACE "bin/loongarch64-unknown-linux-gnu-gcc" "lib/gcc/loongarch64-unknown-linux-gnu/12.0.0/include" loongarch_H_file ${CMAKE_C_COMPILER})
+
 # Add static header includes
 include_directories(
     "include"
