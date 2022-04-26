@@ -7,11 +7,14 @@
  #include <config.h>
  #include <util.h>
 
+ #include <arch/asm/asm.h>
  #include <arch/asm/regdef.h>
+ #include <arch/asm/addrspace.h>
+ #include <arch/machine.h>
 
 .global _stext;
 _stext:
-.section ".ref.text", "ax"
+.section ".boot.text", "ax"
 .global kernel_entry;
 .align 2;
 kernel_entry:                   # kernel entry point
@@ -23,7 +26,10 @@ kernel_entry:                   # kernel entry point
 0:
 	la		t0, __bss_start		# clear .bss
 	st.d		zero, t0, 0
-	la		t1, __bss_stop - LONGSIZE
+	la 		t2, __bss_stop
+	addi.d    t2, t2, -LONGSIZE
+	add.d     t1, t2, zero
+	add.d     t2, zero, zero
 1:
 	addi.d		t0, t0, LONGSIZE
 	st.d		zero, t0, 0
@@ -63,7 +69,7 @@ kernel_entry:                   # kernel entry point
 	set_saved_sp	sp, t0, t1
 	PTR_ADDIU	sp, sp, -4 * SZREG	# init stack pointer
 
-	bl		start_kernel
+	bl		init_kernel
 
 .type kernel_entry 0;
 .size kernel_entry, .-kernel_entry

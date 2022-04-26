@@ -3,8 +3,10 @@
  *
  * SPDX-License-Identifier: GPL-2.0-only
  */
-
 #pragma once
+
+#ifndef _ASM_LOONGARCH_H
+#define _ASM_LOONGARCH_H
 
 #include <util.h>
 #include <arch/machine/hardware.h>
@@ -160,6 +162,8 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 {
 	__iocsrwr_d(val, reg);
 }
+
+#endif // !__ASSEMBLER__
 
 /* Basic CSR registers */
 #define LOONGARCH_CSR_CRMD		0x0	/* Current mode info */
@@ -1064,6 +1068,8 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 #define LOONGARCH_IOCSR_EXTIOI_ROUTE_BASE	0x1c00
 #define IOCSR_EXTIOI_VECTOR_NUM			256
 
+#ifndef __ASSEMBLER__
+
 static inline uint64_t drdtime(void)
 {
 	int rID = 0;
@@ -1173,6 +1179,60 @@ static inline void write_csr_tlbrefill_pagesize(unsigned int size)
 #define write_csr_perfctrl3(val)	__dcsrwr(val, LOONGARCH_CSR_PERFCTRL3)
 #define write_csr_perfcntr3(val)	__dcsrwr(val, LOONGARCH_CSR_PERFCNTR3)
 
+/*
+ * Manipulate bits in a register.
+ */
+#define __BUILD_CSR_COMMON(name)				\
+static inline unsigned long					\
+set_##name(unsigned long set)					\
+{								\
+	unsigned long res, new;					\
+								\
+	res = read_##name();					\
+	new = res | set;					\
+	write_##name(new);					\
+								\
+	return res;						\
+}								\
+								\
+static inline unsigned long					\
+clear_##name(unsigned long clear)				\
+{								\
+	unsigned long res, new;					\
+								\
+	res = read_##name();					\
+	new = res & ~clear;					\
+	write_##name(new);					\
+								\
+	return res;						\
+}								\
+								\
+static inline unsigned long					\
+change_##name(unsigned long change, unsigned long val)		\
+{								\
+	unsigned long res, new;					\
+								\
+	res = read_##name();					\
+	new = res & ~change;					\
+	new |= (val & change);					\
+	write_##name(new);					\
+								\
+	return res;						\
+}
+
+#define __BUILD_CSR_OP(name)	__BUILD_CSR_COMMON(csr_##name)
+
+__BUILD_CSR_OP(euen)
+__BUILD_CSR_OP(ecfg)
+__BUILD_CSR_OP(tlbidx)
+
+#define set_csr_estat(val)	\
+	__dcsrxchg(val, val, LOONGARCH_CSR_ESTAT)
+#define clear_csr_estat(val)	\
+	__dcsrxchg(~(val), val, LOONGARCH_CSR_ESTAT)
+
+#endif /* !__ASSEMBLER__ */
+
 /* Values for PageSize register */
 #define PS_4K		0x0000000c
 #define PS_8K		0x0000000d
@@ -1261,57 +1321,7 @@ static inline void write_csr_tlbrefill_pagesize(unsigned int size)
 #define EXCCODE_INT_END     78
 #define EXCCODE_INT_NUM	    (EXCCODE_INT_END - EXCCODE_INT_START)
 
-/*
- * Manipulate bits in a register.
- */
-#define __BUILD_CSR_COMMON(name)				\
-static inline unsigned long					\
-set_##name(unsigned long set)					\
-{								\
-	unsigned long res, new;					\
-								\
-	res = read_##name();					\
-	new = res | set;					\
-	write_##name(new);					\
-								\
-	return res;						\
-}								\
-								\
-static inline unsigned long					\
-clear_##name(unsigned long clear)				\
-{								\
-	unsigned long res, new;					\
-								\
-	res = read_##name();					\
-	new = res & ~clear;					\
-	write_##name(new);					\
-								\
-	return res;						\
-}								\
-								\
-static inline unsigned long					\
-change_##name(unsigned long change, unsigned long val)		\
-{								\
-	unsigned long res, new;					\
-								\
-	res = read_##name();					\
-	new = res & ~change;					\
-	new |= (val & change);					\
-	write_##name(new);					\
-								\
-	return res;						\
-}
-
-#define __BUILD_CSR_OP(name)	__BUILD_CSR_COMMON(csr_##name)
-
-__BUILD_CSR_OP(euen)
-__BUILD_CSR_OP(ecfg)
-__BUILD_CSR_OP(tlbidx)
-
-#define set_csr_estat(val)	\
-	__dcsrxchg(val, val, LOONGARCH_CSR_ESTAT)
-#define clear_csr_estat(val)	\
-	__dcsrxchg(~(val), val, LOONGARCH_CSR_ESTAT)
+#ifndef __ASSEMBLER__
 
 static inline void setVSpaceRoot(paddr_t addr, asid_t asid)
 {
@@ -1352,7 +1362,6 @@ static inline void local_irq_disable(void)
 		: "memory");
 }
 
+#endif /* !__ASSEMBLER__ */
 
-
-
-#endif // !__ASSEMBLER__
+#endif /* _ASM_LOONGARCH_H */

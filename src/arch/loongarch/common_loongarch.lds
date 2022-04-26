@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: GPL-2.0-only
  */
 
-OUTPUT_ARCH(loongarch64)
+OUTPUT_ARCH(Loongarch64)
 ENTRY(_start)
 
 #include <config.h>
@@ -66,6 +66,7 @@ SECTIONS
         *(.data)
     }
 
+    __bss_start = .
     .bss . : AT(ADDR(.bss) - KERNEL_OFFSET)
     {
         *(.bss)
@@ -80,6 +81,7 @@ SECTIONS
         /* large data such as the globals frame and global PD */
         *(.bss.aligned)
     }
+    __bss_stop = .
 
     . = ALIGN(4K);
     ki_end = .;

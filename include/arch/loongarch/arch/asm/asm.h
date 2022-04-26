@@ -13,7 +13,7 @@
 #ifndef __ASM_ASM_H
 #define __ASM_ASM_H
 
-#include <asm/abidefs.h>
+#include <arch/asm/abidefs.h>
 
 /* LoongArch pref instruction. */
 #ifdef CONFIG_CPU_HAS_PREFETCH
@@ -111,7 +111,7 @@
 #define LONG_SRA	srai.w
 #define LONG_SRAV	sra.w
 
-#ifdef __ASSEMBLY__
+#ifdef __ASSEMBLER__
 #define LONG		.word
 #endif
 #define LONGSIZE	4
@@ -133,7 +133,7 @@
 #define LONG_SRA	sra.w
 #define LONG_SRAV	sra.d
 
-#ifdef __ASSEMBLY__
+#ifdef __ASSEMBLER__
 #define LONG		.dword
 #endif
 #define LONGSIZE	8
