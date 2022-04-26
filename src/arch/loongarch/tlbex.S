@@ -2,12 +2,12 @@
 /*
  * Copyright (C) 2020-2021 Loongson Technology Corporation Limited
  */
-#include <asm/asm.h>
+#include <arch/asm/asm.h>
 #include <machine.h>
-#include <asm/page.h>
-#include <asm/pgtable.h>// may report file missing
-#include <asm/regdef.h>
-#include <asm/stackframe.h>
+// #include <asm/page.h>
+// #include <asm/pgtable.h>// may report file missing
+#include <arch/asm/regdef.h>
+#include <arch/asm/stackframe.h>
 
 	.macro tlb_do_page_fault, write
 	SYM_FUNC_START(tlb_do_page_fault_\write)

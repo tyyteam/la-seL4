@@ -11,6 +11,7 @@
 #include <arch/api/syscall.h>
 #include <arch/machine/registerset.h>
 #include <util.h>
+#include <arch/asm/regdef.h>
 
 #define REGBYTES (CONFIG_WORD_SIZE / 8)
 

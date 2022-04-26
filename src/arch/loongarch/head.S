@@ -7,6 +7,8 @@
  #include <config.h>
  #include <util.h>
 
+ #include <arch/asm/regdef.h>
+
 .global _stext;
 _stext:
 .section ".ref.text", "ax"
