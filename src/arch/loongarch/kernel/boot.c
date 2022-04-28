@@ -22,6 +22,7 @@
 #include <plat/machine/hardware.h> /*CY ？？？在include/下 */
 #include <machine.h> /*CY 平台无关，include/下。这里会include machine/registerset.h（通用的一些寄存器操作 get/set） 然后再include arch/machine/registerset.h（平台相关的寄存器宏定义）*/
 
+
 #ifdef ENABLE_SMP_SUPPORT
 BOOT_BSS static volatile word_t node_boot_lock;
 #endif
