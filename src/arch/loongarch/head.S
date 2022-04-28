@@ -4,20 +4,20 @@
  * SPDX-License-Identifier: GPL-2.0-only
  */
 
- #include <config.h>
- #include <util.h>
+#include <config.h>
+#include <util.h>
 
- #include <arch/asm/asm.h>
- #include <arch/asm/regdef.h>
- #include <arch/asm/addrspace.h>
- #include <arch/machine.h>
+#include <arch/asm/asm.h>
+#include <arch/asm/regdef.h>
+#include <arch/asm/addrspace.h>
+#include <arch/machine.h>
 
-.global _stext;
-_stext:
-.section ".boot.text", "ax"
-.global kernel_entry;
-.align 2;
-kernel_entry:                   # kernel entry point
+.section .boot.text, "ax"
+.global _start
+.extern kernel_stack_alloc
+
+
+_start:                   # kernel entry point
 
 	/* We might not get launched at the address the kernel is linked to,
 	 * so we jump there.  */
@@ -62,17 +62,9 @@ kernel_entry:                   # kernel entry point
 	/* GPR21 used for percpu base (runtime), initialized as 0 */
 	or		u0, zero, zero
 
-	la		tp, init_thread_union
-	/* Set the SP after an empty pt_regs.  */
-	PTR_LI		sp, (_THREAD_SIZE - 32 - PT_SIZE)
-	PTR_ADDU	sp, sp, tp
-	set_saved_sp	sp, t0, t1
-	PTR_ADDIU	sp, sp, -4 * SZREG	# init stack pointer
+	la sp, (kernel_stack_alloc + BIT(CONFIG_KERNEL_STACK_BITS))
 
 	bl		init_kernel
 
-.type kernel_entry 0;
-.size kernel_entry, .-kernel_entry
-
-.global kernel_entry_end;
-kernel_entry_end:
+	la ra, restore_user_context
+	jirl zero, ra, 0
