@@ -311,6 +311,8 @@ static BOOT_CODE bool_t try_init_kernel(
     /* initialise the IRQ states and provide the IRQ control cap */
     init_irqs(root_cnode_cap);
 
+    local_irq_enable();
+
     /* create the bootinfo frame */
     populate_bi_frame(0, CONFIG_MAX_NUM_NODES, ipcbuf_vptr, extra_bi_size);
 
