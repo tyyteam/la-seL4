@@ -256,7 +256,7 @@ BOOT_CODE void initLocalIRQController(void)
 
 BOOT_CODE void initIRQController(void)
 {
-    printf("Initializing PLIC...\n");
+    printf("Initializing extent io interrupt controller...\n");
 
     /* Initialize active_irq[] properly to stick to the semantics and play safe.
      * Effectively this is not needed if irqInvalid is zero (which is currently
@@ -267,7 +267,7 @@ BOOT_CODE void initIRQController(void)
         active_irq[i] = irqInvalid;
     }
 
-    plic_init_controller();
+    extio_init_controller();
 }
 
 static inline void handleSpuriousIRQ(void)

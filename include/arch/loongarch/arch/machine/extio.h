@@ -1,8 +1,8 @@
 /*
- * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
- * Copyright 2021, HENSOLDT Cyber
  *
  * SPDX-License-Identifier: GPL-2.0-only
+ * 
+ * This file will be updated later to support extend io interrupt.
  */
 
 #pragma once
@@ -102,10 +102,7 @@ static inline void plic_irq_set_trigger(irq_t irq, bool_t edge_triggered);
 static inline void plic_init_hart(void);
 
 /*
- * This function is called during the boot process to perform platform specific
- * PLIC initialisation. It is called as part of the platform specific
- * initialisation pprocess and runs after the core specific plic_init_hart() was
- * called. In SMP configurations this is called before the secondary cores are
- * released to start their boot process.
+ * This function is called during the boot process to perform extend io interrupt
+ * controller initialisation.
  */
-static inline void plic_init_controller(void);
+static inline void extio_init_controller(void);

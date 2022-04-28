@@ -3,8 +3,8 @@
  *
  * SPDX-License-Identifier: GPL-2.0-only
  *
- * A dummy PLIC driver for platforms like 3A5000 that do not implement a PLIC.
- * This can be taken as a template for platform specific PLIC drivers.
+ * A dummy extio driver for 3A5000 platform.
+ * This file will be updated later to support ext io interrupt.
  */
 
 #pragma once
@@ -45,7 +45,7 @@ static inline void plic_init_hart(void)
     printf("no PLIC present, skip hart specific initialisation\n");
 }
 
-static inline void plic_init_controller(void)
+static inline void extio_init_controller(void)
 {
-    printf("no PLIC present, skip platform specific initialisation\n");
+    printf("no extio interrupt supported yet. Will be supported later\n");
 }

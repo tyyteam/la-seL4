@@ -1354,7 +1354,18 @@ void init_IRQ(void);
 static inline void local_irq_disable(void)
 {
 	/*clear CSR_CRMD_IE*/
-	__uint32_t flags = 0;
+	uint32_t flags = 0;
+	__asm__ __volatile__(
+		"csrxchg %[val], %[mask], %[reg]\n\t"
+		: [val] "+r" (flags)
+		: [mask] "r" (CSR_CRMD_IE), [reg] "i" (LOONGARCH_CSR_CRMD)
+		: "memory");
+}
+
+static inline void local_irq_enable(void)
+{
+	/*set CSR_CRMD_IE*/
+	uint32_t flags = CSR_CRMD_IE;
 	__asm__ __volatile__(
 		"csrxchg %[val], %[mask], %[reg]\n\t"
 		: [val] "+r" (flags)
