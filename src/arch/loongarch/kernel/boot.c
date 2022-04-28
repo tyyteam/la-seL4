@@ -102,10 +102,10 @@ BOOT_CODE static void init_irqs(cap_t root_cnode_cap)
         }
     }
     setIRQState(IRQTimer, KERNEL_TIMER_IRQ);
-#ifdef ENABLE_SMP_SUPPORT
+/*#ifdef ENABLE_SMP_SUPPORT
     setIRQState(IRQIPI, irq_remote_call_ipi);
     setIRQState(IRQIPI, irq_reschedule_ipi);
-#endif
+#endif*/
     /* provide the IRQ control cap */
     write_slot(SLOT_PTR(pptr_of_cap(root_cnode_cap), seL4_CapIRQControl), cap_irq_control_cap_new());
 }
@@ -311,6 +311,7 @@ static BOOT_CODE bool_t try_init_kernel(
     /* initialise the IRQ states and provide the IRQ control cap */
     init_irqs(root_cnode_cap);
 
+    /*enable local irq*/
     local_irq_enable();
 
     /* create the bootinfo frame */

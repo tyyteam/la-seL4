@@ -51,7 +51,7 @@ if(DEFINED CALLED_declare_default_headers)
     if("${KernelArch}" STREQUAL "riscv")
         math(EXPR MAX_NUM_IRQ "${CONFIGURE_PLIC_MAX_NUM_INT} + 2")
     elseif("${KernelArch}" STREQUAL "loongarch")
-        math(EXPR MAX_NUM_IRQ "${CONFIGURE_PLIC_MAX_NUM_INT} + 2")
+        math(EXPR MAX_NUM_IRQ "${CONFIGURE_HW_MAX_NUM_INT} + 2")
     else()
         if(
             DEFINED KernelMaxNumNodes

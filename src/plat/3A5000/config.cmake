@@ -20,8 +20,8 @@ if(KernelPlatform3A5000)
     endif()
 
     declare_default_headers(
-        TIMER_FREQUENCY 10000000 PLIC_MAX_NUM_INT 0
-        INTERRUPT_CONTROLLER drivers/irq/loongarch_plic_dummy.h
+        TIMER_FREQUENCY 100000000 HW_MAX_NUM_INT 8
+        INTERRUPT_CONTROLLER drivers/irq/loongarch_extio_dummy.h
     )
     
 else()
