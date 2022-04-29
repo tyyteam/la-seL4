@@ -199,14 +199,10 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 #define  CSR_PRMD_PPLV			(UL_CONST(0x3) << CSR_PRMD_PPLV_SHIFT)
 
 #define LOONGARCH_CSR_EUEN		0x2	/* Extended unit enable */
-#define  CSR_EUEN_LBTEN_SHIFT		3
-#define  CSR_EUEN_LBTEN			(UL_CONST(0x1) << CSR_EUEN_LBTEN_SHIFT)
-#define  CSR_EUEN_LASXEN_SHIFT		2
-#define  CSR_EUEN_LASXEN		(UL_CONST(0x1) << CSR_EUEN_LASXEN_SHIFT)
-#define  CSR_EUEN_LSXEN_SHIFT		1
-#define  CSR_EUEN_LSXEN			(UL_CONST(0x1) << CSR_EUEN_LSXEN_SHIFT)
-#define  CSR_EUEN_FPEN_SHIFT		0
-#define  CSR_EUEN_FPEN			(UL_CONST(0x1) << CSR_EUEN_FPEN_SHIFT)
+#define  CSR_EUEN_LBTEN		3
+#define  CSR_EUEN_LASXEN	2
+#define  CSR_EUEN_LSXEN		1
+#define  CSR_EUEN_FPEN		0
 
 #define LOONGARCH_CSR_MISC		0x3	/* Misc config */
 

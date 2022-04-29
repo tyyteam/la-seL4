@@ -241,12 +241,14 @@ BOOT_CODE void initLocalIRQController(void)
 {
     printf("Init local IRQ\n");
 
-    /* Init per-hart PLIC */
-    plic_init_hart();
+    /* Init per-hart extend io interrupt */
+    extio_init_hart();
 
-    /* Enable timer and external interrupt. If SMP is enabled, then enable the
-     * software interrupt also, it is used as IPI between cores. */
-    set_sie_mask(BIT(SIE_SEIE) | BIT(SIE_STIE) | SMP_TERNARY(BIT(SIE_SSIE), 0));
+    /* Enable SoftWare Interrupt, Performance Monitor Counter Overflow Interrupt,
+     * Timer Interrupt. If SMP is enabled, then enable the ECFG_IPI. */
+    set_csr_ecfg(BIT(ECFG_SWI0)|BIT(ECFG_SWI1)|BIT(HW0)|BIT(HW1)|BIT(HW2)|BIT(HW3)\
+        |BIT(HW4)|BIT(HW5)|BIT(HW6)|BIT(HW7)|BIT(ECFG_PMC)|BIT(ECFG_TIMER)\
+        |SMP_TERNARY(BIT(ECFG_IPI), 0));
 }
 
 BOOT_CODE void initIRQController(void)

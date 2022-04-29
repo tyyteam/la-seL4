@@ -14,7 +14,7 @@
  */
 #define HAVE_SET_TRIGGER 1
 
-//#include <arch/machine/plic.h>
+#include <arch/machine/extio.h>
 
 static inline irq_t plic_get_claim(void)
 {
@@ -40,9 +40,9 @@ static inline void plic_irq_set_trigger(irq_t irq, bool_t edge_triggered)
            (int)irq, edge_triggered ? "edge" : "level");
 }
 
-static inline void plic_init_hart(void)
+static inline void extio_init_hart(void)
 {
-    printf("no PLIC present, skip hart specific initialisation\n");
+    printf("no extio present, skip hart specific initialisation\n");
 }
 
 static inline void extio_init_controller(void)

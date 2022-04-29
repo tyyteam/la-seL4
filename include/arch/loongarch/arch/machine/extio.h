@@ -96,10 +96,10 @@ static inline void plic_irq_set_trigger(irq_t irq, bool_t edge_triggered);
 
 /*
  * This function is called during the boot process to perform hart specific
- * PLIC initialisation. It is called as part of the core local initialisation
- * process and runs before plic_init_controller() is called.
+ * extend io interrupt initialisation. It is called as part of the core local initialisation
+ * process and runs before extio_init_controller() is called.
  */
-static inline void plic_init_hart(void);
+static inline void extio_init_hart(void);
 
 /*
  * This function is called during the boot process to perform extend io interrupt

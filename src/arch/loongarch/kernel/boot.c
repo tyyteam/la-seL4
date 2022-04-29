@@ -143,16 +143,16 @@ BOOT_CODE static void init_cpu(void)
 
     init_IRQ();
 
-    initLocalIRQController();//考虑删去
+    initLocalIRQController();
 #ifndef CONFIG_KERNEL_MCS
     initTimer();
 #endif
 
     /* disable FPU access */
-    set_fs_off();
+    clear_csr_euen(BIT(CSR_EUEN_FPEN));
 
 #ifdef CONFIG_HAVE_FPU
-    init_fpu();
+    //init_fpu();
 #endif
 }
 
