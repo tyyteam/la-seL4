@@ -14,7 +14,7 @@
  */
 #define HAVE_SET_TRIGGER 1
 
-#include <arch/machine/plic.h>
+//#include <arch/machine/plic.h>
 
 static inline irq_t plic_get_claim(void)
 {
