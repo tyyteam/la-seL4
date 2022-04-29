@@ -1323,6 +1323,9 @@ __BUILD_CSR_OP(tlbidx)
 
 #ifndef __ASSEMBLER__
 
+word_t PURE getRestartPC(tcb_t *thread);
+void setNextPC(tcb_t *thread, word_t v);
+
 static inline void setVSpaceRoot(paddr_t addr, asid_t asid)
 {
     /*CY 设置页表寄存器PGDH */

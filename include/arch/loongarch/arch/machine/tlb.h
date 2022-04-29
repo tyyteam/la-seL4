@@ -7,7 +7,7 @@
 
 #include <arch/machine.h>
 
-extern init_tlb(void);
+extern void init_tlb(void);
 
 /*
  * TLB Invalidate Flush
@@ -184,25 +184,6 @@ static inline void invtlb_all(uint32_t op, uint32_t info, uint64_t addr)
 	}  while (0)
 #define tlb_end_vma(tlb, vma) do { } while (0)
 #define __tlb_remove_tlb_entry(tlb, ptep, address) do { } while (0)
-
-static void tlb_flush(struct mmu_gather *tlb);
-
-#define tlb_flush tlb_flush
-// #include <asm-generic/tlb.h>
-
-static inline void tlb_flush(struct mmu_gather *tlb)
-{
-	struct vm_area_struct vma;
-
-	vma.vm_mm = tlb->mm;
-	vma.vm_flags = 0;
-	if (tlb->fullmm) {
-		flush_tlb_mm(tlb->mm);
-		return;
-	}
-
-	flush_tlb_range(&vma, tlb->start, tlb->end);
-}
 
 extern void handle_tlb_load(void);
 extern void handle_tlb_store(void);
