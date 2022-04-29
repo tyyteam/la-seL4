@@ -97,7 +97,7 @@ BOOT_CODE static void init_irqs(cap_t root_cnode_cap)
 
     for (i = 0; i <= maxIRQ; i++) {
         if (i != irqInvalid) {
-            /* IRQ 0 is irqInvalid */
+            /* IRQ 255 is irqInvalid */
             setIRQState(IRQInactive, i);
         }
     }
