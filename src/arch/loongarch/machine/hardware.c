@@ -244,6 +244,7 @@ BOOT_CODE void initLocalIRQController(void)
     /* Init per-hart extend io interrupt */
     extio_init_hart();
 
+    clear_csr_estat(ESTATF_IP);
     /* Enable SoftWare Interrupt, Performance Monitor Counter Overflow Interrupt,
      * Timer Interrupt. If SMP is enabled, then enable the ECFG_IPI. */
     set_csr_ecfg(BIT(ECFG_SWI0)|BIT(ECFG_SWI1)|BIT(HW0)|BIT(HW1)|BIT(HW2)|BIT(HW3)\
@@ -307,7 +308,7 @@ BOOT_CODE void set_handler(unsigned long offset, void *addr, unsigned long size)
 	local_flush_icache_range(eentry + offset, eentry + offset + size);
 }
 
-BOOT_CODE void trap_init(void)
+BOOT_CODE void init_trap(void)
 {
 	long i;
 

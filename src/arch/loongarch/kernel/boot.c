@@ -130,29 +130,29 @@ BOOT_CODE static void init_cpu(void)
     activate_kernel_vspace();
     setup_pw();
 
-
-    /* TODO QT irq related*/
+    /* irq related*/
     setup_vint_size(VECSIZE);
+
     configure_exception_vector();
+
     for (i = 0; i < 64; i++)
         set_handler(i * VECSIZE, handle_reserved, VECSIZE);
         
+    /*tlb related exceptions*/
     init_tlb();
-
-    trap_init();
-
-    init_IRQ();
-
+    /*other exceptions*/
+    init_trap();    
+    /*local irqs*/
     initLocalIRQController();
 #ifndef CONFIG_KERNEL_MCS
-    initTimer();
+    //TODO
 #endif
 
-    /* disable FPU access */
+    /* disable FPU*/
     clear_csr_euen(BIT(CSR_EUEN_FPEN));
 
 #ifdef CONFIG_HAVE_FPU
-    //init_fpu();
+    //TODO
 #endif
 }
 
