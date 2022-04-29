@@ -62,7 +62,10 @@ _start:                   # kernel entry point
 	/* GPR21 used for percpu base (runtime), initialized as 0 */
 	or		u0, zero, zero
 
-	la sp, (kernel_stack_alloc + BIT(CONFIG_KERNEL_STACK_BITS))
+	la sp, kernel_stack_alloc
+	addi.w t0, zero, 1
+	slli.w t0, t0, CONFIG_KERNEL_STACK_BITS
+	add.d sp, sp, t0
 
 	bl		init_kernel
 

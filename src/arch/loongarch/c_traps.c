@@ -111,38 +111,38 @@ void VISIBLE NORETURN c_handle_interrupt(void)
     UNREACHABLE();
 }
 
-void VISIBLE NORETURN c_handle_exception(void)
-{
-    NODE_LOCK_SYS;
+// void VISIBLE NORETURN c_handle_exception(void)
+// {
+//     NODE_LOCK_SYS;
 
-    c_entry_hook();
+//     c_entry_hook();
 
-    word_t scause = read_scause();
-    switch (scause) {
-    case RISCVInstructionAccessFault:
-    case RISCVLoadAccessFault:
-    case RISCVStoreAccessFault:
-    case RISCVLoadPageFault:
-    case RISCVStorePageFault:
-    case RISCVInstructionPageFault:
-        handleVMFaultEvent(scause);
-        break;
-    default:
-#ifdef CONFIG_HAVE_FPU
-        if (!isFpuEnable()) {
-            /* we assume the illegal instruction is caused by FPU first */
-            handleFPUFault();
-            setNextPC(NODE_STATE(ksCurThread), getRestartPC(NODE_STATE(ksCurThread)));
-            break;
-        }
-#endif
-        handleUserLevelFault(scause, 0);
-        break;
-    }
+//     word_t scause = read_scause();
+//     switch (scause) {
+//     case RISCVInstructionAccessFault:
+//     case RISCVLoadAccessFault:
+//     case RISCVStoreAccessFault:
+//     case RISCVLoadPageFault:
+//     case RISCVStorePageFault:
+//     case RISCVInstructionPageFault:
+//         handleVMFaultEvent(scause);
+//         break;
+//     default:
+// #ifdef CONFIG_HAVE_FPU
+//         if (!isFpuEnable()) {
+//             /* we assume the illegal instruction is caused by FPU first */
+//             handleFPUFault();
+//             setNextPC(NODE_STATE(ksCurThread), getRestartPC(NODE_STATE(ksCurThread)));
+//             break;
+//         }
+// #endif
+//         handleUserLevelFault(scause, 0);
+//         break;
+//     }
 
-    restore_user_context();
-    UNREACHABLE();
-}
+//     restore_user_context();
+//     UNREACHABLE();
+// }
 
 void VISIBLE NORETURN slowpath(syscall_t syscall)
 {

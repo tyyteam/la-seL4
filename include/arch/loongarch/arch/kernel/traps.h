@@ -13,17 +13,51 @@
 
 /* This file contains some error handler statements*/
 
+static inline void arch_c_entry_hook(void)
+{
+    /* Nothing architecture specific to be done. */
+}
+
+static inline void arch_c_exit_hook(void)
+{
+    /* Nothing architecture specific to be done. */
+}
+
 //refer to genex.S for definitions
-extern asmlinkage void handle_ade(void);
-extern asmlinkage void handle_ale(void);
-extern asmlinkage void handle_sys(void);
-extern asmlinkage void handle_bp(void);
-extern asmlinkage void handle_ri(void);
-extern asmlinkage void handle_fpu(void);
-extern asmlinkage void handle_fpe(void);
-extern asmlinkage void handle_lbt(void);
-extern asmlinkage void handle_lsx(void);
-extern asmlinkage void handle_lasx(void);
-extern asmlinkage void handle_reserved(void);
-extern asmlinkage void handle_watch(void);
-extern asmlinkage void handle_vint(void);
+extern void handle_ade(void);
+extern void handle_ale(void);
+extern void handle_sys(void);
+extern void handle_bp(void);
+extern void handle_ri(void);
+extern void handle_fpu(void);
+extern void handle_fpe(void);
+extern void handle_lbt(void);
+extern void handle_lsx(void);
+extern void handle_lasx(void);
+extern void handle_reserved(void);
+extern void handle_watch(void);
+extern void handle_vint(void);
+
+#ifdef CONFIG_KERNEL_MCS
+void c_handle_fastpath_reply_recv(word_t cptr, word_t msgInfo, word_t reply)
+#else
+void c_handle_fastpath_reply_recv(word_t cptr, word_t msgInfo)
+#endif
+VISIBLE NORETURN;
+
+void c_handle_fastpath_call(word_t cptr, word_t msgInfo)
+VISIBLE NORETURN;
+
+void c_handle_syscall(word_t cptr, word_t msgInfo, syscall_t syscall)
+VISIBLE NORETURN;
+
+void c_handle_interrupt(void)
+VISIBLE NORETURN;
+
+void c_handle_exception(void)
+VISIBLE NORETURN;
+
+void restore_user_context(void)
+VISIBLE NORETURN;
+
+void handle_exception(void);
