@@ -965,33 +965,20 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
  * CSR_ECFG IM
  */
 #define ECFG0_IM		0x00001fff
-#define ECFGB_SIP0		0
-#define ECFGF_SIP0		(UL_CONST(1) << ECFGB_SIP0)
-#define ECFGB_SIP1		1
-#define ECFGF_SIP1		(UL_CONST(1) << ECFGB_SIP1)
-#define ECFGB_IP0		2
-#define ECFGF_IP0		(UL_CONST(1) << ECFGB_IP0)
-#define ECFGB_IP1		3
-#define ECFGF_IP1		(UL_CONST(1) << ECFGB_IP1)
-#define ECFGB_IP2		4
-#define ECFGF_IP2		(UL_CONST(1) << ECFGB_IP2)
-#define ECFGB_IP3		5
-#define ECFGF_IP3		(UL_CONST(1) << ECFGB_IP3)
-#define ECFGB_IP4		6
-#define ECFGF_IP4		(UL_CONST(1) << ECFGB_IP4)
-#define ECFGB_IP5		7
-#define ECFGF_IP5		(UL_CONST(1) << ECFGB_IP5)
-#define ECFGB_IP6		8
-#define ECFGF_IP6		(UL_CONST(1) << ECFGB_IP6)
-#define ECFGB_IP7		9
-#define ECFGF_IP7		(UL_CONST(1) << ECFGB_IP7)
-#define ECFGB_PMC		10
-#define ECFGF_PMC		(UL_CONST(1) << ECFGB_PMC)
-#define ECFGB_TIMER		11
-#define ECFGF_TIMER		(UL_CONST(1) << ECFGB_TIMER)
-#define ECFGB_IPI		12
-#define ECFGF_IPI		(UL_CONST(1) << ECFGB_IPI)
-#define ECFGF(hwirq)		(UL_CONST(1) << hwirq)
+#define ECFG_SWI0		0
+#define ECFG_SWI1		1
+#define ECFG_HW0		2
+#define ECFG_HW1		3
+#define ECFG_HW2		4
+#define ECFG_HW3		5
+#define ECFG_HW4		6
+#define ECFG_HW5		7
+#define ECFG_HW6		8
+#define ECFG_HW7		9
+#define ECFG_PMC		10
+#define ECFG_TIMER		11
+#define ECFG_IPI		12
+//#define ECFGF(hwirq)		(UL_CONST(1) << hwirq)
 
 #define ESTATF_IP		0x00001fff
 

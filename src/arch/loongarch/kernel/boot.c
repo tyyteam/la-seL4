@@ -103,10 +103,9 @@ BOOT_CODE static void init_irqs(cap_t root_cnode_cap)
         }
     }
     setIRQState(IRQTimer, KERNEL_TIMER_IRQ);
-/*#ifdef ENABLE_SMP_SUPPORT
-    setIRQState(IRQIPI, irq_remote_call_ipi);
-    setIRQState(IRQIPI, irq_reschedule_ipi);
-#endif*/
+#ifdef ENABLE_SMP_SUPPORT
+    setIRQState(IRQIPI, INTERRUPT_IPI);
+#endif
     /* provide the IRQ control cap */
     write_slot(SLOT_PTR(pptr_of_cap(root_cnode_cap), seL4_CapIRQControl), cap_irq_control_cap_new());
 }

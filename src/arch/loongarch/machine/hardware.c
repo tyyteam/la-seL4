@@ -171,8 +171,8 @@ static inline bool_t isIRQPending(void)
  * Disable or enable IRQs.
  *
  * maskInterrupt disables and enables IRQs. When an IRQ is disabled, it should
- * not raise an interrupt on the Kernel's HART context. This either masks the
- * core timer on the sie register or masks an external IRQ at the plic.
+ * not raise an interrupt on the Kernel's HART context. See LOONGARCH_CSR_ECFG
+ * register for more information
  *
  * @param[in]  disable  The disable
  * @param[in]  irq      The irq
@@ -180,21 +180,16 @@ static inline bool_t isIRQPending(void)
 static inline void maskInterrupt(bool_t disable, irq_t irq)
 {
     assert(IS_IRQ_VALID(irq));
-    if (irq == KERNEL_TIMER_IRQ) {
-        if (disable) {
-            clear_sie_mask(BIT(SIE_STIE));
-        } else {
-            set_sie_mask(BIT(SIE_STIE));
+    if (irq >= 0 && irq <= maxIRQ){
+        if(disable){
+            clear_csr_ecfg(BIT(irq));
+        }else{
+            set_csr_ecfg(BIT(irq));
         }
-#ifdef ENABLE_SMP_SUPPORT
-    } else if (irq == irq_reschedule_ipi || irq == irq_remote_call_ipi) {
-        return;
-#endif
-    } else {
-        plic_mask_irq(disable, irq);
     }
 }
 
+    
 /**
  * Kernel has dealt with the pending interrupt getActiveIRQ can return next IRQ.
  *
