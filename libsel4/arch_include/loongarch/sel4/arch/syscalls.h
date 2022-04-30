@@ -121,7 +121,7 @@ static inline void riscv_sys_null(seL4_Word sys)
     );
 }
 
-static inline void riscv_sys_send_recv(seL4_Word sys, seL4_Word dest, seL4_Word *out_badge, seL4_Word info_arg,
+static inline void loongarch_sys_send_recv(seL4_Word sys, seL4_Word dest, seL4_Word *out_badge, seL4_Word info_arg,
                                        seL4_Word
                                        *out_info, seL4_Word *in_out_mr0, seL4_Word *in_out_mr1, seL4_Word *in_out_mr2,
                                        seL4_Word
@@ -140,7 +140,7 @@ static inline void riscv_sys_send_recv(seL4_Word sys, seL4_Word dest, seL4_Word 
     /* Perform the system call. */
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "riscv_sys_send_recv-ecall"
+        "syscall 0"
         : "+r"(msg0), "+r"(msg1), "+r"(msg2), "+r"(msg3),
         "+r"(info), "+r"(destptr)
         : "r"(scno) MCS_PARAM
@@ -355,7 +355,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_Call(seL4_CPtr dest, seL4_MessageInf
     seL4_Word msg2 = seL4_GetMR(2);
     seL4_Word msg3 = seL4_GetMR(3);
 
-    riscv_sys_send_recv(seL4_SysCall, dest, &dest, msgInfo.words[0], &info.words[0], &msg0, &msg1,
+    loongarch_sys_send_recv(seL4_SysCall, dest, &dest, msgInfo.words[0], &info.words[0], &msg0, &msg1,
                         &msg2, &msg3, 0);
 
     /* Write out the data back to memory. */
@@ -405,7 +405,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_CallWithMRs(seL4_CPtr dest, seL4_Mes
         msg3 = *mr3;
     }
 
-    riscv_sys_send_recv(seL4_SysCall, dest, &dest, msgInfo.words[0], &info.words[0], &msg0, &msg1,
+    loongarch_sys_send_recv(seL4_SysCall, dest, &dest, msgInfo.words[0], &info.words[0], &msg0, &msg1,
                         &msg2, &msg3, 0);
 
     if (mr0 != seL4_Null) {
@@ -444,7 +444,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_ReplyRecv(seL4_CPtr src, seL4_Messag
     msg2 = seL4_GetMR(2);
     msg3 = seL4_GetMR(3);
 
-    riscv_sys_send_recv(seL4_SysReplyRecv, src, &badge, msgInfo.words[0], &info.words[0], &msg0, &msg1, &msg2, &msg3,
+    loongarch_sys_send_recv(seL4_SysReplyRecv, src, &badge, msgInfo.words[0], &info.words[0], &msg0, &msg1, &msg2, &msg3,
                         LIBSEL4_MCS_REPLY);
 
     /* Write the message back out to memory. */
@@ -492,7 +492,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_ReplyRecvWithMRs(seL4_CPtr src, seL4
         msg3 = *mr3;
     }
 
-    riscv_sys_send_recv(seL4_SysReplyRecv, src, &badge, msgInfo.words[0], &info.words[0], &msg0, &msg1, &msg2, &msg3,
+    loongarch_sys_send_recv(seL4_SysReplyRecv, src, &badge, msgInfo.words[0], &info.words[0], &msg0, &msg1, &msg2, &msg3,
                         LIBSEL4_MCS_REPLY);
 
     /* Write out the data back to memory. */
@@ -782,7 +782,7 @@ LIBSEL4_INLINE_FUNC void seL4_DebugPutChar(char c)
     seL4_Word unused4 = 0;
     seL4_Word unused5 = 0;
 
-    riscv_sys_send_recv(seL4_SysDebugPutChar, c, &unused0, 0, &unused1, &unused2, &unused3,
+    loongarch_sys_send_recv(seL4_SysDebugPutChar, c, &unused0, 0, &unused1, &unused2, &unused3,
                         &unused4, &unused5, 0);
 }
 
@@ -803,7 +803,7 @@ LIBSEL4_INLINE_FUNC void seL4_DebugDumpScheduler(void)
     seL4_Word unused4 = 0;
     seL4_Word unused5 = 0;
 
-    riscv_sys_send_recv(seL4_SysDebugDumpScheduler, 0, &unused0, 0, &unused1, &unused2, &unused3,
+    loongarch_sys_send_recv(seL4_SysDebugDumpScheduler, 0, &unused0, 0, &unused1, &unused2, &unused3,
                         &unused4, &unused5, 0);
 }
 #endif
@@ -829,7 +829,7 @@ LIBSEL4_INLINE_FUNC seL4_Uint32 seL4_DebugCapIdentify(seL4_CPtr cap)
     seL4_Word unused3 = 0;
     seL4_Word unused4 = 0;
 
-    riscv_sys_send_recv(seL4_SysDebugCapIdentify, cap, &cap, 0, &unused0, &unused1, &unused2,
+    loongarch_sys_send_recv(seL4_SysDebugCapIdentify, cap, &cap, 0, &unused0, &unused1, &unused2,
                         &unused3, &unused4, 0);
     return (seL4_Uint32)cap;
 }
@@ -846,7 +846,7 @@ LIBSEL4_INLINE_FUNC void seL4_DebugNameThread(seL4_CPtr tcb, const char *name)
     seL4_Word unused4 = 0;
     seL4_Word unused5 = 0;
 
-    riscv_sys_send_recv(seL4_SysDebugNameThread, tcb, &unused0, 0, &unused1, &unused2, &unused3,
+    loongarch_sys_send_recv(seL4_SysDebugNameThread, tcb, &unused0, 0, &unused1, &unused2, &unused3,
                         &unused4, &unused5, 0);
 }
 #endif
@@ -872,7 +872,7 @@ LIBSEL4_INLINE_FUNC seL4_Error seL4_BenchmarkResetLog(void)
     seL4_Word unused4 = 0;
 
     seL4_Word ret;
-    riscv_sys_send_recv(seL4_SysBenchmarkResetLog, 0, &ret, 0, &unused0, &unused1, &unused2, &unused3, &unused4, 0);
+    loongarch_sys_send_recv(seL4_SysBenchmarkResetLog, 0, &ret, 0, &unused0, &unused1, &unused2, &unused3, &unused4, 0);
 
     return (seL4_Error) ret;
 }
@@ -886,7 +886,7 @@ LIBSEL4_INLINE_FUNC seL4_Word seL4_BenchmarkFinalizeLog(void)
     seL4_Word unused4 = 0;
 
     seL4_Word index_ret;
-    riscv_sys_send_recv(seL4_SysBenchmarkFinalizeLog, 0, &index_ret, 0, &unused0, &unused1, &unused2, &unused3, &unused4,
+    loongarch_sys_send_recv(seL4_SysBenchmarkFinalizeLog, 0, &index_ret, 0, &unused0, &unused1, &unused2, &unused3, &unused4,
                         0);
 
     return (seL4_Word) index_ret;
@@ -900,7 +900,7 @@ LIBSEL4_INLINE_FUNC seL4_Error seL4_BenchmarkSetLogBuffer(seL4_Word frame_cptr)
     seL4_Word unused3 = 0;
     seL4_Word unused4 = 0;
 
-    riscv_sys_send_recv(seL4_SysBenchmarkSetLogBuffer, frame_cptr, &frame_cptr, 0, &unused0, &unused1, &unused2, &unused3,
+    loongarch_sys_send_recv(seL4_SysBenchmarkSetLogBuffer, frame_cptr, &frame_cptr, 0, &unused0, &unused1, &unused2, &unused3,
                         &unused4, 0);
 
     return (seL4_Error) frame_cptr;
@@ -934,7 +934,7 @@ LIBSEL4_INLINE_FUNC void seL4_BenchmarkGetThreadUtilisation(seL4_Word tcb_cptr)
     seL4_Word unused4 = 0;
     seL4_Word unused5 = 0;
 
-    riscv_sys_send_recv(seL4_SysBenchmarkGetThreadUtilisation, tcb_cptr, &unused0, 0, &unused1, &unused2, &unused3,
+    loongarch_sys_send_recv(seL4_SysBenchmarkGetThreadUtilisation, tcb_cptr, &unused0, 0, &unused1, &unused2, &unused3,
                         &unused4, &unused5, 0);
 }
 
@@ -947,7 +947,7 @@ LIBSEL4_INLINE_FUNC void seL4_BenchmarkResetThreadUtilisation(seL4_Word tcb_cptr
     seL4_Word unused4 = 0;
     seL4_Word unused5 = 0;
 
-    riscv_sys_send_recv(seL4_SysBenchmarkResetThreadUtilisation, tcb_cptr, &unused0, 0, &unused1, &unused2, &unused3,
+    loongarch_sys_send_recv(seL4_SysBenchmarkResetThreadUtilisation, tcb_cptr, &unused0, 0, &unused1, &unused2, &unused3,
                         &unused4, &unused5, 0);
 }
 #ifdef CONFIG_DEBUG_BUILD
@@ -960,7 +960,7 @@ LIBSEL4_INLINE_FUNC void seL4_BenchmarkDumpAllThreadsUtilisation(void)
     seL4_Word unused4 = 0;
     seL4_Word unused5 = 0;
 
-    riscv_sys_send_recv(seL4_SysBenchmarkDumpAllThreadsUtilisation, 0, &unused0, 0, &unused1, &unused2, &unused3, &unused4,
+    loongarch_sys_send_recv(seL4_SysBenchmarkDumpAllThreadsUtilisation, 0, &unused0, 0, &unused1, &unused2, &unused3, &unused4,
                         &unused5, 0);
 }
 
@@ -973,7 +973,7 @@ LIBSEL4_INLINE_FUNC void seL4_BenchmarkResetAllThreadsUtilisation(void)
     seL4_Word unused4 = 0;
     seL4_Word unused5 = 0;
 
-    riscv_sys_send_recv(seL4_SysBenchmarkResetAllThreadsUtilisation, 0, &unused0, 0, &unused1, &unused2, &unused3, &unused4,
+    loongarch_sys_send_recv(seL4_SysBenchmarkResetAllThreadsUtilisation, 0, &unused0, 0, &unused1, &unused2, &unused3, &unused4,
                         &unused5, 0);
 }
 #endif
