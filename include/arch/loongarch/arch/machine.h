@@ -13,7 +13,6 @@
 
 #ifndef __ASSEMBLER__
 #include <larchintrin.h>
-
 /*
  * parse_r var, r - Helper assembler macro for parsing register names.
  *

@@ -12,6 +12,7 @@
 #include <arch/asm/addrspace.h>
 #include <arch/machine.h>
 
+
 .section .boot.text, "ax"
 .global _start
 .extern kernel_stack_alloc
