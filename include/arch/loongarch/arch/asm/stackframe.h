@@ -5,13 +5,13 @@
 #ifndef _ASM_STACKFRAME_H
 #define _ASM_STACKFRAME_H
 
-#include <linux/threads.h>
+// #include <linux/threads.h>
 
-#include <asm/asm.h>
-#include <asm/asmmacro.h>
-#include <asm/asm-offsets.h>
-#include <machine.h>
-#include <asm/thread_info.h>
+#include <arch/asm/asm.h>
+#include <arch/asm/asmmacro.h>
+#include <arch/asm/asm-offsets.h>
+#include <arch/machine.h>
+#include <arch/asm/thread_info.h>
 
 /* Make the addition of cfi info a little easier. */
 	.macro cfi_rel_offset reg offset=0 docfi=0
