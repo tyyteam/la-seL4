@@ -111,6 +111,7 @@ block vm_attributes {
     field riscvExecuteNever  1
 }
 
+
 ---- RISCV-specific object types
 
 -- RISC-V PTE format (priv-1.10) requires MSBs after PPN to be reserved 0s

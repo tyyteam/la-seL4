@@ -177,7 +177,7 @@ BOOT_CODE void map_it_pt_cap(cap_t vspace_cap, cap_t pt_cap)
 
 BOOT_CODE void map_it_frame_cap(cap_t vspace_cap, cap_t frame_cap)
 {
-    pte_t *lvl1pt   = PTE_PTR(pptr_of_cap(vspace_cap));
+    pde_t *lvl1pt   = PDE_PTR(pptr_of_cap(vspace_cap));
     pte_t *frame_pptr   = PTE_PTR(pptr_of_cap(frame_cap));
     vptr_t frame_vptr = cap_frame_cap_get_capFMappedAddress(frame_cap);
 
@@ -247,7 +247,7 @@ BOOT_CODE cap_t create_it_address_space(cap_t root_cnode_cap, v_region_t it_v_re
     cap_t      lvl1pt_cap;
     vptr_t     pt_vptr;
 
-    copyGlobalMappings(PTE_PTR(rootserver.vspace));
+    copyGlobalMappings(PDE_PTR(rootserver.vspace));
 
     lvl1pt_cap =
         cap_page_table_cap_new(
@@ -300,29 +300,29 @@ BOOT_CODE void write_it_asid_pool(cap_t it_ap_cap, cap_t it_lvl1pt_cap)
 static findVSpaceForASID_ret_t findVSpaceForASID(asid_t asid)
 {
     findVSpaceForASID_ret_t ret;
-    asid_pool_t        *poolPtr;
-    pte_t     *vspace_root;
+    // asid_pool_t        *poolPtr;
+    // pde_t     *vspace_root;
 
-    poolPtr = riscvKSASIDTable[asid >> asidLowBits];
-    if (!poolPtr) {
-        current_lookup_fault = lookup_fault_invalid_root_new();
+    // poolPtr = riscvKSASIDTable[asid >> asidLowBits];
+    // if (!poolPtr) {
+    //     current_lookup_fault = lookup_fault_invalid_root_new();
 
-        ret.vspace_root = NULL;
-        ret.status = EXCEPTION_LOOKUP_FAULT;
-        return ret;
-    }
+    //     ret.vspace_root = NULL;
+    //     ret.status = EXCEPTION_LOOKUP_FAULT;
+    //     return ret;
+    // }
 
-    vspace_root = poolPtr->array[asid & MASK(asidLowBits)];
-    if (!vspace_root) {
-        current_lookup_fault = lookup_fault_invalid_root_new();
+    // vspace_root = poolPtr->array[asid & MASK(asidLowBits)];
+    // if (!vspace_root) {
+    //     current_lookup_fault = lookup_fault_invalid_root_new();
 
-        ret.vspace_root = NULL;
-        ret.status = EXCEPTION_LOOKUP_FAULT;
-        return ret;
-    }
+    //     ret.vspace_root = NULL;
+    //     ret.status = EXCEPTION_LOOKUP_FAULT;
+    //     return ret;
+    // }
 
-    ret.vspace_root = vspace_root;
-    ret.status = EXCEPTION_NONE;
+    // ret.vspace_root = vspace_root;
+    // ret.status = EXCEPTION_NONE;
     return ret;
 }
 
@@ -365,17 +365,17 @@ word_t *PURE lookupIPCBuffer(bool_t isReceiver, tcb_t *thread)
     }
 }
 
-// static inline pte_t *getPPtrFromHWPTE(pte_t *pte)
-// {
-//     return PTE_PTR(ptrFromPAddr(pte_ptr_get_ppn(pte) << seL4_PageTableBits));
-// }
+static inline pte_t *getPPtrFromHWPTE(pte_t *pte)
+{
+    return PTE_PTR(ptrFromPAddr(pte_ptr_get_ppn(pte) << seL4_PageTableBits));
+}
 
-lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
+lookupPTSlot_ret_t lookupPTSlot(pde_t *lvl1pt, vptr_t vptr)
 {
     lookupPTSlot_ret_t ret;
 
     word_t level = CONFIG_PT_LEVELS - 1;
-    pte_t *pt = lvl1pt;
+    pde_t *pt, *save_ptSlot = lvl1pt;
 
     /* this is how many bits we potentially have left to decode. Initially we have the
      * full address space to decode, and every time we walk this will be reduced. The
@@ -383,13 +383,16 @@ lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
      * or already exists, in ret.ptSlot. The following formulation is an invariant of
      * the loop: */
     ret.ptBitsLeft = PT_INDEX_BITS * level + seL4_PageBits;
-    ret.ptSlot = pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
+    save_ptSlot = (pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS)));
 
-    while (isPTEPageTable(ret.ptSlot) && likely(0 < level)) {
-        level--;
+    while (likely(0 < level)) {
         ret.ptBitsLeft -= PT_INDEX_BITS;
-        pt = getPPtrFromHWPTE(ret.ptSlot);
-        ret.ptSlot = pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
+        pt = (pde_t *)(*save_ptSlot);
+        save_ptSlot = pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
+    }
+
+    if (isPTEPageTable((pte_t *)save_ptSlot)) {
+        ret.ptSlot = (pte_t *)save_ptSlot;
     }
 
     return ret;
@@ -484,47 +487,47 @@ static exception_t performASIDControlInvocation(void *frame, cte_t *slot, cte_t 
 //     }
 // }
 
-void unmapPageTable(asid_t asid, vptr_t vptr, pte_t *target_pt)
-{
-    findVSpaceForASID_ret_t find_ret = findVSpaceForASID(asid);
-    if (unlikely(find_ret.status != EXCEPTION_NONE)) {
-        /* nothing to do */
-        return;
-    }
-    /* We won't ever unmap a top level page table */
-    assert(find_ret.vspace_root != target_pt);
-    pte_t *ptSlot = NULL;
-    pte_t *pt = find_ret.vspace_root;
+// void unmapPageTable(asid_t asid, vptr_t vptr, pte_t *target_pt)
+// {
+//     findVSpaceForASID_ret_t find_ret = findVSpaceForASID(asid);
+//     if (unlikely(find_ret.status != EXCEPTION_NONE)) {
+//         /* nothing to do */
+//         return;
+//     }
+//     /* We won't ever unmap a top level page table */
+//     assert(find_ret.vspace_root != target_pt);
+//     pte_t *ptSlot = NULL;
+//     pte_t *pt = find_ret.vspace_root;
 
-    for (word_t i = 0; i < CONFIG_PT_LEVELS - 1 && pt != target_pt; i++) {
-        ptSlot = pt + LA_GET_PT_INDEX(vptr, i);
-        if (unlikely(!isPTEPageTable(ptSlot))) {
-            /* couldn't find it */
-            return;
-        }
-        pt = getPPtrFromHWPTE(ptSlot);
-    }
+//     for (word_t i = 0; i < CONFIG_PT_LEVELS - 1 && pt != target_pt; i++) {
+//         ptSlot = pt + LA_GET_PT_INDEX(vptr, i);
+//         if (unlikely(!isPTEPageTable(ptSlot))) {
+//             /* couldn't find it */
+//             return;
+//         }
+//         pt = getPPtrFromHWPTE(ptSlot);
+//     }
 
-    if (pt != target_pt) {
-        /* didn't find it */
-        return;
-    }
-    /* If we found a pt then ptSlot won't be null */
-    assert(ptSlot != NULL);
-    *ptSlot = pte_new(
-                  0,  /* phy_address */
-                  0,  /* sw */
-                  0,  /* dirty */
-                  0,  /* accessed */
-                  0,  /* global */
-                  0,  /* user */
-                  0,  /* execute */
-                  0,  /* write */
-                  0,  /* read */
-                  0  /* valid */
-              );
-    // sfence();
-}
+//     if (pt != target_pt) {
+//         /* didn't find it */
+//         return;
+//     }
+//     /* If we found a pt then ptSlot won't be null */
+//     assert(ptSlot != NULL);
+//     *ptSlot = pte_new(
+//                   0,  /* phy_address */
+//                   0,  /* sw */
+//                   0,  /* dirty */
+//                   0,  /* accessed */
+//                   0,  /* global */
+//                   0,  /* user */
+//                   0,  /* execute */
+//                   0,  /* write */
+//                   0,  /* read */
+//                   0  /* valid */
+//               );
+//     // sfence();
+// }
 
 static pte_t pte_pte_invalid_new(void)
 {
