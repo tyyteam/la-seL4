@@ -499,7 +499,6 @@ foreach(bf_dec ${bf_declarations})
             dummy_headers "${CMAKE_CURRENT_BINARY_DIR}/generated_prune/${bf_gen_dir}/${bf_target}"
     )
 endforeach()
-
 add_custom_command(
     OUTPUT ${dummy_headers}
     COMMAND
@@ -612,6 +611,7 @@ foreach(bf_dec ${bf_declarations})
     list(APPEND gen_files_list "${CMAKE_CURRENT_BINARY_DIR}/generated/${bf_gen_dir}/${bf_target}")
     set(bf_gen_target "${bf_gen_target}1")
 endforeach()
+message(FATAL_ERROR)
 # At this point we have generated a bunch of headers into ${CMAKE_CURRENT_BINARY_DIR}/generated
 # but we do not pass this to include_directories, as that will cause it to be an include directory
 # for *all* targets in this file (including ones we defined earlier) and the prune generation
