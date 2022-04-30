@@ -1339,7 +1339,6 @@ void setup_vint_size(unsigned int);
 void configure_exception_vector(void);
 void set_handler(unsigned long, void *, unsigned long);
 void init_trap(void);
-void init_IRQ(void);
 
 static inline void local_irq_disable(void)
 {
