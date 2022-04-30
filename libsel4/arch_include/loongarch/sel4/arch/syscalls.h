@@ -37,7 +37,7 @@ static inline void riscv_sys_send(seL4_Word sys, seL4_Word dest, seL4_Word info_
     /* Perform the system call. */
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "ecall"
+        "riscv_sys_send-ecall"
         : "+r"(destptr), "+r"(msg0), "+r"(msg1), "+r"(msg2),
         "+r"(msg3), "+r"(info)
         : "r"(scno)
@@ -59,7 +59,7 @@ static inline void riscv_sys_reply(seL4_Word sys, seL4_Word info_arg, seL4_Word 
     /* Perform the system call. */
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "ecall"
+        "riscv_sys_reply-ecall"
         : "+r"(msg0), "+r"(msg1), "+r"(msg2), "+r"(msg3),
         "+r"(info)
         : "r"(scno)
@@ -75,7 +75,7 @@ static inline void riscv_sys_send_null(seL4_Word sys, seL4_Word src, seL4_Word i
     /* Perform the system call. */
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "ecall"
+        "riscv_sys_send_null-ecall"
         : "+r"(destptr), "+r"(info)
         : "r"(scno)
     );
@@ -97,7 +97,7 @@ static inline void riscv_sys_recv(seL4_Word sys, seL4_Word src, seL4_Word *out_b
     /* Perform the system call. */
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "ecall"
+        "riscv_sys_recv-ecall"
         : "=r"(msg0), "=r"(msg1), "=r"(msg2), "=r"(msg3),
         "=r"(info), "+r"(src_and_badge)
         : "r"(scno) MCS_PARAM
@@ -115,7 +115,7 @@ static inline void riscv_sys_null(seL4_Word sys)
 {
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "ecall"
+        "riscv_sys_null-ecall"
         : /* no outputs */
         : "r"(scno)
     );
@@ -140,7 +140,7 @@ static inline void riscv_sys_send_recv(seL4_Word sys, seL4_Word dest, seL4_Word 
     /* Perform the system call. */
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "ecall"
+        "riscv_sys_send_recv-ecall"
         : "+r"(msg0), "+r"(msg1), "+r"(msg2), "+r"(msg3),
         "+r"(info), "+r"(destptr)
         : "r"(scno) MCS_PARAM
@@ -175,7 +175,7 @@ static inline void riscv_sys_nbsend_recv(seL4_Word sys, seL4_Word dest, seL4_Wor
     /* Perform the system call. */
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "ecall"
+        "riscv_sys_nbsend_recv-ecall"
         : "+r"(msg0), "+r"(msg1), "+r"(msg2), "+r"(msg3),
         "+r"(src_and_badge), "+r"(info)
         : "r"(scno), "r"(reply_reg), "r"(dest_reg)
@@ -688,7 +688,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_NBSendWaitWithMRs(seL4_CPtr dest, se
 LIBSEL4_INLINE_FUNC void seL4_Yield(void)
 {
     register seL4_Word scno asm("a7") = seL4_SysYield;
-    asm volatile("ecall" :: "r"(scno));
+    asm volatile("seL4_Yield-ecall" :: "r"(scno));
 }
 
 #ifdef CONFIG_KERNEL_MCS
@@ -812,13 +812,13 @@ LIBSEL4_INLINE_FUNC void seL4_DebugDumpScheduler(void)
 LIBSEL4_INLINE_FUNC void seL4_DebugHalt(void)
 {
     register seL4_Word scno asm("a7") = seL4_SysDebugHalt;
-    asm volatile("ecall" :: "r"(scno) : "memory");
+    asm volatile("seL4_DebugHalt-ecall" :: "r"(scno) : "memory");
 }
 
 LIBSEL4_INLINE_FUNC void seL4_DebugSnapshot(void)
 {
     register seL4_Word scno asm("a7") = seL4_SysDebugSnapshot;
-    asm volatile("ecall" ::"r"(scno) : "memory");
+    asm volatile("seL4_DebugSnapshot-ecall" ::"r"(scno) : "memory");
 }
 
 LIBSEL4_INLINE_FUNC seL4_Uint32 seL4_DebugCapIdentify(seL4_CPtr cap)
@@ -857,7 +857,7 @@ LIBSEL4_INLINE_FUNC void seL4_DebugRun(void (* userfn)(void *), void *userarg)
     register seL4_Word arg1 asm("a0") = (seL4_Word)userfn;
     register seL4_Word arg2 asm("a1") = (seL4_Word)userarg;
     register seL4_Word scno asm("a7") = seL4_SysDebugRun;
-    asm volatile("ecall" : "+r"(arg1) : "r"(arg2), "r"(scno));
+    asm volatile("seL4_DebugRun-ecall" : "+r"(arg1) : "r"(arg2), "r"(scno));
 }
 #endif
 
