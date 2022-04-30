@@ -247,8 +247,8 @@ BOOT_CODE void initLocalIRQController(void)
     clear_csr_estat(ESTATF_IP);
     /* Enable SoftWare Interrupt, Performance Monitor Counter Overflow Interrupt,
      * Timer Interrupt. If SMP is enabled, then enable the ECFG_IPI. */
-    set_csr_ecfg(BIT(ECFG_SWI0)|BIT(ECFG_SWI1)|BIT(HW0)|BIT(HW1)|BIT(HW2)|BIT(HW3)\
-        |BIT(HW4)|BIT(HW5)|BIT(HW6)|BIT(HW7)|BIT(ECFG_PMC)|BIT(ECFG_TIMER)\
+    set_csr_ecfg(BIT(ECFG_SWI0)|BIT(ECFG_SWI1)|BIT(ECFG_HW0)|BIT(ECFG_HW1)|BIT(ECFG_HW2)|BIT(ECFG_HW3)\
+        |BIT(ECFG_HW4)|BIT(ECFG_HW5)|BIT(ECFG_HW6)|BIT(ECFG_HW7)|BIT(ECFG_PMC)|BIT(ECFG_TIMER)\
         |SMP_TERNARY(BIT(ECFG_IPI), 0));
 }
 
@@ -271,7 +271,7 @@ BOOT_CODE void initIRQController(void)
 static inline void handleSpuriousIRQ(void)
 {
     /* Do nothing */
-    printf("Superior IRQ!! SIP %lx\n", read_sip());
+    printf("Superior IRQ!! csr_estat %u\n", read_csr_estat());
 }
 
 /* set the vs size of LOONGARCH_CSR_ECFG*/
