@@ -9,13 +9,13 @@
  * Copyright (C) 2002, 2007  Maciej W. Rozycki
  * Copyright (C) 2001, 2012 MIPS Technologies, Inc.  All rights reserved.
  */
-#include <asm/asm.h>
-#include <asm/asmmacro.h>
+#include <arch/asm/asm.h>
+#include <arch/asm/asmmacro.h>
 #include <machine.h>// Some files may be missing due to difference from seL4 and Linux
-#include <asm/regdef.h>
-#include <asm/fpregdef.h>
-#include <asm/stackframe.h>
-#include <asm/thread_info.h>
+#include <arch/asm/regdef.h>
+#include <arch/asm/fpregdef.h>
+#include <arch/asm/stackframe.h>
+#include <arch/asm/thread_info.h>
 
 	.align	5
 SYM_FUNC_START(__arch_cpu_idle)

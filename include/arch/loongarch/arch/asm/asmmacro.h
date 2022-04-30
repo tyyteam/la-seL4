@@ -9,9 +9,9 @@
 #ifndef _ASM_ASMMACRO_H
 #define _ASM_ASMMACRO_H
 
-#include <asm/asm-offsets.h>
-#include <asm/regdef.h>
-#include <asm/fpregdef.h>
+#include <arch/asm/asm-offsets.h>
+#include <arch/asm/regdef.h>
+#include <arch/asm/fpregdef.h>
 #include <machine.h>// Some files may be missing due to difference from seL4 and Linux
 
 #undef v0

@@ -12,7 +12,7 @@
 #ifndef _ASM_FPREGDEF_H
 #define _ASM_FPREGDEF_H
 
-#include <asm/sgidefs.h>
+#include <arch/asm/sgidefs.h>
 
 /*
  * starting with binutils 2.24.51.20140729, MIPS binutils warn about mixing
