@@ -46,13 +46,14 @@ typedef word_t vm_rights_t;
 
 typedef pte_t vspace_root_t;
 
-/* Generic fastpath.c code expects pde_t for stored_hw_asid
- * that's a workaround in the time being.
- */
-typedef pte_t pde_t;
+typedef word_t pde_t;
+
+#define PDE_PTR(r) ((pde_t *)(r))
+#define PDE_REF(p) ((pde_t)(p))
+
 
 #define PTE_PTR(r) ((pte_t *)(r))
-#define PTE_REF(p) ((word_t)(p))
+#define PTE_REF(p) ((pte_t)(p))
 
 #define PT_SIZE_BITS 12
 #define PT_PTR(r) ((pte_t *)(r))

@@ -135,7 +135,7 @@ BOOT_CODE static void init_cpu(void)
 
     configure_exception_vector();
 
-    for (i = 0; i < 64; i++)
+    for (int i = 0; i < 64; i++)
         set_handler(i * VECSIZE, handle_reserved, VECSIZE);
         
     /*tlb related exceptions*/

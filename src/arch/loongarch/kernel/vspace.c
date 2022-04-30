@@ -29,7 +29,7 @@
 
 enum PTE_TYPE {
     PTE_BASIC,
-    PTE_LARGE;
+    PTE_LARGE
 };
 
 struct resolve_ret {
@@ -66,7 +66,7 @@ static inline bool_t isPTEPageTable(pte_t *pte)
  * Maps all pages with full RWX and supervisor perms by default.
  */
 /*CY 根据自动生成的pte_next函数，待改 */
-static pte_t pte_next(word_t phys_addr, bool_t is_leaf, PTE_TYPE pte_type)
+static pte_t pte_next(word_t phys_addr, bool_t is_leaf, enum PTE_TYPE pte_type)
 {
 
     word_t ppn = (word_t)(phys_addr >> 12);
@@ -103,14 +103,14 @@ BOOT_CODE void map_kernel_frame(paddr_t paddr, pptr_t vaddr, vm_rights_t vm_righ
 //#else
 if (vaddr >= KDEV_BASE) {
 /* Map devices in 2nd-level page table */
-	paddr = ROUND_DOWN(paddr, RISCV_GET_LVL_PGSIZE_BITS(1));
-	assert((paddr % RISCV_GET_LVL_PGSIZE(1)) == 0);
-	kernel_image_level2_dev_pt[RISCV_GET_PT_INDEX(vaddr, 1)] = pte_next(paddr, true);
+	// paddr = ROUND_DOWN(paddr, RISCV_GET_LVL_PGSIZE_BITS(1));
+	// assert((paddr % RISCV_GET_LVL_PGSIZE(1)) == 0);
+	// kernel_image_level2_dev_pt[RISCV_GET_PT_INDEX(vaddr, 1)] = pte_next(paddr, true);
 } 
 else {
-	paddr = ROUND_DOWN(paddr, RISCV_GET_LVL_PGSIZE_BITS(0));
-	assert((paddr % RISCV_GET_LVL_PGSIZE(0)) == 0);
-	kernel_root_pageTable[RISCV_GET_PT_INDEX(vaddr, 0)] = pte_next(paddr, true);
+	// paddr = ROUND_DOWN(paddr, RISCV_GET_LVL_PGSIZE_BITS(0));
+	// assert((paddr % RISCV_GET_LVL_PGSIZE(0)) == 0);
+	// kernel_root_pageTable[RISCV_GET_PT_INDEX(vaddr, 0)] = pte_next(paddr, true);
 }
 
 //#endif
@@ -118,6 +118,8 @@ else {
 
 BOOT_CODE VISIBLE void map_kernel_window(void)
 {
+    /*CY TODO !!! */
+
     /* mapping of KERNEL_ELF_BASE (virtual address) to kernel's
      * KERNEL_ELF_PHYS_BASE  */
     assert(CONFIG_PT_LEVELS > 1 && CONFIG_PT_LEVELS <= 4);
@@ -129,7 +131,7 @@ BOOT_CODE VISIBLE void map_kernel_window(void)
     while (pptr < KDEV_BASE) {
         kernel_level0_pd[LA_GET_PT_INDEX(pptr, 0)] = kpptr_to_paddr(&kernel_level1_pd[LA_GET_PT_INDEX(pptr, 1)]);
         for (int i = 0; pptr - PPTR_BASE < LA_GET_LVL_PGSIZE(1) * i; ++i) {
-            kernel_level1_pd[LA_GET_PT_INDEX(pptr, 1) * (LA_GET_PT_INDEX(pptr, 0) + 1)] = kpptr_to_paddr(&kernel_level3_pageTable[LA_GET_PT_INDEX(pptr, 2) * (LA_GET_PT_INDEX(pptr, 1) + 1) * (LA_GET_PT_INDEX(pptr, 0) + 1)]);
+            kernel_level1_pd[LA_GET_PT_INDEX(pptr, 1) * (LA_GET_PT_INDEX(pptr, 0) + 1)] = kpptr_to_paddr(&kernel_pt[LA_GET_PT_INDEX(pptr, 2) * (LA_GET_PT_INDEX(pptr, 1) + 1) * (LA_GET_PT_INDEX(pptr, 0) + 1)]);
             for (int j = 0; pptr - PPTR_BASE < LA_GET_LVL_PGSIZE(2) * j; ++j) {
                 kernel_pt[LA_GET_PT_INDEX(pptr, 2)] = pte_next(paddr, true, PTE_BASIC);
                 pptr += LA_GET_LVL_PGSIZE(2);
@@ -148,7 +150,7 @@ BOOT_CODE void map_it_pt_cap(cap_t vspace_cap, cap_t pt_cap)
     lookupPTSlot_ret_t pt_ret;
     pte_t *targetSlot;
     vptr_t vptr = cap_page_table_cap_get_capPTMappedAddress(pt_cap);
-    pte_t *lvl1pt = PTE_PTR(pptr_of_cap(vspace_cap));
+    pde_t *lvl1pt = PDE_PTR(pptr_of_cap(vspace_cap));
 
     /* pt to be mapped */
     pte_t *pt   = PTE_PTR(pptr_of_cap(pt_cap));
@@ -170,7 +172,7 @@ BOOT_CODE void map_it_pt_cap(cap_t vspace_cap, cap_t pt_cap)
                       0,  /* read */
                       1 /* valid */
                   );
-    sfence();
+    // sfence();//TODO 虚拟内存屏障指令
 }
 
 BOOT_CODE void map_it_frame_cap(cap_t vspace_cap, cap_t frame_cap)
@@ -197,7 +199,7 @@ BOOT_CODE void map_it_frame_cap(cap_t vspace_cap, cap_t frame_cap)
                       1,  /* read */
                       1   /* valid */
                   );
-    sfence();
+    // sfence();
 }
 
 BOOT_CODE cap_t create_unmapped_it_frame_cap(pptr_t pptr, bool_t use_large)
@@ -233,7 +235,7 @@ BOOT_CODE word_t arch_get_n_paging(v_region_t it_v_reg)
 {
     word_t n = 0;
     for (int i = 0; i < CONFIG_PT_LEVELS - 1; i++) {
-        n += get_n_paging(it_v_reg, RISCV_GET_LVL_PGSIZE_BITS(i));
+        n += get_n_paging(it_v_reg, LA_GET_LVL_PGSIZE_BITS(i));
     }
     return n;
 }
@@ -261,9 +263,9 @@ BOOT_CODE cap_t create_it_address_space(cap_t root_cnode_cap, v_region_t it_v_re
     /* create all n level PT caps necessary to cover userland image in 4KiB pages */
     for (int i = 0; i < CONFIG_PT_LEVELS - 1; i++) {
 
-        for (pt_vptr = ROUND_DOWN(it_v_reg.start, RISCV_GET_LVL_PGSIZE_BITS(i));
+        for (pt_vptr = ROUND_DOWN(it_v_reg.start, LA_GET_LVL_PGSIZE_BITS(i));
              pt_vptr < it_v_reg.end;
-             pt_vptr += RISCV_GET_LVL_PGSIZE(i)) {
+             pt_vptr += LA_GET_LVL_PGSIZE(i)) {
             if (!provide_cap(root_cnode_cap,
                              create_it_pt_cap(lvl1pt_cap, it_alloc_paging(), pt_vptr, IT_ASID))
                ) {
@@ -283,7 +285,7 @@ BOOT_CODE cap_t create_it_address_space(cap_t root_cnode_cap, v_region_t it_v_re
 
 BOOT_CODE void activate_kernel_vspace(void)
 {
-    setVSpaceRoot(kpptr_to_paddr(&kernel_root_pageTable), 0);
+    setVSpaceRoot(kpptr_to_paddr(&kernel_level0_pd), 0);
 }
 
 BOOT_CODE void write_it_asid_pool(cap_t it_ap_cap, cap_t it_lvl1pt_cap)
@@ -324,12 +326,12 @@ static findVSpaceForASID_ret_t findVSpaceForASID(asid_t asid)
     return ret;
 }
 
-void copyGlobalMappings(pte_t *newLvl1pt)
+void copyGlobalMappings(word_t *newLvl1pt)
 {
     unsigned long i;
-    pte_t *global_kernel_vspace = kernel_root_pageTable;
+    word_t *global_kernel_vspace = kernel_level0_pd;
 
-    for (i = RISCV_GET_PT_INDEX(PPTR_BASE, 0); i < BIT(PT_INDEX_BITS); i++) {
+    for (i = LA_GET_PT_INDEX(PPTR_BASE, 0); i < BIT(PT_INDEX_BITS); i++) {
         newLvl1pt[i] = global_kernel_vspace[i];
     }
 }
@@ -363,10 +365,10 @@ word_t *PURE lookupIPCBuffer(bool_t isReceiver, tcb_t *thread)
     }
 }
 
-static inline pte_t *getPPtrFromHWPTE(pte_t *pte)
-{
-    return PTE_PTR(ptrFromPAddr(pte_ptr_get_ppn(pte) << seL4_PageTableBits));
-}
+// static inline pte_t *getPPtrFromHWPTE(pte_t *pte)
+// {
+//     return PTE_PTR(ptrFromPAddr(pte_ptr_get_ppn(pte) << seL4_PageTableBits));
+// }
 
 lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
 {
@@ -393,30 +395,30 @@ lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
     return ret;
 }
 
-exception_t handleVMFault(tcb_t *thread, vm_fault_type_t vm_faultType)
-{
-    uint64_t addr;
+// exception_t handleVMFault(tcb_t *thread, vm_fault_type_t vm_faultType)
+// {
+//     uint64_t addr;
 
-    addr = read_stval();
+//     addr = read_stval();
 
-    switch (vm_faultType) {
-    case RISCVLoadPageFault:
-    case RISCVLoadAccessFault:
-        current_fault = seL4_Fault_VMFault_new(addr, RISCVLoadAccessFault, false);
-        return EXCEPTION_FAULT;
-    case RISCVStorePageFault:
-    case RISCVStoreAccessFault:
-        current_fault = seL4_Fault_VMFault_new(addr, RISCVStoreAccessFault, false);
-        return EXCEPTION_FAULT;
-    case RISCVInstructionPageFault:
-    case RISCVInstructionAccessFault:
-        current_fault = seL4_Fault_VMFault_new(addr, RISCVInstructionAccessFault, true);
-        return EXCEPTION_FAULT;
+//     switch (vm_faultType) {
+//     case RISCVLoadPageFault:
+//     case RISCVLoadAccessFault:
+//         current_fault = seL4_Fault_VMFault_new(addr, RISCVLoadAccessFault, false);
+//         return EXCEPTION_FAULT;
+//     case RISCVStorePageFault:
+//     case RISCVStoreAccessFault:
+//         current_fault = seL4_Fault_VMFault_new(addr, RISCVStoreAccessFault, false);
+//         return EXCEPTION_FAULT;
+//     case RISCVInstructionPageFault:
+//     case RISCVInstructionAccessFault:
+//         current_fault = seL4_Fault_VMFault_new(addr, RISCVInstructionAccessFault, true);
+//         return EXCEPTION_FAULT;
 
-    default:
-        fail("Invalid VM fault type");
-    }
-}
+//     default:
+//         fail("Invalid VM fault type");
+//     }
+// }
 
 void deleteASIDPool(asid_t asid_base, asid_pool_t *pool)
 {
@@ -454,33 +456,33 @@ static exception_t performASIDControlInvocation(void *frame, cte_t *slot, cte_t 
     return EXCEPTION_NONE;
 }
 
-static exception_t performASIDPoolInvocation(asid_t asid, asid_pool_t *poolPtr, cte_t *vspaceCapSlot)
-{
-    cap_t cap = vspaceCapSlot->cap;
-    pte_t *regionBase = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap));
-    cap = cap_page_table_cap_set_capPTMappedASID(cap, asid);
-    cap = cap_page_table_cap_set_capPTMappedAddress(cap, 0);
-    cap = cap_page_table_cap_set_capPTIsMapped(cap, 1);
-    vspaceCapSlot->cap = cap;
+// static exception_t performASIDPoolInvocation(asid_t asid, asid_pool_t *poolPtr, cte_t *vspaceCapSlot)
+// {
+//     cap_t cap = vspaceCapSlot->cap;
+//     word_t *regionBase = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap));
+//     cap = cap_page_table_cap_set_capPTMappedASID(cap, asid);
+//     cap = cap_page_table_cap_set_capPTMappedAddress(cap, 0);
+//     cap = cap_page_table_cap_set_capPTIsMapped(cap, 1);
+//     vspaceCapSlot->cap = cap;
 
-    copyGlobalMappings(regionBase);
+//     copyGlobalMappings(regionBase);
 
-    poolPtr->array[asid & MASK(asidLowBits)] = regionBase;
+//     poolPtr->array[asid & MASK(asidLowBits)] = regionBase;
 
-    return EXCEPTION_NONE;
-}
+//     return EXCEPTION_NONE;
+// }
 
-void deleteASID(asid_t asid, pte_t *vspace)
-{
-    asid_pool_t *poolPtr;
+// void deleteASID(asid_t asid, pte_t *vspace)
+// {
+//     asid_pool_t *poolPtr;
 
-    poolPtr = riscvKSASIDTable[asid >> asidLowBits];
-    if (poolPtr != NULL && poolPtr->array[asid & MASK(asidLowBits)] == vspace) {
-        hwASIDFlush(asid);
-        poolPtr->array[asid & MASK(asidLowBits)] = NULL;
-        setVMRoot(NODE_STATE(ksCurThread));
-    }
-}
+//     poolPtr = riscvKSASIDTable[asid >> asidLowBits];
+//     if (poolPtr != NULL && poolPtr->array[asid & MASK(asidLowBits)] == vspace) {
+//         hwASIDFlush(asid);
+//         poolPtr->array[asid & MASK(asidLowBits)] = NULL;
+//         setVMRoot(NODE_STATE(ksCurThread));
+//     }
+// }
 
 void unmapPageTable(asid_t asid, vptr_t vptr, pte_t *target_pt)
 {
@@ -495,7 +497,7 @@ void unmapPageTable(asid_t asid, vptr_t vptr, pte_t *target_pt)
     pte_t *pt = find_ret.vspace_root;
 
     for (word_t i = 0; i < CONFIG_PT_LEVELS - 1 && pt != target_pt; i++) {
-        ptSlot = pt + RISCV_GET_PT_INDEX(vptr, i);
+        ptSlot = pt + LA_GET_PT_INDEX(vptr, i);
         if (unlikely(!isPTEPageTable(ptSlot))) {
             /* couldn't find it */
             return;
@@ -521,7 +523,7 @@ void unmapPageTable(asid_t asid, vptr_t vptr, pte_t *target_pt)
                   0,  /* read */
                   0  /* valid */
               );
-    sfence();
+    // sfence();
 }
 
 static pte_t pte_pte_invalid_new(void)
@@ -551,34 +553,34 @@ void unmapPage(vm_page_size_t page_size, asid_t asid, vptr_t vptr, pptr_t pptr)
     }
 
     lu_ret.ptSlot[0] = pte_pte_invalid_new();
-    sfence();
+    // sfence();
 }
 
-void setVMRoot(tcb_t *tcb)
-{
-    cap_t threadRoot;
-    asid_t asid;
-    pte_t *lvl1pt;
-    findVSpaceForASID_ret_t  find_ret;
+// void setVMRoot(tcb_t *tcb)
+// {
+//     cap_t threadRoot;
+//     asid_t asid;
+//     pte_t *lvl1pt;
+//     findVSpaceForASID_ret_t  find_ret;
 
-    threadRoot = TCB_PTR_CTE_PTR(tcb, tcbVTable)->cap;
+//     threadRoot = TCB_PTR_CTE_PTR(tcb, tcbVTable)->cap;
 
-    if (cap_get_capType(threadRoot) != cap_page_table_cap) {
-        setVSpaceRoot(kpptr_to_paddr(&kernel_root_pageTable), 0);
-        return;
-    }
+//     if (cap_get_capType(threadRoot) != cap_page_table_cap) {
+//         setVSpaceRoot(kpptr_to_paddr(&kernel_level0_pd), 0);
+//         return;
+//     }
 
-    lvl1pt = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(threadRoot));
+//     lvl1pt = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(threadRoot));
 
-    asid = cap_page_table_cap_get_capPTMappedASID(threadRoot);
-    find_ret = findVSpaceForASID(asid);
-    if (unlikely(find_ret.status != EXCEPTION_NONE || find_ret.vspace_root != lvl1pt)) {
-        setVSpaceRoot(kpptr_to_paddr(&kernel_root_pageTable), 0);
-        return;
-    }
+//     asid = cap_page_table_cap_get_capPTMappedASID(threadRoot);
+//     find_ret = findVSpaceForASID(asid);
+//     if (unlikely(find_ret.status != EXCEPTION_NONE || find_ret.vspace_root != lvl1pt)) {
+//         setVSpaceRoot(kpptr_to_paddr(&kernel_level0_pd), 0);
+//         return;
+//     }
 
-    setVSpaceRoot(addrFromPPtr(lvl1pt), asid);
-}
+//     setVSpaceRoot(addrFromPPtr(lvl1pt), asid);
+// }
 
 bool_t CONST isValidVTableRoot(cap_t cap)
 {
@@ -654,559 +656,559 @@ static inline bool_t CONST checkVPAlignment(vm_page_size_t sz, word_t w)
     return (w & MASK(pageBitsForSize(sz))) == 0;
 }
 
-static exception_t decodeRISCVPageTableInvocation(word_t label, word_t length,
-                                                  cte_t *cte, cap_t cap, word_t *buffer)
-{
-    if (label == RISCVPageTableUnmap) {
-        if (unlikely(!isFinalCapability(cte))) {
-            userError("RISCVPageTableUnmap: cannot unmap if more than once cap exists");
-            current_syscall_error.type = seL4_RevokeFirst;
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-        /* Ensure that if the page table is mapped, it is not a top level table */
-        if (likely(cap_page_table_cap_get_capPTIsMapped(cap))) {
-            asid_t asid = cap_page_table_cap_get_capPTMappedASID(cap);
-            findVSpaceForASID_ret_t find_ret = findVSpaceForASID(asid);
-            pte_t *pte = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap));
-            if (unlikely(find_ret.status == EXCEPTION_NONE &&
-                         find_ret.vspace_root == pte)) {
-                userError("RISCVPageTableUnmap: cannot call unmap on top level PageTable");
-                current_syscall_error.type = seL4_RevokeFirst;
-                return EXCEPTION_SYSCALL_ERROR;
-            }
-        }
-
-        setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
-        return performPageTableInvocationUnmap(cap, cte);
-    }
-
-    if (unlikely((label != RISCVPageTableMap))) {
-        userError("RISCVPageTable: Illegal Operation");
-        current_syscall_error.type = seL4_IllegalOperation;
-        return EXCEPTION_SYSCALL_ERROR;
-    }
-
-    if (unlikely(length < 2 || current_extra_caps.excaprefs[0] == NULL)) {
-        userError("RISCVPageTable: truncated message");
-        current_syscall_error.type = seL4_TruncatedMessage;
-        return EXCEPTION_SYSCALL_ERROR;
-    }
-    if (unlikely(cap_page_table_cap_get_capPTIsMapped(cap))) {
-        userError("RISCVPageTable: PageTable is already mapped.");
-        current_syscall_error.type = seL4_InvalidCapability;
-        current_syscall_error.invalidCapNumber = 0;
-        return EXCEPTION_SYSCALL_ERROR;
-    }
-
-    word_t vaddr = getSyscallArg(0, buffer);
-    cap_t lvl1ptCap = current_extra_caps.excaprefs[0]->cap;
-
-    if (unlikely(cap_get_capType(lvl1ptCap) != cap_page_table_cap ||
-                 cap_page_table_cap_get_capPTIsMapped(lvl1ptCap) == asidInvalid)) {
-        userError("RISCVPageTableMap: Invalid top-level PageTable.");
-        current_syscall_error.type = seL4_InvalidCapability;
-        current_syscall_error.invalidCapNumber = 1;
-
-        return EXCEPTION_SYSCALL_ERROR;
-    }
-
-    pte_t *lvl1pt = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(lvl1ptCap));
-    asid_t asid = cap_page_table_cap_get_capPTMappedASID(lvl1ptCap);
-
-    if (unlikely(vaddr >= USER_TOP)) {
-        userError("RISCVPageTableMap: Virtual address cannot be in kernel window.");
-        current_syscall_error.type = seL4_InvalidArgument;
-        current_syscall_error.invalidArgumentNumber = 0;
-
-        return EXCEPTION_SYSCALL_ERROR;
-    }
-
-    findVSpaceForASID_ret_t find_ret = findVSpaceForASID(asid);
-    if (unlikely(find_ret.status != EXCEPTION_NONE)) {
-        userError("RISCVPageTableMap: ASID lookup failed");
-        current_syscall_error.type = seL4_FailedLookup;
-        current_syscall_error.failedLookupWasSource = false;
-        return EXCEPTION_SYSCALL_ERROR;
-    }
-
-    if (unlikely(find_ret.vspace_root != lvl1pt)) {
-        userError("RISCVPageTableMap: ASID lookup failed");
-        current_syscall_error.type = seL4_InvalidCapability;
-        current_syscall_error.invalidCapNumber = 1;
-        return EXCEPTION_SYSCALL_ERROR;
-    }
-
-    lookupPTSlot_ret_t lu_ret = lookupPTSlot(lvl1pt, vaddr);
-
-    /* if there is already something mapped (valid is set) or we have traversed far enough
-     * that a page table is not valid to map then tell the user that they ahve to delete
-     * something before they can put a PT here */
-    if (lu_ret.ptBitsLeft == seL4_PageBits || pte_ptr_get_valid(lu_ret.ptSlot)) {
-        userError("RISCVPageTableMap: All objects mapped at this address");
-        current_syscall_error.type = seL4_DeleteFirst;
-        return EXCEPTION_SYSCALL_ERROR;
-    }
-
-    /* Get the slot to install the PT in */
-    pte_t *ptSlot = lu_ret.ptSlot;
-
-    paddr_t paddr = addrFromPPtr(
-                        PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap)));
-    pte_t pte = pte_new((paddr >> seL4_PageBits),
-                        0, /* sw */
-                        1, /* dirty */
-                        1, /* accessed */
-                        0,  /* global */
-                        0,  /* user */
-                        0,  /* execute */
-                        0,  /* write */
-                        0,  /* read */
-                        1 /* valid */
-                       );
-
-    cap = cap_page_table_cap_set_capPTIsMapped(cap, 1);
-    cap = cap_page_table_cap_set_capPTMappedASID(cap, asid);
-    cap = cap_page_table_cap_set_capPTMappedAddress(cap, (vaddr & ~MASK(lu_ret.ptBitsLeft)));
-
-    setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
-    return performPageTableInvocationMap(cap, cte, pte, ptSlot);
-}
-
-static exception_t decodeRISCVFrameInvocation(word_t label, word_t length,
-                                              cte_t *cte, cap_t cap, word_t *buffer)
-{
-    switch (label) {
-    case RISCVPageMap: {
-        if (unlikely(length < 3 || current_extra_caps.excaprefs[0] == NULL)) {
-            userError("RISCVPageMap: Truncated message.");
-            current_syscall_error.type = seL4_TruncatedMessage;
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        word_t vaddr = getSyscallArg(0, buffer);
-        word_t w_rightsMask = getSyscallArg(1, buffer);
-        vm_attributes_t attr = vmAttributesFromWord(getSyscallArg(2, buffer));
-        cap_t lvl1ptCap = current_extra_caps.excaprefs[0]->cap;
-
-        vm_page_size_t frameSize = cap_frame_cap_get_capFSize(cap);
-        vm_rights_t capVMRights = cap_frame_cap_get_capFVMRights(cap);
-
-        if (unlikely(cap_get_capType(lvl1ptCap) != cap_page_table_cap ||
-                     !cap_page_table_cap_get_capPTIsMapped(lvl1ptCap))) {
-            userError("RISCVPageMap: Bad PageTable cap.");
-            current_syscall_error.type = seL4_InvalidCapability;
-            current_syscall_error.invalidCapNumber = 1;
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        pte_t *lvl1pt = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(lvl1ptCap));
-        asid_t asid = cap_page_table_cap_get_capPTMappedASID(lvl1ptCap);
-
-        findVSpaceForASID_ret_t find_ret = findVSpaceForASID(asid);
-        if (unlikely(find_ret.status != EXCEPTION_NONE)) {
-            userError("RISCVPageMap: No PageTable for ASID");
-            current_syscall_error.type = seL4_FailedLookup;
-            current_syscall_error.failedLookupWasSource = false;
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        if (unlikely(find_ret.vspace_root != lvl1pt)) {
-            userError("RISCVPageMap: ASID lookup failed");
-            current_syscall_error.type = seL4_InvalidCapability;
-            current_syscall_error.invalidCapNumber = 1;
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        /* check the vaddr is valid */
-        word_t vtop = vaddr + BIT(pageBitsForSize(frameSize)) - 1;
-        if (unlikely(vtop >= USER_TOP)) {
-            current_syscall_error.type = seL4_InvalidArgument;
-            current_syscall_error.invalidArgumentNumber = 0;
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-        if (unlikely(!checkVPAlignment(frameSize, vaddr))) {
-            current_syscall_error.type = seL4_AlignmentError;
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        /* Check if this page is already mapped */
-        lookupPTSlot_ret_t lu_ret = lookupPTSlot(lvl1pt, vaddr);
-        if (unlikely(lu_ret.ptBitsLeft != pageBitsForSize(frameSize))) {
-            current_lookup_fault = lookup_fault_missing_capability_new(lu_ret.ptBitsLeft);
-            current_syscall_error.type = seL4_FailedLookup;
-            current_syscall_error.failedLookupWasSource = false;
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        asid_t frame_asid = cap_frame_cap_get_capFMappedASID(cap);
-        if (unlikely(frame_asid != asidInvalid)) {
-            /* this frame is already mapped */
-            if (frame_asid != asid) {
-                userError("RISCVPageMap: Attempting to remap a frame that does not belong to the passed address space");
-                current_syscall_error.type = seL4_InvalidCapability;
-                current_syscall_error.invalidCapNumber = 1;
-                return EXCEPTION_SYSCALL_ERROR;
-            }
-            word_t mapped_vaddr = cap_frame_cap_get_capFMappedAddress(cap);
-            if (unlikely(mapped_vaddr != vaddr)) {
-                userError("RISCVPageMap: attempting to map frame into multiple addresses");
-                current_syscall_error.type = seL4_InvalidArgument;
-                current_syscall_error.invalidArgumentNumber = 0;
-                return EXCEPTION_SYSCALL_ERROR;
-            }
-            /* this check is redundant, as lookupPTSlot does not stop on a page
-             * table PTE */
-            if (unlikely(isPTEPageTable(lu_ret.ptSlot))) {
-                userError("RISCVPageMap: no mapping to remap.");
-                current_syscall_error.type = seL4_DeleteFirst;
-                return EXCEPTION_SYSCALL_ERROR;
-            }
-        } else {
-            /* check this vaddr isn't already mapped */
-            if (unlikely(pte_ptr_get_valid(lu_ret.ptSlot))) {
-                userError("Virtual address already mapped");
-                current_syscall_error.type = seL4_DeleteFirst;
-                return EXCEPTION_SYSCALL_ERROR;
-            }
-        }
-
-        vm_rights_t vmRights = maskVMRights(capVMRights, rightsFromWord(w_rightsMask));
-        paddr_t frame_paddr = addrFromPPtr((void *) cap_frame_cap_get_capFBasePtr(cap));
-        cap = cap_frame_cap_set_capFMappedASID(cap, asid);
-        cap = cap_frame_cap_set_capFMappedAddress(cap,  vaddr);
-
-        bool_t executable = !vm_attributes_get_riscvExecuteNever(attr);
-        pte_t pte = makeUserPTE(frame_paddr, executable, vmRights);
-        setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
-        return performPageInvocationMapPTE(cap, cte, pte, lu_ret.ptSlot);
-    }
-
-    case RISCVPageUnmap: {
-        setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
-        return performPageInvocationUnmap(cap, cte);
-    }
-
-    case RISCVPageGetAddress: {
-
-        /* Check that there are enough message registers */
-        assert(n_msgRegisters >= 1);
-
-        setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
-        return performPageGetAddress((void *)cap_frame_cap_get_capFBasePtr(cap));
-    }
-
-    default:
-        userError("RISCVPage: Illegal operation.");
-        current_syscall_error.type = seL4_IllegalOperation;
-
-        return EXCEPTION_SYSCALL_ERROR;
-    }
-
-}
-
-exception_t decodeRISCVMMUInvocation(word_t label, word_t length, cptr_t cptr,
-                                     cte_t *cte, cap_t cap, word_t *buffer)
-{
-    switch (cap_get_capType(cap)) {
-
-    case cap_page_table_cap:
-        return decodeRISCVPageTableInvocation(label, length, cte, cap, buffer);
-
-    case cap_frame_cap:
-        return decodeRISCVFrameInvocation(label, length, cte, cap, buffer);
-
-    case cap_asid_control_cap: {
-        word_t     i;
-        asid_t           asid_base;
-        word_t           index;
-        word_t           depth;
-        cap_t            untyped;
-        cap_t            root;
-        cte_t           *parentSlot;
-        cte_t           *destSlot;
-        lookupSlot_ret_t lu_ret;
-        void            *frame;
-        exception_t      status;
-
-        if (label != RISCVASIDControlMakePool) {
-            current_syscall_error.type = seL4_IllegalOperation;
-
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        if (length < 2 || current_extra_caps.excaprefs[0] == NULL
-            || current_extra_caps.excaprefs[1] == NULL) {
-            current_syscall_error.type = seL4_TruncatedMessage;
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        index = getSyscallArg(0, buffer);
-        depth = getSyscallArg(1, buffer);
-        parentSlot = current_extra_caps.excaprefs[0];
-        untyped = parentSlot->cap;
-        root = current_extra_caps.excaprefs[1]->cap;
-
-        /* Find first free pool */
-        for (i = 0; i < nASIDPools && riscvKSASIDTable[i]; i++);
-
-        if (i == nASIDPools) {
-            /* no unallocated pool is found */
-            current_syscall_error.type = seL4_DeleteFirst;
-
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        asid_base = i << asidLowBits;
-
-        if (cap_get_capType(untyped) != cap_untyped_cap ||
-            cap_untyped_cap_get_capBlockSize(untyped) != seL4_ASIDPoolBits ||
-            cap_untyped_cap_get_capIsDevice(untyped)) {
-            current_syscall_error.type = seL4_InvalidCapability;
-            current_syscall_error.invalidCapNumber = 1;
-
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        status = ensureNoChildren(parentSlot);
-        if (status != EXCEPTION_NONE) {
-            return status;
-        }
-
-        frame = WORD_PTR(cap_untyped_cap_get_capPtr(untyped));
-
-        lu_ret = lookupTargetSlot(root, index, depth);
-        if (lu_ret.status != EXCEPTION_NONE) {
-            return lu_ret.status;
-        }
-        destSlot = lu_ret.slot;
-
-        status = ensureEmptySlot(destSlot);
-        if (status != EXCEPTION_NONE) {
-            return status;
-        }
-
-        setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
-        return performASIDControlInvocation(frame, destSlot, parentSlot, asid_base);
-    }
-
-    case cap_asid_pool_cap: {
-        cap_t        vspaceCap;
-        cte_t       *vspaceCapSlot;
-        asid_pool_t *pool;
-        word_t i;
-        asid_t       asid;
-
-        if (label != RISCVASIDPoolAssign) {
-            current_syscall_error.type = seL4_IllegalOperation;
-
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-        if (current_extra_caps.excaprefs[0] == NULL) {
-            current_syscall_error.type = seL4_TruncatedMessage;
-
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        vspaceCapSlot = current_extra_caps.excaprefs[0];
-        vspaceCap = vspaceCapSlot->cap;
-
-        if (unlikely(
-                cap_get_capType(vspaceCap) != cap_page_table_cap ||
-                cap_page_table_cap_get_capPTIsMapped(vspaceCap))) {
-            userError("RISCVASIDPool: Invalid vspace root.");
-            current_syscall_error.type = seL4_InvalidCapability;
-            current_syscall_error.invalidCapNumber = 1;
-
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        pool = riscvKSASIDTable[cap_asid_pool_cap_get_capASIDBase(cap) >> asidLowBits];
-        if (!pool) {
-            current_syscall_error.type = seL4_FailedLookup;
-            current_syscall_error.failedLookupWasSource = false;
-            current_lookup_fault = lookup_fault_invalid_root_new();
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        if (pool != ASID_POOL_PTR(cap_asid_pool_cap_get_capASIDPool(cap))) {
-            current_syscall_error.type = seL4_InvalidCapability;
-            current_syscall_error.invalidCapNumber = 0;
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        /* Find first free ASID */
-        asid = cap_asid_pool_cap_get_capASIDBase(cap);
-        for (i = 0; i < BIT(asidLowBits) && (asid + i == 0 || pool->array[i]); i++);
-
-        if (i == BIT(asidLowBits)) {
-            current_syscall_error.type = seL4_DeleteFirst;
-
-            return EXCEPTION_SYSCALL_ERROR;
-        }
-
-        asid += i;
-
-        setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
-        return performASIDPoolInvocation(asid, pool, vspaceCapSlot);
-    }
-    default:
-        fail("Invalid arch cap type");
-    }
-}
-
-exception_t performPageTableInvocationMap(cap_t cap, cte_t *ctSlot,
-                                          pte_t pte, pte_t *ptSlot)
-{
-    ctSlot->cap = cap;
-    *ptSlot = pte;
-    sfence();
-
-    return EXCEPTION_NONE;
-}
-
-exception_t performPageTableInvocationUnmap(cap_t cap, cte_t *ctSlot)
-{
-    if (cap_page_table_cap_get_capPTIsMapped(cap)) {
-        pte_t *pt = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap));
-        unmapPageTable(
-            cap_page_table_cap_get_capPTMappedASID(cap),
-            cap_page_table_cap_get_capPTMappedAddress(cap),
-            pt
-        );
-        clearMemory((void *)pt, seL4_PageTableBits);
-    }
-    cap_page_table_cap_ptr_set_capPTIsMapped(&(ctSlot->cap), 0);
-
-    return EXCEPTION_NONE;
-}
-
-static exception_t performPageGetAddress(void *vbase_ptr)
-{
-    paddr_t capFBasePtr;
-
-    /* Get the physical address of this frame. */
-    capFBasePtr = addrFromPPtr(vbase_ptr);
-
-    /* return it in the first message register */
-    setRegister(NODE_STATE(ksCurThread), msgRegisters[0], capFBasePtr);
-    setRegister(NODE_STATE(ksCurThread), msgInfoRegister,
-                wordFromMessageInfo(seL4_MessageInfo_new(0, 0, 0, 1)));
-
-    return EXCEPTION_NONE;
-}
-
-static exception_t updatePTE(pte_t pte, pte_t *base)
-{
-    *base = pte;
-    sfence();
-    return EXCEPTION_NONE;
-}
-
-exception_t performPageInvocationMapPTE(cap_t cap, cte_t *ctSlot,
-                                        pte_t pte, pte_t *base)
-{
-    ctSlot->cap = cap;
-    return updatePTE(pte, base);
-}
-
-exception_t performPageInvocationUnmap(cap_t cap, cte_t *ctSlot)
-{
-    if (cap_frame_cap_get_capFMappedASID(cap) != asidInvalid) {
-        unmapPage(cap_frame_cap_get_capFSize(cap),
-                  cap_frame_cap_get_capFMappedASID(cap),
-                  cap_frame_cap_get_capFMappedAddress(cap),
-                  cap_frame_cap_get_capFBasePtr(cap)
-                 );
-    }
-
-    cap_t slotCap = ctSlot->cap;
-    slotCap = cap_frame_cap_set_capFMappedAddress(slotCap, 0);
-    slotCap = cap_frame_cap_set_capFMappedASID(slotCap, asidInvalid);
-    ctSlot->cap = slotCap;
-
-    return EXCEPTION_NONE;
-}
-
-#ifdef CONFIG_PRINTING
-void Arch_userStackTrace(tcb_t *tptr)
-{
-    cap_t threadRoot = TCB_PTR_CTE_PTR(tptr, tcbVTable)->cap;
-    if (!isValidVTableRoot(threadRoot)) {
-        printf("Invalid vspace\n");
-        return;
-    }
-
-    word_t sp = getRegister(tptr, SP);
-    if (!IS_ALIGNED(sp, seL4_WordSizeBits)) {
-        printf("SP %p not aligned", (void *) sp);
-        return;
-    }
-
-    pte_t *vspace_root = PTE_PTR(pptr_of_cap(threadRoot));
-    for (int i = 0; i < CONFIG_USER_STACK_TRACE_LENGTH; i++) {
-        word_t address = sp + (i * sizeof(word_t));
-        lookupPTSlot_ret_t ret = lookupPTSlot(vspace_root, address);
-        if (pte_ptr_get_valid(ret.ptSlot) && !isPTEPageTable(ret.ptSlot)) {
-            pptr_t pptr = (pptr_t)(getPPtrFromHWPTE(ret.ptSlot));
-            word_t *value = (word_t *)((word_t)pptr + (address & MASK(ret.ptBitsLeft)));
-            printf("0x%lx: 0x%lx\n", (long) address, (long) *value);
-        } else {
-            printf("0x%lx: INVALID\n", (long) address);
-        }
-    }
-}
-#endif
-
-#ifdef CONFIG_KERNEL_LOG_BUFFER
-exception_t benchmark_arch_map_logBuffer(word_t frame_cptr)
-{
-    lookupCapAndSlot_ret_t lu_ret;
-    vm_page_size_t frameSize;
-    pptr_t  frame_pptr;
-
-    /* faulting section */
-    lu_ret = lookupCapAndSlot(NODE_STATE(ksCurThread), frame_cptr);
-
-    if (unlikely(lu_ret.status != EXCEPTION_NONE)) {
-        userError("Invalid cap #%lu.", frame_cptr);
-        current_fault = seL4_Fault_CapFault_new(frame_cptr, false);
-
-        return EXCEPTION_SYSCALL_ERROR;
-    }
-
-    if (cap_get_capType(lu_ret.cap) != cap_frame_cap) {
-        userError("Invalid cap. Log buffer should be of a frame cap");
-        current_fault = seL4_Fault_CapFault_new(frame_cptr, false);
-
-        return EXCEPTION_SYSCALL_ERROR;
-    }
-
-    frameSize = cap_frame_cap_get_capFSize(lu_ret.cap);
-
-    if (frameSize != RISCV_Mega_Page) {
-        userError("Invalid frame size. The kernel expects large page log buffer");
-        current_fault = seL4_Fault_CapFault_new(frame_cptr, false);
-
-        return EXCEPTION_SYSCALL_ERROR;
-    }
-
-    frame_pptr = cap_frame_cap_get_capFBasePtr(lu_ret.cap);
-
-    ksUserLogBuffer = pptr_to_paddr((void *) frame_pptr);
-
-#if __loongarch_xlen == 32
-    paddr_t physical_address = ksUserLogBuffer;
-    for (word_t i = 0; i < BIT(PT_INDEX_BITS); i += 1) {
-        kernel_image_level2_log_buffer_pt[i] = pte_next(physical_address, true);
-        physical_address += BIT(PAGE_BITS);
-    }
-    assert(physical_address - ksUserLogBuffer == BIT(seL4_LargePageBits));
-#else
-    kernel_image_level2_dev_pt[RISCV_GET_PT_INDEX(KS_LOG_PPTR, 1)] = pte_next(ksUserLogBuffer, true);
-#endif
-
-    sfence();
-
-    return EXCEPTION_NONE;
-}
-#endif /* CONFIG_KERNEL_LOG_BUFFER */
+// static exception_t decodeRISCVPageTableInvocation(word_t label, word_t length,
+//                                                   cte_t *cte, cap_t cap, word_t *buffer)
+// {
+//     if (label == RISCVPageTableUnmap) {
+//         if (unlikely(!isFinalCapability(cte))) {
+//             userError("RISCVPageTableUnmap: cannot unmap if more than once cap exists");
+//             current_syscall_error.type = seL4_RevokeFirst;
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+//         /* Ensure that if the page table is mapped, it is not a top level table */
+//         if (likely(cap_page_table_cap_get_capPTIsMapped(cap))) {
+//             asid_t asid = cap_page_table_cap_get_capPTMappedASID(cap);
+//             findVSpaceForASID_ret_t find_ret = findVSpaceForASID(asid);
+//             pte_t *pte = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap));
+//             if (unlikely(find_ret.status == EXCEPTION_NONE &&
+//                          find_ret.vspace_root == pte)) {
+//                 userError("RISCVPageTableUnmap: cannot call unmap on top level PageTable");
+//                 current_syscall_error.type = seL4_RevokeFirst;
+//                 return EXCEPTION_SYSCALL_ERROR;
+//             }
+//         }
+
+//         setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
+//         return performPageTableInvocationUnmap(cap, cte);
+//     }
+
+//     if (unlikely((label != RISCVPageTableMap))) {
+//         userError("RISCVPageTable: Illegal Operation");
+//         current_syscall_error.type = seL4_IllegalOperation;
+//         return EXCEPTION_SYSCALL_ERROR;
+//     }
+
+//     if (unlikely(length < 2 || current_extra_caps.excaprefs[0] == NULL)) {
+//         userError("RISCVPageTable: truncated message");
+//         current_syscall_error.type = seL4_TruncatedMessage;
+//         return EXCEPTION_SYSCALL_ERROR;
+//     }
+//     if (unlikely(cap_page_table_cap_get_capPTIsMapped(cap))) {
+//         userError("RISCVPageTable: PageTable is already mapped.");
+//         current_syscall_error.type = seL4_InvalidCapability;
+//         current_syscall_error.invalidCapNumber = 0;
+//         return EXCEPTION_SYSCALL_ERROR;
+//     }
+
+//     word_t vaddr = getSyscallArg(0, buffer);
+//     cap_t lvl1ptCap = current_extra_caps.excaprefs[0]->cap;
+
+//     if (unlikely(cap_get_capType(lvl1ptCap) != cap_page_table_cap ||
+//                  cap_page_table_cap_get_capPTIsMapped(lvl1ptCap) == asidInvalid)) {
+//         userError("RISCVPageTableMap: Invalid top-level PageTable.");
+//         current_syscall_error.type = seL4_InvalidCapability;
+//         current_syscall_error.invalidCapNumber = 1;
+
+//         return EXCEPTION_SYSCALL_ERROR;
+//     }
+
+//     pte_t *lvl1pt = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(lvl1ptCap));
+//     asid_t asid = cap_page_table_cap_get_capPTMappedASID(lvl1ptCap);
+
+//     if (unlikely(vaddr >= USER_TOP)) {
+//         userError("RISCVPageTableMap: Virtual address cannot be in kernel window.");
+//         current_syscall_error.type = seL4_InvalidArgument;
+//         current_syscall_error.invalidArgumentNumber = 0;
+
+//         return EXCEPTION_SYSCALL_ERROR;
+//     }
+
+//     findVSpaceForASID_ret_t find_ret = findVSpaceForASID(asid);
+//     if (unlikely(find_ret.status != EXCEPTION_NONE)) {
+//         userError("RISCVPageTableMap: ASID lookup failed");
+//         current_syscall_error.type = seL4_FailedLookup;
+//         current_syscall_error.failedLookupWasSource = false;
+//         return EXCEPTION_SYSCALL_ERROR;
+//     }
+
+//     if (unlikely(find_ret.vspace_root != lvl1pt)) {
+//         userError("RISCVPageTableMap: ASID lookup failed");
+//         current_syscall_error.type = seL4_InvalidCapability;
+//         current_syscall_error.invalidCapNumber = 1;
+//         return EXCEPTION_SYSCALL_ERROR;
+//     }
+
+//     lookupPTSlot_ret_t lu_ret = lookupPTSlot(lvl1pt, vaddr);
+
+//     /* if there is already something mapped (valid is set) or we have traversed far enough
+//      * that a page table is not valid to map then tell the user that they ahve to delete
+//      * something before they can put a PT here */
+//     if (lu_ret.ptBitsLeft == seL4_PageBits || pte_ptr_get_valid(lu_ret.ptSlot)) {
+//         userError("RISCVPageTableMap: All objects mapped at this address");
+//         current_syscall_error.type = seL4_DeleteFirst;
+//         return EXCEPTION_SYSCALL_ERROR;
+//     }
+
+//     /* Get the slot to install the PT in */
+//     pte_t *ptSlot = lu_ret.ptSlot;
+
+//     paddr_t paddr = addrFromPPtr(
+//                         PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap)));
+//     pte_t pte = pte_new((paddr >> seL4_PageBits),
+//                         0, /* sw */
+//                         1, /* dirty */
+//                         1, /* accessed */
+//                         0,  /* global */
+//                         0,  /* user */
+//                         0,  /* execute */
+//                         0,  /* write */
+//                         0,  /* read */
+//                         1 /* valid */
+//                        );
+
+//     cap = cap_page_table_cap_set_capPTIsMapped(cap, 1);
+//     cap = cap_page_table_cap_set_capPTMappedASID(cap, asid);
+//     cap = cap_page_table_cap_set_capPTMappedAddress(cap, (vaddr & ~MASK(lu_ret.ptBitsLeft)));
+
+//     setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
+//     return performPageTableInvocationMap(cap, cte, pte, ptSlot);
+// }
+
+// static exception_t decodeRISCVFrameInvocation(word_t label, word_t length,
+//                                               cte_t *cte, cap_t cap, word_t *buffer)
+// {
+//     switch (label) {
+//     case RISCVPageMap: {
+//         if (unlikely(length < 3 || current_extra_caps.excaprefs[0] == NULL)) {
+//             userError("RISCVPageMap: Truncated message.");
+//             current_syscall_error.type = seL4_TruncatedMessage;
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         word_t vaddr = getSyscallArg(0, buffer);
+//         word_t w_rightsMask = getSyscallArg(1, buffer);
+//         vm_attributes_t attr = vmAttributesFromWord(getSyscallArg(2, buffer));
+//         cap_t lvl1ptCap = current_extra_caps.excaprefs[0]->cap;
+
+//         vm_page_size_t frameSize = cap_frame_cap_get_capFSize(cap);
+//         vm_rights_t capVMRights = cap_frame_cap_get_capFVMRights(cap);
+
+//         if (unlikely(cap_get_capType(lvl1ptCap) != cap_page_table_cap ||
+//                      !cap_page_table_cap_get_capPTIsMapped(lvl1ptCap))) {
+//             userError("RISCVPageMap: Bad PageTable cap.");
+//             current_syscall_error.type = seL4_InvalidCapability;
+//             current_syscall_error.invalidCapNumber = 1;
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         pte_t *lvl1pt = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(lvl1ptCap));
+//         asid_t asid = cap_page_table_cap_get_capPTMappedASID(lvl1ptCap);
+
+//         findVSpaceForASID_ret_t find_ret = findVSpaceForASID(asid);
+//         if (unlikely(find_ret.status != EXCEPTION_NONE)) {
+//             userError("RISCVPageMap: No PageTable for ASID");
+//             current_syscall_error.type = seL4_FailedLookup;
+//             current_syscall_error.failedLookupWasSource = false;
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         if (unlikely(find_ret.vspace_root != lvl1pt)) {
+//             userError("RISCVPageMap: ASID lookup failed");
+//             current_syscall_error.type = seL4_InvalidCapability;
+//             current_syscall_error.invalidCapNumber = 1;
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         /* check the vaddr is valid */
+//         word_t vtop = vaddr + BIT(pageBitsForSize(frameSize)) - 1;
+//         if (unlikely(vtop >= USER_TOP)) {
+//             current_syscall_error.type = seL4_InvalidArgument;
+//             current_syscall_error.invalidArgumentNumber = 0;
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+//         if (unlikely(!checkVPAlignment(frameSize, vaddr))) {
+//             current_syscall_error.type = seL4_AlignmentError;
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         /* Check if this page is already mapped */
+//         lookupPTSlot_ret_t lu_ret = lookupPTSlot(lvl1pt, vaddr);
+//         if (unlikely(lu_ret.ptBitsLeft != pageBitsForSize(frameSize))) {
+//             current_lookup_fault = lookup_fault_missing_capability_new(lu_ret.ptBitsLeft);
+//             current_syscall_error.type = seL4_FailedLookup;
+//             current_syscall_error.failedLookupWasSource = false;
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         asid_t frame_asid = cap_frame_cap_get_capFMappedASID(cap);
+//         if (unlikely(frame_asid != asidInvalid)) {
+//             /* this frame is already mapped */
+//             if (frame_asid != asid) {
+//                 userError("RISCVPageMap: Attempting to remap a frame that does not belong to the passed address space");
+//                 current_syscall_error.type = seL4_InvalidCapability;
+//                 current_syscall_error.invalidCapNumber = 1;
+//                 return EXCEPTION_SYSCALL_ERROR;
+//             }
+//             word_t mapped_vaddr = cap_frame_cap_get_capFMappedAddress(cap);
+//             if (unlikely(mapped_vaddr != vaddr)) {
+//                 userError("RISCVPageMap: attempting to map frame into multiple addresses");
+//                 current_syscall_error.type = seL4_InvalidArgument;
+//                 current_syscall_error.invalidArgumentNumber = 0;
+//                 return EXCEPTION_SYSCALL_ERROR;
+//             }
+//             /* this check is redundant, as lookupPTSlot does not stop on a page
+//              * table PTE */
+//             if (unlikely(isPTEPageTable(lu_ret.ptSlot))) {
+//                 userError("RISCVPageMap: no mapping to remap.");
+//                 current_syscall_error.type = seL4_DeleteFirst;
+//                 return EXCEPTION_SYSCALL_ERROR;
+//             }
+//         } else {
+//             /* check this vaddr isn't already mapped */
+//             if (unlikely(pte_ptr_get_valid(lu_ret.ptSlot))) {
+//                 userError("Virtual address already mapped");
+//                 current_syscall_error.type = seL4_DeleteFirst;
+//                 return EXCEPTION_SYSCALL_ERROR;
+//             }
+//         }
+
+//         vm_rights_t vmRights = maskVMRights(capVMRights, rightsFromWord(w_rightsMask));
+//         paddr_t frame_paddr = addrFromPPtr((void *) cap_frame_cap_get_capFBasePtr(cap));
+//         cap = cap_frame_cap_set_capFMappedASID(cap, asid);
+//         cap = cap_frame_cap_set_capFMappedAddress(cap,  vaddr);
+
+//         bool_t executable = !vm_attributes_get_riscvExecuteNever(attr);
+//         pte_t pte = makeUserPTE(frame_paddr, executable, vmRights);
+//         setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
+//         return performPageInvocationMapPTE(cap, cte, pte, lu_ret.ptSlot);
+//     }
+
+//     case RISCVPageUnmap: {
+//         setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
+//         return performPageInvocationUnmap(cap, cte);
+//     }
+
+//     case RISCVPageGetAddress: {
+
+//         /* Check that there are enough message registers */
+//         assert(n_msgRegisters >= 1);
+
+//         setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
+//         return performPageGetAddress((void *)cap_frame_cap_get_capFBasePtr(cap));
+//     }
+
+//     default:
+//         userError("RISCVPage: Illegal operation.");
+//         current_syscall_error.type = seL4_IllegalOperation;
+
+//         return EXCEPTION_SYSCALL_ERROR;
+//     }
+
+// }
+
+// exception_t decodeRISCVMMUInvocation(word_t label, word_t length, cptr_t cptr,
+//                                      cte_t *cte, cap_t cap, word_t *buffer)
+// {
+//     switch (cap_get_capType(cap)) {
+
+//     case cap_page_table_cap:
+//         return decodeRISCVPageTableInvocation(label, length, cte, cap, buffer);
+
+//     case cap_frame_cap:
+//         return decodeRISCVFrameInvocation(label, length, cte, cap, buffer);
+
+//     case cap_asid_control_cap: {
+//         word_t     i;
+//         asid_t           asid_base;
+//         word_t           index;
+//         word_t           depth;
+//         cap_t            untyped;
+//         cap_t            root;
+//         cte_t           *parentSlot;
+//         cte_t           *destSlot;
+//         lookupSlot_ret_t lu_ret;
+//         void            *frame;
+//         exception_t      status;
+
+//         if (label != RISCVASIDControlMakePool) {
+//             current_syscall_error.type = seL4_IllegalOperation;
+
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         if (length < 2 || current_extra_caps.excaprefs[0] == NULL
+//             || current_extra_caps.excaprefs[1] == NULL) {
+//             current_syscall_error.type = seL4_TruncatedMessage;
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         index = getSyscallArg(0, buffer);
+//         depth = getSyscallArg(1, buffer);
+//         parentSlot = current_extra_caps.excaprefs[0];
+//         untyped = parentSlot->cap;
+//         root = current_extra_caps.excaprefs[1]->cap;
+
+//         /* Find first free pool */
+//         for (i = 0; i < nASIDPools && riscvKSASIDTable[i]; i++);
+
+//         if (i == nASIDPools) {
+//             /* no unallocated pool is found */
+//             current_syscall_error.type = seL4_DeleteFirst;
+
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         asid_base = i << asidLowBits;
+
+//         if (cap_get_capType(untyped) != cap_untyped_cap ||
+//             cap_untyped_cap_get_capBlockSize(untyped) != seL4_ASIDPoolBits ||
+//             cap_untyped_cap_get_capIsDevice(untyped)) {
+//             current_syscall_error.type = seL4_InvalidCapability;
+//             current_syscall_error.invalidCapNumber = 1;
+
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         status = ensureNoChildren(parentSlot);
+//         if (status != EXCEPTION_NONE) {
+//             return status;
+//         }
+
+//         frame = WORD_PTR(cap_untyped_cap_get_capPtr(untyped));
+
+//         lu_ret = lookupTargetSlot(root, index, depth);
+//         if (lu_ret.status != EXCEPTION_NONE) {
+//             return lu_ret.status;
+//         }
+//         destSlot = lu_ret.slot;
+
+//         status = ensureEmptySlot(destSlot);
+//         if (status != EXCEPTION_NONE) {
+//             return status;
+//         }
+
+//         setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
+//         return performASIDControlInvocation(frame, destSlot, parentSlot, asid_base);
+//     }
+
+//     case cap_asid_pool_cap: {
+//         cap_t        vspaceCap;
+//         cte_t       *vspaceCapSlot;
+//         asid_pool_t *pool;
+//         word_t i;
+//         asid_t       asid;
+
+//         if (label != RISCVASIDPoolAssign) {
+//             current_syscall_error.type = seL4_IllegalOperation;
+
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+//         if (current_extra_caps.excaprefs[0] == NULL) {
+//             current_syscall_error.type = seL4_TruncatedMessage;
+
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         vspaceCapSlot = current_extra_caps.excaprefs[0];
+//         vspaceCap = vspaceCapSlot->cap;
+
+//         if (unlikely(
+//                 cap_get_capType(vspaceCap) != cap_page_table_cap ||
+//                 cap_page_table_cap_get_capPTIsMapped(vspaceCap))) {
+//             userError("RISCVASIDPool: Invalid vspace root.");
+//             current_syscall_error.type = seL4_InvalidCapability;
+//             current_syscall_error.invalidCapNumber = 1;
+
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         pool = riscvKSASIDTable[cap_asid_pool_cap_get_capASIDBase(cap) >> asidLowBits];
+//         if (!pool) {
+//             current_syscall_error.type = seL4_FailedLookup;
+//             current_syscall_error.failedLookupWasSource = false;
+//             current_lookup_fault = lookup_fault_invalid_root_new();
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         if (pool != ASID_POOL_PTR(cap_asid_pool_cap_get_capASIDPool(cap))) {
+//             current_syscall_error.type = seL4_InvalidCapability;
+//             current_syscall_error.invalidCapNumber = 0;
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         /* Find first free ASID */
+//         asid = cap_asid_pool_cap_get_capASIDBase(cap);
+//         for (i = 0; i < BIT(asidLowBits) && (asid + i == 0 || pool->array[i]); i++);
+
+//         if (i == BIT(asidLowBits)) {
+//             current_syscall_error.type = seL4_DeleteFirst;
+
+//             return EXCEPTION_SYSCALL_ERROR;
+//         }
+
+//         asid += i;
+
+//         setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
+//         return performASIDPoolInvocation(asid, pool, vspaceCapSlot);
+//     }
+//     default:
+//         fail("Invalid arch cap type");
+//     }
+// }
+
+// exception_t performPageTableInvocationMap(cap_t cap, cte_t *ctSlot,
+//                                           pte_t pte, pte_t *ptSlot)
+// {
+//     ctSlot->cap = cap;
+//     *ptSlot = pte;
+//     sfence();
+
+//     return EXCEPTION_NONE;
+// }
+
+// exception_t performPageTableInvocationUnmap(cap_t cap, cte_t *ctSlot)
+// {
+//     if (cap_page_table_cap_get_capPTIsMapped(cap)) {
+//         pte_t *pt = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap));
+//         unmapPageTable(
+//             cap_page_table_cap_get_capPTMappedASID(cap),
+//             cap_page_table_cap_get_capPTMappedAddress(cap),
+//             pt
+//         );
+//         clearMemory((void *)pt, seL4_PageTableBits);
+//     }
+//     cap_page_table_cap_ptr_set_capPTIsMapped(&(ctSlot->cap), 0);
+
+//     return EXCEPTION_NONE;
+// }
+
+// static exception_t performPageGetAddress(void *vbase_ptr)
+// {
+//     paddr_t capFBasePtr;
+
+//     /* Get the physical address of this frame. */
+//     capFBasePtr = addrFromPPtr(vbase_ptr);
+
+//     /* return it in the first message register */
+//     setRegister(NODE_STATE(ksCurThread), msgRegisters[0], capFBasePtr);
+//     setRegister(NODE_STATE(ksCurThread), msgInfoRegister,
+//                 wordFromMessageInfo(seL4_MessageInfo_new(0, 0, 0, 1)));
+
+//     return EXCEPTION_NONE;
+// }
+
+// static exception_t updatePTE(pte_t pte, pte_t *base)
+// {
+//     *base = pte;
+//     sfence();
+//     return EXCEPTION_NONE;
+// }
+
+// exception_t performPageInvocationMapPTE(cap_t cap, cte_t *ctSlot,
+//                                         pte_t pte, pte_t *base)
+// {
+//     ctSlot->cap = cap;
+//     return updatePTE(pte, base);
+// }
+
+// exception_t performPageInvocationUnmap(cap_t cap, cte_t *ctSlot)
+// {
+//     if (cap_frame_cap_get_capFMappedASID(cap) != asidInvalid) {
+//         unmapPage(cap_frame_cap_get_capFSize(cap),
+//                   cap_frame_cap_get_capFMappedASID(cap),
+//                   cap_frame_cap_get_capFMappedAddress(cap),
+//                   cap_frame_cap_get_capFBasePtr(cap)
+//                  );
+//     }
+
+//     cap_t slotCap = ctSlot->cap;
+//     slotCap = cap_frame_cap_set_capFMappedAddress(slotCap, 0);
+//     slotCap = cap_frame_cap_set_capFMappedASID(slotCap, asidInvalid);
+//     ctSlot->cap = slotCap;
+
+//     return EXCEPTION_NONE;
+// }
+
+// #ifdef CONFIG_PRINTING
+// void Arch_userStackTrace(tcb_t *tptr)
+// {
+//     cap_t threadRoot = TCB_PTR_CTE_PTR(tptr, tcbVTable)->cap;
+//     if (!isValidVTableRoot(threadRoot)) {
+//         printf("Invalid vspace\n");
+//         return;
+//     }
+
+//     word_t sp = getRegister(tptr, SP);
+//     if (!IS_ALIGNED(sp, seL4_WordSizeBits)) {
+//         printf("SP %p not aligned", (void *) sp);
+//         return;
+//     }
+
+//     pte_t *vspace_root = PTE_PTR(pptr_of_cap(threadRoot));
+//     for (int i = 0; i < CONFIG_USER_STACK_TRACE_LENGTH; i++) {
+//         word_t address = sp + (i * sizeof(word_t));
+//         lookupPTSlot_ret_t ret = lookupPTSlot(vspace_root, address);
+//         if (pte_ptr_get_valid(ret.ptSlot) && !isPTEPageTable(ret.ptSlot)) {
+//             pptr_t pptr = (pptr_t)(getPPtrFromHWPTE(ret.ptSlot));
+//             word_t *value = (word_t *)((word_t)pptr + (address & MASK(ret.ptBitsLeft)));
+//             printf("0x%lx: 0x%lx\n", (long) address, (long) *value);
+//         } else {
+//             printf("0x%lx: INVALID\n", (long) address);
+//         }
+//     }
+// }
+// #endif
+
+// #ifdef CONFIG_KERNEL_LOG_BUFFER
+// exception_t benchmark_arch_map_logBuffer(word_t frame_cptr)
+// {
+//     lookupCapAndSlot_ret_t lu_ret;
+//     vm_page_size_t frameSize;
+//     pptr_t  frame_pptr;
+
+//     /* faulting section */
+//     lu_ret = lookupCapAndSlot(NODE_STATE(ksCurThread), frame_cptr);
+
+//     if (unlikely(lu_ret.status != EXCEPTION_NONE)) {
+//         userError("Invalid cap #%lu.", frame_cptr);
+//         current_fault = seL4_Fault_CapFault_new(frame_cptr, false);
+
+//         return EXCEPTION_SYSCALL_ERROR;
+//     }
+
+//     if (cap_get_capType(lu_ret.cap) != cap_frame_cap) {
+//         userError("Invalid cap. Log buffer should be of a frame cap");
+//         current_fault = seL4_Fault_CapFault_new(frame_cptr, false);
+
+//         return EXCEPTION_SYSCALL_ERROR;
+//     }
+
+//     frameSize = cap_frame_cap_get_capFSize(lu_ret.cap);
+
+//     if (frameSize != RISCV_Mega_Page) {
+//         userError("Invalid frame size. The kernel expects large page log buffer");
+//         current_fault = seL4_Fault_CapFault_new(frame_cptr, false);
+
+//         return EXCEPTION_SYSCALL_ERROR;
+//     }
+
+//     frame_pptr = cap_frame_cap_get_capFBasePtr(lu_ret.cap);
+
+//     ksUserLogBuffer = pptr_to_paddr((void *) frame_pptr);
+
+// #if __loongarch_xlen == 32
+//     paddr_t physical_address = ksUserLogBuffer;
+//     for (word_t i = 0; i < BIT(PT_INDEX_BITS); i += 1) {
+//         kernel_image_level2_log_buffer_pt[i] = pte_next(physical_address, true);
+//         physical_address += BIT(PAGE_BITS);
+//     }
+//     assert(physical_address - ksUserLogBuffer == BIT(seL4_LargePageBits));
+// #else
+//     kernel_image_level2_dev_pt[RISCV_GET_PT_INDEX(KS_LOG_PPTR, 1)] = pte_next(ksUserLogBuffer, true);
+// #endif
+
+//     sfence();
+
+//     return EXCEPTION_NONE;
+// }
+// #endif /* CONFIG_KERNEL_LOG_BUFFER */

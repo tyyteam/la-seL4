@@ -1320,7 +1320,11 @@ static inline void setVSpaceRoot(paddr_t addr, asid_t asid)
 
 void map_kernel_devices(void);
 void setup_pw(void);
+void initTimer(void);
+void initLocalIRQController(void);
+void initIRQController(void);
 
+void trap_init(void);
 
 
 /* irq related macro definitions, variables and functions during bootstrapping*/
