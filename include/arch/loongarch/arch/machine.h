@@ -1321,7 +1321,9 @@ __BUILD_CSR_OP(tlbidx)
 #define EXCCODE_INT_END     78
 #define EXCCODE_INT_NUM	    (EXCCODE_INT_END - EXCCODE_INT_START)
 
-#define LOG_BASE_2(n) (sizeof(unsigned long) * 8 - CLZL(n) - 1)
+#define CHAR_BIT 8
+#define CLZL(x) __builtin_clzl(x)
+#define LOG_BASE_2(n) (sizeof(unsigned long) * CHAR_BIT - __builtin_clzl(n) - 1)
 
 #ifndef __ASSEMBLER__
 
