@@ -441,7 +441,7 @@ static exception_t performASIDControlInvocation(void *frame, cte_t *slot, cte_t 
     cap_untyped_cap_ptr_set_capFreeIndex(&(parent->cap),
                                          MAX_FREE_INDEX(cap_untyped_cap_get_capBlockSize(parent->cap)));
 
-    memzero(frame, BIT(pageBitsForSize(RISCV_4K_Page)));
+    memzero(frame, BIT(pageBitsForSize(LOONGARCH_16K_Page)));
     /** AUXUPD: "(True, ptr_retyps 1 (Ptr (ptr_val \<acute>frame) :: asid_pool_C ptr))" */
 
     cteInsert(

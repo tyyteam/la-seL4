@@ -78,41 +78,41 @@ enum vm_fault_type {
 typedef word_t vm_fault_type_t;
 
 enum frameSizeConstants {
-    RISCVPageBits        = seL4_PageBits,
-    RISCVMegaPageBits    = seL4_LargePageBits,
+    LOONGARCHPageBits        = seL4_PageBits,
+    LOONGARCHMegaPageBits    = seL4_LargePageBits,
 #if CONFIG_PT_LEVELS > 2
-    RISCVGigaPageBits    = seL4_HugePageBits,
+    LOONGARCHGigaPageBits    = seL4_HugePageBits,
 #endif
 #if CONFIG_PT_LEVELS > 3
-    RISCVTeraPageBits    = seL4_TeraPageBits
+    LOONGARCHTeraPageBits    = seL4_TeraPageBits
 #endif
 };
 
 enum vm_page_size {
-    RISCV_4K_Page,
-    RISCV_Mega_Page,
-    RISCV_Giga_Page,
-    RISCV_Tera_Page
+    LOONGARCH_16K_Page,
+    LOONGARCH_Mega_Page,
+    LOONGARCH_Giga_Page,
+    LOONGARCH_Tera_Page
 };
 typedef word_t vm_page_size_t;
 
 static inline word_t CONST pageBitsForSize(vm_page_size_t pagesize)
 {
     switch (pagesize) {
-    case RISCV_4K_Page:
-        return RISCVPageBits;
+    case LOONGARCH_16K_Page:
+        return LOONGARCHPageBits;
 
-    case RISCV_Mega_Page:
-        return RISCVMegaPageBits;
+    case LOONGARCH_Mega_Page:
+        return LOONGARCHMegaPageBits;
 
 #if CONFIG_PT_LEVELS > 2
-    case RISCV_Giga_Page:
-        return RISCVGigaPageBits;
+    case LOONGARCH_Giga_Page:
+        return LOONGARCHGigaPageBits;
 #endif
 
 #if CONFIG_PT_LEVELS > 3
-    case RISCV_Tera_Page:
-        return RISCVTeraPageBits;
+    case LOONGARCH_Tera_Page:
+        return LOONGARCHTeraPageBits;
 #endif
 
     default:

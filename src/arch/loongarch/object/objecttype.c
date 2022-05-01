@@ -172,17 +172,17 @@ bool_t CONST Arch_sameObjectAs(cap_t cap_a, cap_t cap_b)
 word_t Arch_getObjectSize(word_t t)
 {
     switch (t) {
-    case seL4_RISCV_4K_Page:
-    case seL4_RISCV_PageTableObject:
+    case seL4_LOONGARCH_16K_Page:
+    case seL4_LOONGARCH_PageTableObject:
         return seL4_PageBits;
-    case seL4_RISCV_Mega_Page:
+    case seL4_LOONGARCH_Mega_Page:
         return seL4_LargePageBits;
 #if CONFIG_PT_LEVELS > 2
-    case seL4_RISCV_Giga_Page:
+    case seL4_LOONGARCH_Giga_Page:
         return seL4_HugePageBits;
 #endif
 #if CONFIG_PT_LEVELS > 3
-    case seL4_RISCV_Tera_Page:
+    case seL4_LOONGARCH_Tera_Page:
         return seL4_TeraPageBits;
 #endif
     default:
@@ -195,47 +195,47 @@ cap_t Arch_createObject(object_t t, void *regionBase, word_t userSize, bool_t
                         deviceMemory)
 {
     switch (t) {
-    case seL4_RISCV_4K_Page:
+    case seL4_LOONGARCH_16K_Page:
         if (deviceMemory) {
             /** AUXUPD: "(True, ptr_retyps 1
                      (Ptr (ptr_val \<acute>regionBase) :: user_data_device_C ptr))" */
-            /** GHOSTUPD: "(True, gs_new_frames vmpage_size.RISCVSmallPage
+            /** GHOSTUPD: "(True, gs_new_frames vmpage_size.LOONGARCHSmallPage
                                                     (ptr_val \<acute>regionBase)
-                                                    (unat RISCVPageBits))" */
+                                                    (unat LOONGARCHPageBits))" */
         } else {
             /** AUXUPD: "(True, ptr_retyps 1
                      (Ptr (ptr_val \<acute>regionBase) :: user_data_C ptr))" */
-            /** GHOSTUPD: "(True, gs_new_frames vmpage_size.RISCVSmallPage
+            /** GHOSTUPD: "(True, gs_new_frames vmpage_size.LOONGARCHSmallPage
                                                     (ptr_val \<acute>regionBase)
-                                                    (unat RISCVPageBits))" */
+                                                    (unat LOONGARCHPageBits))" */
         }
         return cap_frame_cap_new(
                    asidInvalid,                    /* capFMappedASID       */
                    (word_t) regionBase,            /* capFBasePtr          */
-                   RISCV_4K_Page,                  /* capFSize             */
+                   LOONGARCH_16K_Page,                  /* capFSize             */
                    wordFromVMRights(VMReadWrite),  /* capFVMRights         */
                    deviceMemory,                   /* capFIsDevice         */
                    0                               /* capFMappedAddress    */
                );
 
-    case seL4_RISCV_Mega_Page: {
+    case seL4_LOONGARCH_Mega_Page: {
         if (deviceMemory) {
             /** AUXUPD: "(True, ptr_retyps (2^9)
                      (Ptr (ptr_val \<acute>regionBase) :: user_data_device_C ptr))" */
-            /** GHOSTUPD: "(True, gs_new_frames vmpage_size.RISCVLargePage
+            /** GHOSTUPD: "(True, gs_new_frames vmpage_size.LOONGARCHLargePage
                                                     (ptr_val \<acute>regionBase)
-                                                    (unat RISCVMegaPageBits))" */
+                                                    (unat LOONGARCHMegaPageBits))" */
         } else {
             /** AUXUPD: "(True, ptr_retyps (2^9)
                      (Ptr (ptr_val \<acute>regionBase) :: user_data_C ptr))" */
-            /** GHOSTUPD: "(True, gs_new_frames vmpage_size.RISCVLargePage
+            /** GHOSTUPD: "(True, gs_new_frames vmpage_size.LOONGARCHLargePage
                                                     (ptr_val \<acute>regionBase)
-                                                    (unat RISCVMegaPageBits))" */
+                                                    (unat LOONGARCHMegaPageBits))" */
         }
         return cap_frame_cap_new(
                    asidInvalid,                    /* capFMappedASID       */
                    (word_t) regionBase,            /* capFBasePtr          */
-                   RISCV_Mega_Page,                  /* capFSize             */
+                   LOONGARCH_Mega_Page,                  /* capFSize             */
                    wordFromVMRights(VMReadWrite),  /* capFVMRights         */
                    deviceMemory,                   /* capFIsDevice         */
                    0                               /* capFMappedAddress    */
@@ -260,7 +260,7 @@ cap_t Arch_createObject(object_t t, void *regionBase, word_t userSize, bool_t
         return cap_frame_cap_new(
                    asidInvalid,                    /* capFMappedASID       */
                    (word_t) regionBase,            /* capFBasePtr          */
-                   RISCV_Giga_Page,                  /* capFSize             */
+                   LOONGARCH_Giga_Page,                  /* capFSize             */
                    wordFromVMRights(VMReadWrite),  /* capFVMRights         */
                    deviceMemory,                   /* capFIsDevice         */
                    0                               /* capFMappedAddress    */
@@ -268,7 +268,7 @@ cap_t Arch_createObject(object_t t, void *regionBase, word_t userSize, bool_t
     }
 #endif
 
-    case seL4_RISCV_PageTableObject:
+    case seL4_LOONGARCH_PageTableObject:
         /** AUXUPD: "(True, ptr_retyps 1
               (Ptr (ptr_val \<acute>regionBase) :: (pte_C[512]) ptr))" */
         return cap_page_table_cap_new(
@@ -311,14 +311,11 @@ void Arch_prepareThreadDelete(tcb_t *thread)
 bool_t Arch_isFrameType(word_t type)
 {
     switch (type) {
-#if CONFIG_PT_LEVELS == 4
-    case seL4_RISCV_Tera_Page:
-#endif
 #if CONFIG_PT_LEVELS > 2
-    case seL4_RISCV_Giga_Page:
+    case seL4_LOONGARCH_Giga_Page:
 #endif
-    case seL4_RISCV_Mega_Page:
-    case seL4_RISCV_4K_Page:
+    case seL4_LOONGARCH_Mega_Page:
+    case seL4_LOONGARCH_16K_Page:
         return true;
     default:
         return false;

@@ -36,9 +36,9 @@ BOOT_CODE cap_t create_mapped_it_frame_cap(cap_t pd_cap, pptr_t pptr, vptr_t vpt
     vm_page_size_t frame_size;
 
     if (use_large) {
-        frame_size = RISCV_Mega_Page;
+        frame_size = LOONGARCH_Mega_Page;
     } else {
-        frame_size = RISCV_4K_Page;
+        frame_size = LOONGARCH_16K_Page;
     }
 
     cap = cap_frame_cap_new(

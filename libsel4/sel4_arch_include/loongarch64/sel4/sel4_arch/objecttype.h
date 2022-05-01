@@ -10,7 +10,7 @@
 #include <autoconf.h>
 
 typedef enum _mode_object {
-    seL4_LOONGARCH_64Giga_Page = seL4_NonArchObjectTypeCount,
+    seL4_LOONGARCH_Giga_Page = seL4_NonArchObjectTypeCount,
 #if CONFIG_PT_LEVELS > 3
     seL4_LOONGARCH_Tera_Page,
 #endif

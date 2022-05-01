@@ -279,11 +279,12 @@ BOOT_CODE void setup_vint_size(unsigned int size)
 {
 	unsigned int vs;
 
-    if (size == 0x200)
-        vs = CSR_ECFG_VS_OF_VECSIZE_0X200;
-
+    vs = LOG_BASE_2(size/4);
+    
     if (vs == 0 || vs > 7)
 		printf("vint_size %d Not support yet", vs);
+    else 
+        printf("using %d as vint_size",vs);
 
     assert(vs != 0 && vs <= 7);
 
