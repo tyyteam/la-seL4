@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <config.h>
 #include <util.h>
 
 #if CONFIG_PT_LEVELS == 3
@@ -44,7 +45,7 @@
 #define KS_LOG_PPTR UL_CONST(0xA00000007FE00000)
 
 #else
-#error Only PT_LEVELS == 3 is supported
+#error //Only PT_LEVELS == 3 is supported
 #endif
 
 /*rv
