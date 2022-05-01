@@ -37,8 +37,6 @@ typedef struct seL4_UserContext_ {
     seL4_Word s7;
     seL4_Word s8;
     seL4_Word s9;
-    seL4_Word s10;
-    seL4_Word s11;
 
     seL4_Word a0;
     seL4_Word a1;
@@ -56,6 +54,8 @@ typedef struct seL4_UserContext_ {
     seL4_Word t4;
     seL4_Word t5;
     seL4_Word t6;
+    seL4_Word t7;
+    seL4_Word t8;
 
     seL4_Word tp;
 } seL4_UserContext;
