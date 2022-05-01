@@ -158,16 +158,20 @@ void setIRQTrigger(irq_t irq, bool_t edge_triggered)
 /* isIRQPending is used to determine whether to preempt long running
  * operations at various preemption points throughout the kernel. If this
  * returns true, it means that if the Kernel were to return to user mode, it
- * would then immediately take an interrupt. We check the SIP register for if
- * either a timer interrupt (STIP) or an external interrupt (SEIP) is pending.
+ * would then immediately take an interrupt. We check the estat register for if
+ * either a timer interrupt (TI) or external interrupts (HWI0~7) is pending.
  * We don't check software generated interrupts. These are used to perform cross
  * core signalling which isn't currently supported.
- * TODO: Add SSIP check when SMP support is added.
+ * TODO: Add IPI check when SMP support is added.
  */
 static inline bool_t isIRQPending(void)
 {
-    word_t sip = read_sip();
-    return (sip & (BIT(SIP_STIP) | BIT(SIP_SEIP)));
+    word_t word_estat = (unsigned long)read_csr_estat();
+    return (word_estat & (BIT(CSR_ESTAT_IS_TIMER)|BIT(CSR_ESTAT_IS_HWI0)|BIT(CSR_ESTAT_IS_HWI1)|BIT(CSR_ESTAT_IS_HWI2)|
+                        BIT(CSR_ESTAT_IS_HWI3)|BIT(CSR_ESTAT_IS_HWI4)|BIT(CSR_ESTAT_IS_HWI5)|
+                        BIT(CSR_ESTAT_IS_HWI6)|BIT(CSR_ESTAT_IS_HWI7)));
+    //word_t sip = read_sip();
+    //return (sip & (BIT(SIP_STIP) | BIT(SIP_SEIP)));
 }
 
 /**
