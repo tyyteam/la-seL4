@@ -2,6 +2,7 @@
 #ifndef __ASM_LINKAGE_H
 #define __ASM_LINKAGE_H
 
+#define ALIGN __ALIGN
 #define __ALIGN		.align 2
 #define __ALIGN_STR	".align 2"
 #define SYM_L_GLOBAL(name)			.globl name
@@ -10,6 +11,20 @@
 #ifndef ASM_NL
 #define ASM_NL		 ;
 #endif
+
+#define STT_NOTYPE  0
+#define STT_OBJECT  1
+#define STT_FUNC    2
+#define STT_SECTION 3
+#define STT_FILE    4
+#define STT_COMMON  5
+#define STT_TLS     6
+
+#define SYM_T_FUNC				STT_FUNC
+
+#define SYM_END(name, sym_type)				\
+	.type name sym_type ASM_NL			\
+	.size name, .-name
 
 #define SYM_ENTRY(name, linkage, align...)		\
 	linkage(name) ASM_NL				\
