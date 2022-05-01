@@ -1303,6 +1303,8 @@ __BUILD_CSR_OP(tlbidx)
 #define EXCCODE_INT_END     78
 #define EXCCODE_INT_NUM	    (EXCCODE_INT_END - EXCCODE_INT_START)
 
+#define LOG_BASE_2 (sizeof(unsigned long) * 8 - CLZL(n) - 1)
+
 #ifndef __ASSEMBLER__
 
 /* Cleaning memory before user-level access */
