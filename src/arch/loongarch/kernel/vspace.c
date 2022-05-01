@@ -39,20 +39,20 @@ struct resolve_ret {
 };
 typedef struct resolve_ret resolve_ret_t;
 
-static exception_t performPageGetAddress(void *vbase_ptr);
+// static exception_t performPageGetAddress(void *vbase_ptr);
 
-static word_t CONST RISCVGetWriteFromVMRights(vm_rights_t vm_rights)
-{
-    /* Write-only frame cap rights not currently supported. */
-    return vm_rights == VMReadWrite;
-}
+// static word_t CONST RISCVGetWriteFromVMRights(vm_rights_t vm_rights)
+// {
+//     /* Write-only frame cap rights not currently supported. */
+//     return vm_rights == VMReadWrite;
+// }
 
-static inline word_t CONST RISCVGetReadFromVMRights(vm_rights_t vm_rights)
-{
-    /* Write-only frame cap rights not currently supported.
-     * Kernel-only conveys no user rights. */
-    return vm_rights != VMKernelOnly;
-}
+// static inline word_t CONST RISCVGetReadFromVMRights(vm_rights_t vm_rights)
+// {
+//     /* Write-only frame cap rights not currently supported.
+//      * Kernel-only conveys no user rights. */
+//     return vm_rights != VMKernelOnly;
+// }
 
 static inline bool_t isPTEPageTable(pte_t *pte)
 {
@@ -434,30 +434,30 @@ void deleteASIDPool(asid_t asid_base, asid_pool_t *pool)
     }
 }
 
-static exception_t performASIDControlInvocation(void *frame, cte_t *slot, cte_t *parent, asid_t asid_base)
-{
-    /** AUXUPD: "(True, typ_region_bytes (ptr_val \<acute>frame) 12)" */
-    /** GHOSTUPD: "(True, gs_clear_region (ptr_val \<acute>frame) 12)" */
-    cap_untyped_cap_ptr_set_capFreeIndex(&(parent->cap),
-                                         MAX_FREE_INDEX(cap_untyped_cap_get_capBlockSize(parent->cap)));
+// static exception_t performASIDControlInvocation(void *frame, cte_t *slot, cte_t *parent, asid_t asid_base)
+// {
+//     /** AUXUPD: "(True, typ_region_bytes (ptr_val \<acute>frame) 12)" */
+//     /** GHOSTUPD: "(True, gs_clear_region (ptr_val \<acute>frame) 12)" */
+//     cap_untyped_cap_ptr_set_capFreeIndex(&(parent->cap),
+//                                          MAX_FREE_INDEX(cap_untyped_cap_get_capBlockSize(parent->cap)));
 
-    memzero(frame, BIT(pageBitsForSize(LOONGARCH_16K_Page)));
-    /** AUXUPD: "(True, ptr_retyps 1 (Ptr (ptr_val \<acute>frame) :: asid_pool_C ptr))" */
+//     memzero(frame, BIT(pageBitsForSize(LOONGARCH_16K_Page)));
+//     /** AUXUPD: "(True, ptr_retyps 1 (Ptr (ptr_val \<acute>frame) :: asid_pool_C ptr))" */
 
-    cteInsert(
-        cap_asid_pool_cap_new(
-            asid_base,          /* capASIDBase  */
-            WORD_REF(frame)     /* capASIDPool  */
-        ),
-        parent,
-        slot
-    );
-    /* Haskell error: "ASID pool's base must be aligned" */
-    assert((asid_base & MASK(asidLowBits)) == 0);
-    riscvKSASIDTable[asid_base >> asidLowBits] = (asid_pool_t *)frame;
+//     cteInsert(
+//         cap_asid_pool_cap_new(
+//             asid_base,          /* capASIDBase  */
+//             WORD_REF(frame)     /* capASIDPool  */
+//         ),
+//         parent,
+//         slot
+//     );
+//     /* Haskell error: "ASID pool's base must be aligned" */
+//     assert((asid_base & MASK(asidLowBits)) == 0);
+//     riscvKSASIDTable[asid_base >> asidLowBits] = (asid_pool_t *)frame;
 
-    return EXCEPTION_NONE;
-}
+//     return EXCEPTION_NONE;
+// }
 
 // static exception_t performASIDPoolInvocation(asid_t asid, asid_pool_t *poolPtr, cte_t *vspaceCapSlot)
 // {
@@ -632,27 +632,27 @@ vm_rights_t CONST maskVMRights(vm_rights_t vm_rights, seL4_CapRights_t cap_right
 
 /* The rest of the file implements the RISCV object invocations */
 
-static pte_t CONST makeUserPTE(paddr_t paddr, bool_t executable, vm_rights_t vm_rights)
-{
-    word_t write = RISCVGetWriteFromVMRights(vm_rights);
-    word_t read = RISCVGetReadFromVMRights(vm_rights);
-    if (unlikely(!read && !write && !executable)) {
-        return pte_pte_invalid_new();
-    } else {
-        return pte_new(
-                   paddr >> seL4_PageBits,
-                   0, /* sw */
-                   1, /* dirty */
-                   1, /* accessed */
-                   0, /* global */
-                   1, /* user */
-                   executable, /* execute */
-                   RISCVGetWriteFromVMRights(vm_rights), /* write */
-                   RISCVGetReadFromVMRights(vm_rights), /* read */
-                   1 /* valid */
-               );
-    }
-}
+// static pte_t CONST makeUserPTE(paddr_t paddr, bool_t executable, vm_rights_t vm_rights)
+// {
+//     word_t write = RISCVGetWriteFromVMRights(vm_rights);
+//     word_t read = RISCVGetReadFromVMRights(vm_rights);
+//     if (unlikely(!read && !write && !executable)) {
+//         return pte_pte_invalid_new();
+//     } else {
+//         return pte_new(
+//                    paddr >> seL4_PageBits,
+//                    0, /* sw */
+//                    1, /* dirty */
+//                    1, /* accessed */
+//                    0, /* global */
+//                    1, /* user */
+//                    executable, /* execute */
+//                    RISCVGetWriteFromVMRights(vm_rights), /* write */
+//                    RISCVGetReadFromVMRights(vm_rights), /* read */
+//                    1 /* valid */
+//                );
+//     }
+// }
 
 static inline bool_t CONST checkVPAlignment(vm_page_size_t sz, word_t w)
 {

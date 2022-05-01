@@ -68,54 +68,54 @@ cap_t CONST Arch_maskCapRights(seL4_CapRights_t cap_rights_mask, cap_t cap)
     }
 }
 
-finaliseCap_ret_t Arch_finaliseCap(cap_t cap, bool_t final)
-{
-    finaliseCap_ret_t fc_ret;
+// finaliseCap_ret_t Arch_finaliseCap(cap_t cap, bool_t final)
+// {
+//     finaliseCap_ret_t fc_ret;
 
-    switch (cap_get_capType(cap)) {
-    case cap_frame_cap:
+//     switch (cap_get_capType(cap)) {
+//     case cap_frame_cap:
 
-        if (cap_frame_cap_get_capFMappedASID(cap)) {
-            unmapPage(cap_frame_cap_get_capFSize(cap),
-                      cap_frame_cap_get_capFMappedASID(cap),
-                      cap_frame_cap_get_capFMappedAddress(cap),
-                      cap_frame_cap_get_capFBasePtr(cap));
-        }
-        break;
-    case cap_page_table_cap:
-        if (final && cap_page_table_cap_get_capPTIsMapped(cap)) {
-            /*
-             * This PageTable is either mapped as a vspace_root or otherwise exists
-             * as an entry in another PageTable. We check if it is a vspace_root and
-             * if it is delete the entry from the ASID pool otherwise we treat it as
-             * a mapped PageTable and unmap it from whatever page table it is mapped
-             * into.
-             */
-            asid_t asid = cap_page_table_cap_get_capPTMappedASID(cap);
-            findVSpaceForASID_ret_t find_ret = findVSpaceForASID(asid);
-            pte_t *pte = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap));
-            if (find_ret.status == EXCEPTION_NONE && find_ret.vspace_root == pte) {
-                deleteASID(asid, pte);
-            } else {
-                unmapPageTable(asid, cap_page_table_cap_get_capPTMappedAddress(cap), pte);
-            }
-        }
-        break;
-    case cap_asid_pool_cap:
-        if (final) {
-            deleteASIDPool(
-                cap_asid_pool_cap_get_capASIDBase(cap),
-                ASID_POOL_PTR(cap_asid_pool_cap_get_capASIDPool(cap))
-            );
-        }
-        break;
-    case cap_asid_control_cap:
-        break;
-    }
-    fc_ret.remainder = cap_null_cap_new();
-    fc_ret.cleanupInfo = cap_null_cap_new();
-    return fc_ret;
-}
+//         if (cap_frame_cap_get_capFMappedASID(cap)) {
+//             unmapPage(cap_frame_cap_get_capFSize(cap),
+//                       cap_frame_cap_get_capFMappedASID(cap),
+//                       cap_frame_cap_get_capFMappedAddress(cap),
+//                       cap_frame_cap_get_capFBasePtr(cap));
+//         }
+//         break;
+//     case cap_page_table_cap:
+//         if (final && cap_page_table_cap_get_capPTIsMapped(cap)) {
+//             /*
+//              * This PageTable is either mapped as a vspace_root or otherwise exists
+//              * as an entry in another PageTable. We check if it is a vspace_root and
+//              * if it is delete the entry from the ASID pool otherwise we treat it as
+//              * a mapped PageTable and unmap it from whatever page table it is mapped
+//              * into.
+//              */
+//             asid_t asid = cap_page_table_cap_get_capPTMappedASID(cap);
+//             findVSpaceForASID_ret_t find_ret = findVSpaceForASID(asid);
+//             pte_t *pte = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap));
+//             if (find_ret.status == EXCEPTION_NONE && find_ret.vspace_root == pte) {
+//                 deleteASID(asid, pte);
+//             } else {
+//                 unmapPageTable(asid, cap_page_table_cap_get_capPTMappedAddress(cap), pte);
+//             }
+//         }
+//         break;
+//     case cap_asid_pool_cap:
+//         if (final) {
+//             deleteASIDPool(
+//                 cap_asid_pool_cap_get_capASIDBase(cap),
+//                 ASID_POOL_PTR(cap_asid_pool_cap_get_capASIDPool(cap))
+//             );
+//         }
+//         break;
+//     case cap_asid_control_cap:
+//         break;
+//     }
+//     fc_ret.remainder = cap_null_cap_new();
+//     fc_ret.cleanupInfo = cap_null_cap_new();
+//     return fc_ret;
+// }
 
 bool_t CONST Arch_sameRegionAs(cap_t cap_a, cap_t cap_b)
 {
@@ -243,7 +243,7 @@ cap_t Arch_createObject(object_t t, void *regionBase, word_t userSize, bool_t
     }
 
 #if CONFIG_PT_LEVELS > 2
-    case seL4_RISCV_Giga_Page: {
+    case seL4_LOONGARCH_Giga_Page: {
         if (deviceMemory) {
             /** AUXUPD: "(True, ptr_retyps (2^18)
                      (Ptr (ptr_val \<acute>regionBase) :: user_data_device_C ptr))" */
