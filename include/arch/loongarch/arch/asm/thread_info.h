@@ -8,7 +8,7 @@
 #ifndef _ASM_THREAD_INFO_H
 #define _ASM_THREAD_INFO_H
 
-#ifdef __KERNEL__
+//#ifdef __KERNEL__
 
 #ifndef __ASSEMBLER__
 
@@ -112,5 +112,5 @@ register unsigned long current_stack_pointer __asm__("$r3");
 #define _TIF_LSX_CTX_LIVE	(1<<TIF_LSX_CTX_LIVE)
 #define _TIF_LASX_CTX_LIVE	(1<<TIF_LASX_CTX_LIVE)
 
-#endif /* __KERNEL__ */
+//#endif /* __KERNEL__ */
 #endif /* _ASM_THREAD_INFO_H */

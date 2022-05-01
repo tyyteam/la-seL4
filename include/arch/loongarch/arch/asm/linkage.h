@@ -22,6 +22,13 @@
 
 #define SYM_T_FUNC				STT_FUNC
 
+#define PGDIR_SHIFT		28
+#define PGD_ORDER		0
+
+#define PTRS_PER_PGD	((PAGE_SIZE << PGD_ORDER) >> 3)
+
+#define PMD_SHIFT	(PAGE_SHIFT + (PAGE_SHIFT + PTE_ORDER - 3))
+
 #define SYM_END(name, sym_type)				\
 	.type name sym_type ASM_NL			\
 	.size name, .-name
