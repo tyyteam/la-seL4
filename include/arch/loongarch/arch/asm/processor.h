@@ -9,10 +9,10 @@
 #include <linux/cpumask.h>
 #include <linux/sizes.h>
 
-#include <asm/cpu.h>
-#include <asm/cpu-info.h>
-#include <asm/loongarch.h>
-#include <asm/vdso/processor.h>
+#include <arch/asm/cpu.h>
+#include <arch/asm/cpu-info.h>
+#include <arch/machine.h>
+#include <arch/asm/vdso/processor.h>
 #include <uapi/asm/ptrace.h>
 #include <uapi/asm/sigcontext.h>
 

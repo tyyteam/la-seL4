@@ -12,7 +12,7 @@
 #include <arch/asm/asm-offsets.h>
 #include <arch/asm/regdef.h>
 #include <arch/asm/fpregdef.h>
-#include <machine.h>// Some files may be missing due to difference from seL4 and Linux
+#include <arch/machine.h>// Some files may be missing due to difference from seL4 and Linux
 
 #undef v0
 #undef v1

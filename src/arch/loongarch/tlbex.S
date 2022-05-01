@@ -3,7 +3,7 @@
  * Copyright (C) 2020-2021 Loongson Technology Corporation Limited
  */
 #include <arch/asm/asm.h>
-#include <machine.h>
+#include <arch/machine.h>
 // #include <asm/page.h>
 // #include <asm/pgtable.h>// may report file missing
 #include <arch/asm/regdef.h>
@@ -55,7 +55,7 @@ vmalloc_done_load:
 	andi	t0, t0, (PTRS_PER_PGD - 1)
 	slli.d	t0, t0, 3
 	add.d	t1, t1, t0
-#if CONFIG_PGTABLE_LEVELS > 3
+#if CONFIG_PT_LEVELS > 3
 	csrrd	t0, LOONGARCH_CSR_BADV
 	ld.d t1, t1, 0
 	srli.d	t0, t0, PUD_SHIFT
@@ -63,7 +63,7 @@ vmalloc_done_load:
 	slli.d	t0, t0, 3
 	add.d	t1, t1, t0
 #endif
-#if CONFIG_PGTABLE_LEVELS > 2
+#if CONFIG_PT_LEVELS > 2
 	csrrd	t0, LOONGARCH_CSR_BADV
 	ld.d	t1, t1, 0
 	srli.d	t0, t0, PMD_SHIFT
@@ -219,7 +219,7 @@ vmalloc_done_store:
 	slli.d	t0, t0, 3
 	add.d	t1, t1, t0
 
-#if CONFIG_PGTABLE_LEVELS > 3
+#if CONFIG_PT_LEVELS > 3
 	csrrd	t0, LOONGARCH_CSR_BADV
 	ld.d t1, t1, 0
 	srli.d	t0, t0, PUD_SHIFT
@@ -227,7 +227,7 @@ vmalloc_done_store:
 	slli.d	t0, t0, 3
 	add.d	t1, t1, t0
 #endif
-#if CONFIG_PGTABLE_LEVELS > 2
+#if CONFIG_PT_LEVELS > 2
 	csrrd	t0, LOONGARCH_CSR_BADV
 	ld.d	t1, t1, 0
 	srli.d	t0, t0, PMD_SHIFT
@@ -386,7 +386,7 @@ vmalloc_done_modify:
 	andi	t0, t0, (PTRS_PER_PGD - 1)
 	slli.d	t0, t0, 3
 	add.d	t1, t1, t0
-#if CONFIG_PGTABLE_LEVELS > 3
+#if CONFIG_PT_LEVELS > 3
 	csrrd	t0, LOONGARCH_CSR_BADV
 	ld.d t1, t1, 0
 	srli.d	t0, t0, PUD_SHIFT
@@ -394,7 +394,7 @@ vmalloc_done_modify:
 	slli.d	t0, t0, 3
 	add.d	t1, t1, t0
 #endif
-#if CONFIG_PGTABLE_LEVELS > 2
+#if CONFIG_PT_LEVELS > 2
 	csrrd	t0, LOONGARCH_CSR_BADV
 	ld.d	t1, t1, 0
 	srli.d	t0, t0, PMD_SHIFT
@@ -531,7 +531,7 @@ SYM_FUNC_START(handle_tlb_refill)
 	csrwr	t0, LOONGARCH_CSR_TLBRSAVE
 	csrrd	t0, LOONGARCH_CSR_PGD
 	lddir	t0, t0, 3
-#if CONFIG_PGTABLE_LEVELS > 2
+#if CONFIG_PT_LEVELS > 2
 	lddir	t0, t0, 1
 #endif
 	ldpte	t0, 0

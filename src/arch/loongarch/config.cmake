@@ -70,7 +70,7 @@ add_sources(
         object/objecttype.c
         object/tcb.c
         smp/ipi.c
-    ASMFILES head.S genex.S tlbex.S
+    ASMFILES head.S genex.S tlbex.S 
 )
 
 add_bf_source_old("KernelArchLoongarch" "structures.bf" "include/arch/loongarch" "arch/object")
