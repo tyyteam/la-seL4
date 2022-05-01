@@ -16,6 +16,8 @@
 #include <arch/asm/fpregdef.h>
 #include <arch/asm/stackframe.h>
 #include <arch/asm/thread_info.h>
+#include <arch/asm/linkage.h>
+
 	.align	5
 SYM_FUNC_START(__arch_cpu_idle)
 	/* start of rollback region */

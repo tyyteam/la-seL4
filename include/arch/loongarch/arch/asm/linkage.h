@@ -4,6 +4,20 @@
 
 #define __ALIGN		.align 2
 #define __ALIGN_STR	".align 2"
+#define SYM_L_GLOBAL(name)			.globl name
+#define SYM_A_ALIGN				ALIGN
+
+#ifndef ASM_NL
+#define ASM_NL		 ;
+#endif
+
+#define SYM_ENTRY(name, linkage, align...)		\
+	linkage(name) ASM_NL				\
+	align ASM_NL					\
+	name:
+
+#define SYM_START(name, linkage, align...)		\
+	SYM_ENTRY(name, linkage, align)
 
 #define SYM_FUNC_START(name)				\
 	SYM_START(name, SYM_L_GLOBAL, SYM_A_ALIGN)	\

@@ -9,6 +9,7 @@
 #include <arch/asm/regdef.h>
 #include <arch/asm/stackframe.h>
 #include <config.h>
+#include <arch/asm/linkage.h>
 
 	.macro tlb_do_page_fault, write
 	SYM_FUNC_START(tlb_do_page_fault_\write)
