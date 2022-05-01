@@ -16,7 +16,7 @@
 
 #include <arch/machine/extio.h>
 
-static inline irq_t plic_get_claim(void)
+static inline irq_t extio_get_claim(void)
 {
     printf("no PLIC present, can't claim any interrupt\n");
     return irqInvalid;

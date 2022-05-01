@@ -101,20 +101,22 @@ static inline irq_t getActiveIRQ(void)
     /* No interrupt currently active, find a new one from the sources. The
      * priorities are: external -> software -> timer.
      */
-    word_t sip = read_sip();
-    if (sip & BIT(SIP_SEIP)) {
-        /* Even if we say an external interrupt is pending, the PLIC may not
-         * return any pending interrupt here in some corner cases. A level
-         * triggered interrupt might have been deasserted again or another hard
+    word_t word_estat = (unsigned long)read_csr_estat();
+    //word_t sip = read_sip();
+    if (word_estat & (BIT(CSR_ESTAT_IS_HWI0)|BIT(CSR_ESTAT_IS_HWI1)|BIT(CSR_ESTAT_IS_HWI2)|
+                        BIT(CSR_ESTAT_IS_HWI3)|BIT(CSR_ESTAT_IS_HWI4)|BIT(CSR_ESTAT_IS_HWI5)|
+                        BIT(CSR_ESTAT_IS_HWI6)|BIT(CSR_ESTAT_IS_HWI7))){
+        /* Even if we say an external interrupt is pending, the extend io interrupt controller
+         *  may not return any pending interrupt here in some corner cases. 
+         * A level triggered interrupt might have been deasserted again or another hard
          * has claimed it in a multicore system.
          */
-        irq = plic_get_claim();
+        irq = extio_get_claim();
 #ifdef ENABLE_SMP_SUPPORT
-    } else if (sip & BIT(SIP_SSIP)) {
-        sbi_clear_ipi();
-        irq = ipi_get_irq();
+    } else if(word_estat & BIT(CSR_ESTAT_IS_IPI)) {
+        //TODO
 #endif
-    } else if (sip & BIT(SIP_STIP)) {
+    } else if (word_estat & BIT(CSR_ESTAT_IS_TIMER)) {
         irq = KERNEL_TIMER_IRQ;
     } else {
         /* Seems none of the known sources has a pending interrupt. This can

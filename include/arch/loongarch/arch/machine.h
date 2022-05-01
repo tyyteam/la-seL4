@@ -223,6 +223,24 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 #define  CSR_ESTAT_IS_SHIFT		0
 #define  CSR_ESTAT_IS_WIDTH		15
 #define  CSR_ESTAT_IS			(UL_CONST(0x7fff) << CSR_ESTAT_IS_SHIFT)
+#define  CSR_ESTAT_IS_SWI0		0
+#define  CSR_ESTAT_IS_SWI1		1
+#define  CSR_ESTAT_IS_HWI0		2
+#define  CSR_ESTAT_IS_HWI1		3
+#define  CSR_ESTAT_IS_HWI2		4
+#define  CSR_ESTAT_IS_HWI3		5
+#define  CSR_ESTAT_IS_HWI4		6
+#define  CSR_ESTAT_IS_HWI5		7
+#define  CSR_ESTAT_IS_HWI6		8
+#define  CSR_ESTAT_IS_HWI7		9
+#define  CSR_ESTAT_IS_PMC		10
+#define  CSR_ESTAT_IS_TIMER		11
+#ifdef 	ENABLE_SMP_SUPPORT
+#define  CSR_ESTAT_IS_IPI		12
+#endif
+
+
+
 
 #define LOONGARCH_CSR_ERA		0x6	/* ERA */
 
@@ -1303,7 +1321,7 @@ __BUILD_CSR_OP(tlbidx)
 #define EXCCODE_INT_END     78
 #define EXCCODE_INT_NUM	    (EXCCODE_INT_END - EXCCODE_INT_START)
 
-#define LOG_BASE_2 (sizeof(unsigned long) * 8 - CLZL(n) - 1)
+#define LOG_BASE_2(n) (sizeof(unsigned long) * 8 - CLZL(n) - 1)
 
 #ifndef __ASSEMBLER__
 

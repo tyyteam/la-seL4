@@ -62,7 +62,7 @@
  *
  * @return     interrupt number or irqInvalid.
  */
-static inline irq_t plic_get_claim(void);
+static inline irq_t extio_get_claim(void);
 
 /*
  * This function is called to complete a claim process for an interrupt.
