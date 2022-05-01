@@ -9,7 +9,6 @@
 #define _ASM_LOONGARCH_H
 
 #include <util.h>
-#include <utils/arith.h>
 #include <arch/machine/hardware.h>
 
 #ifndef __ASSEMBLER__
@@ -1303,6 +1302,8 @@ __BUILD_CSR_OP(tlbidx)
 #define EXCCODE_NMI         77
 #define EXCCODE_INT_END     78
 #define EXCCODE_INT_NUM	    (EXCCODE_INT_END - EXCCODE_INT_START)
+
+#define LOG_BASE_2 (sizeof(unsigned long) * 8 - CLZL(n) - 1)
 
 #ifndef __ASSEMBLER__
 
