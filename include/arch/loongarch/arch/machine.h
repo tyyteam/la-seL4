@@ -9,6 +9,7 @@
 #define _ASM_LOONGARCH_H
 
 #include <util.h>
+#include <utils/arith.h>
 #include <arch/machine/hardware.h>
 
 #ifndef __ASSEMBLER__
