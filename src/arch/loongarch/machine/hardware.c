@@ -11,6 +11,7 @@
 #include <machine/registerset.h>
 #include <machine/timer.h>
 #include <arch/machine.h>
+#include <arch/machine/cache.h>
 #include <arch/smp/ipi.h>
 
 #ifndef CONFIG_KERNEL_MCS
@@ -292,7 +293,7 @@ BOOT_CODE void setup_vint_size(unsigned int size)
 }
 
 /*configure the entry of exception*/
-BOOT_CODE void set_exception_vector(void)
+BOOT_CODE void configure_exception_vector(void)
 {
 	eentry    = (unsigned long)exception_handlers;
 	tlbrentry = (unsigned long)exception_handlers + 80*VECSIZE;
