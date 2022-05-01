@@ -22,7 +22,7 @@
 #define LIBSEL4_MCS_REPLY 0
 #endif
 
-static inline void riscv_sys_send(seL4_Word sys, seL4_Word dest, seL4_Word info_arg, seL4_Word mr0, seL4_Word mr1,
+static inline void loongarch_sys_send(seL4_Word sys, seL4_Word dest, seL4_Word info_arg, seL4_Word mr0, seL4_Word mr1,
                                   seL4_Word mr2, seL4_Word mr3)
 {
     register seL4_Word destptr asm("a0") = dest;
@@ -37,7 +37,7 @@ static inline void riscv_sys_send(seL4_Word sys, seL4_Word dest, seL4_Word info_
     /* Perform the system call. */
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "riscv_sys_send-ecall"
+        "syscall 0"
         : "+r"(destptr), "+r"(msg0), "+r"(msg1), "+r"(msg2),
         "+r"(msg3), "+r"(info)
         : "r"(scno)
@@ -45,7 +45,7 @@ static inline void riscv_sys_send(seL4_Word sys, seL4_Word dest, seL4_Word info_
 }
 
 #ifndef CONFIG_KERNEL_MCS
-static inline void riscv_sys_reply(seL4_Word sys, seL4_Word info_arg, seL4_Word mr0, seL4_Word mr1, seL4_Word mr2,
+static inline void loongarch_sys_reply(seL4_Word sys, seL4_Word info_arg, seL4_Word mr0, seL4_Word mr1, seL4_Word mr2,
                                    seL4_Word mr3)
 {
     register seL4_Word info asm("a1") = info_arg;
@@ -59,7 +59,7 @@ static inline void riscv_sys_reply(seL4_Word sys, seL4_Word info_arg, seL4_Word 
     /* Perform the system call. */
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "riscv_sys_reply-ecall"
+        "syscall 0"
         : "+r"(msg0), "+r"(msg1), "+r"(msg2), "+r"(msg3),
         "+r"(info)
         : "r"(scno)
@@ -67,7 +67,7 @@ static inline void riscv_sys_reply(seL4_Word sys, seL4_Word info_arg, seL4_Word 
 }
 #endif
 
-static inline void riscv_sys_send_null(seL4_Word sys, seL4_Word src, seL4_Word info_arg)
+static inline void loongarch_sys_send_null(seL4_Word sys, seL4_Word src, seL4_Word info_arg)
 {
     register seL4_Word destptr asm("a0") = src;
     register seL4_Word info asm("a1") = info_arg;
@@ -75,13 +75,13 @@ static inline void riscv_sys_send_null(seL4_Word sys, seL4_Word src, seL4_Word i
     /* Perform the system call. */
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "riscv_sys_send_null-ecall"
+        "syscall 0"
         : "+r"(destptr), "+r"(info)
         : "r"(scno)
     );
 }
 
-static inline void riscv_sys_recv(seL4_Word sys, seL4_Word src, seL4_Word *out_badge, seL4_Word *out_info, seL4_Word
+static inline void loongarch_sys_recv(seL4_Word sys, seL4_Word src, seL4_Word *out_badge, seL4_Word *out_info, seL4_Word
                                   *out_mr0, seL4_Word *out_mr1, seL4_Word *out_mr2, seL4_Word *out_mr3, LIBSEL4_UNUSED seL4_Word reply)
 {
     register seL4_Word src_and_badge asm("a0") = src;
@@ -97,7 +97,7 @@ static inline void riscv_sys_recv(seL4_Word sys, seL4_Word src, seL4_Word *out_b
     /* Perform the system call. */
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "riscv_sys_recv-ecall"
+        "syscall 0"
         : "=r"(msg0), "=r"(msg1), "=r"(msg2), "=r"(msg3),
         "=r"(info), "+r"(src_and_badge)
         : "r"(scno) MCS_PARAM
@@ -111,11 +111,11 @@ static inline void riscv_sys_recv(seL4_Word sys, seL4_Word src, seL4_Word *out_b
     *out_mr3 = msg3;
 }
 
-static inline void riscv_sys_null(seL4_Word sys)
+static inline void loongarch_sys_null(seL4_Word sys)
 {
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "riscv_sys_null-ecall"
+        "syscall 0"
         : /* no outputs */
         : "r"(scno)
     );
@@ -155,7 +155,7 @@ static inline void loongarch_sys_send_recv(seL4_Word sys, seL4_Word dest, seL4_W
 }
 
 #ifdef CONFIG_KERNEL_MCS
-static inline void riscv_sys_nbsend_recv(seL4_Word sys, seL4_Word dest, seL4_Word src, seL4_Word *out_badge,
+static inline void loongarch_sys_nbsend_recv(seL4_Word sys, seL4_Word dest, seL4_Word src, seL4_Word *out_badge,
                                          seL4_Word info_arg,
                                          seL4_Word *out_info, seL4_Word *in_out_mr0, seL4_Word *in_out_mr1, seL4_Word *in_out_mr2,
                                          seL4_Word *in_out_mr3, seL4_Word reply)
@@ -175,7 +175,7 @@ static inline void riscv_sys_nbsend_recv(seL4_Word sys, seL4_Word dest, seL4_Wor
     /* Perform the system call. */
     register seL4_Word scno asm("a7") = sys;
     asm volatile(
-        "riscv_sys_nbsend_recv-ecall"
+        "syscall 0"
         : "+r"(msg0), "+r"(msg1), "+r"(msg2), "+r"(msg3),
         "+r"(src_and_badge), "+r"(info)
         : "r"(scno), "r"(reply_reg), "r"(dest_reg)
@@ -193,14 +193,14 @@ static inline void riscv_sys_nbsend_recv(seL4_Word sys, seL4_Word dest, seL4_Wor
 
 LIBSEL4_INLINE_FUNC void seL4_Send(seL4_CPtr dest, seL4_MessageInfo_t msgInfo)
 {
-    riscv_sys_send(seL4_SysSend, dest, msgInfo.words[0], seL4_GetMR(0), seL4_GetMR(1),
+    loongarch_sys_send(seL4_SysSend, dest, msgInfo.words[0], seL4_GetMR(0), seL4_GetMR(1),
                    seL4_GetMR(2), seL4_GetMR(3));
 }
 
 LIBSEL4_INLINE_FUNC void seL4_SendWithMRs(seL4_CPtr dest, seL4_MessageInfo_t msgInfo,
                                           seL4_Word *mr0, seL4_Word *mr1, seL4_Word *mr2, seL4_Word *mr3)
 {
-    riscv_sys_send(seL4_SysSend, dest, msgInfo.words[0],
+    loongarch_sys_send(seL4_SysSend, dest, msgInfo.words[0],
                    mr0 != seL4_Null && seL4_MessageInfo_get_length(msgInfo) > 0 ? *mr0 : 0,
                    mr1 != seL4_Null && seL4_MessageInfo_get_length(msgInfo) > 0 ? *mr1 : 0,
                    mr2 != seL4_Null && seL4_MessageInfo_get_length(msgInfo) > 0 ? *mr2 : 0,
@@ -211,7 +211,7 @@ LIBSEL4_INLINE_FUNC void seL4_SendWithMRs(seL4_CPtr dest, seL4_MessageInfo_t msg
 
 LIBSEL4_INLINE_FUNC void seL4_NBSend(seL4_CPtr dest, seL4_MessageInfo_t msgInfo)
 {
-    riscv_sys_send(seL4_SysNBSend, dest, msgInfo.words[0], seL4_GetMR(0), seL4_GetMR(1),
+    loongarch_sys_send(seL4_SysNBSend, dest, msgInfo.words[0], seL4_GetMR(0), seL4_GetMR(1),
                    seL4_GetMR(2), seL4_GetMR(3));
 
 }
@@ -219,7 +219,7 @@ LIBSEL4_INLINE_FUNC void seL4_NBSend(seL4_CPtr dest, seL4_MessageInfo_t msgInfo)
 LIBSEL4_INLINE_FUNC void seL4_NBSendWithMRs(seL4_CPtr dest, seL4_MessageInfo_t msgInfo,
                                             seL4_Word *mr0, seL4_Word *mr1, seL4_Word *mr2, seL4_Word *mr3)
 {
-    riscv_sys_send(seL4_SysNBSend, dest, msgInfo.words[0],
+    loongarch_sys_send(seL4_SysNBSend, dest, msgInfo.words[0],
                    mr0 != seL4_Null && seL4_MessageInfo_get_length(msgInfo) > 0 ? *mr0 : 0,
                    mr1 != seL4_Null && seL4_MessageInfo_get_length(msgInfo) > 0 ? *mr1 : 0,
                    mr2 != seL4_Null && seL4_MessageInfo_get_length(msgInfo) > 0 ? *mr2 : 0,
@@ -231,14 +231,14 @@ LIBSEL4_INLINE_FUNC void seL4_NBSendWithMRs(seL4_CPtr dest, seL4_MessageInfo_t m
 #ifndef CONFIG_KERNEL_MCS
 LIBSEL4_INLINE_FUNC void seL4_Reply(seL4_MessageInfo_t msgInfo)
 {
-    riscv_sys_reply(seL4_SysReply, msgInfo.words[0], seL4_GetMR(0), seL4_GetMR(1), seL4_GetMR(2),
+    loongarch_sys_reply(seL4_SysReply, msgInfo.words[0], seL4_GetMR(0), seL4_GetMR(1), seL4_GetMR(2),
                     seL4_GetMR(3));
 }
 
 LIBSEL4_INLINE_FUNC void seL4_ReplyWithMRs(seL4_MessageInfo_t msgInfo,
                                            seL4_Word *mr0, seL4_Word *mr1, seL4_Word *mr2, seL4_Word *mr3)
 {
-    riscv_sys_reply(seL4_SysReply, msgInfo.words[0],
+    loongarch_sys_reply(seL4_SysReply, msgInfo.words[0],
                     mr0 != seL4_Null && seL4_MessageInfo_get_length(msgInfo) > 0 ? *mr0 : 0,
                     mr1 != seL4_Null && seL4_MessageInfo_get_length(msgInfo) > 0 ? *mr1 : 0,
                     mr2 != seL4_Null && seL4_MessageInfo_get_length(msgInfo) > 0 ? *mr2 : 0,
@@ -250,7 +250,7 @@ LIBSEL4_INLINE_FUNC void seL4_ReplyWithMRs(seL4_MessageInfo_t msgInfo,
 
 LIBSEL4_INLINE_FUNC void seL4_Signal(seL4_CPtr dest)
 {
-    riscv_sys_send_null(seL4_SysSend, dest, seL4_MessageInfo_new(0, 0, 0, 0).words[0]);
+    loongarch_sys_send_null(seL4_SysSend, dest, seL4_MessageInfo_new(0, 0, 0, 0).words[0]);
 }
 
 #ifdef CONFIG_KERNEL_MCS
@@ -266,7 +266,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_Recv(seL4_CPtr src, seL4_Word *sende
     seL4_Word msg2;
     seL4_Word msg3;
 
-    riscv_sys_recv(seL4_SysRecv, src, &badge, &info.words[0], &msg0, &msg1, &msg2, &msg3, LIBSEL4_MCS_REPLY);
+    loongarch_sys_recv(seL4_SysRecv, src, &badge, &info.words[0], &msg0, &msg1, &msg2, &msg3, LIBSEL4_MCS_REPLY);
 
     seL4_SetMR(0, msg0);
     seL4_SetMR(1, msg1);
@@ -296,7 +296,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_RecvWithMRs(seL4_CPtr src, seL4_Word
     seL4_Word msg2 = 0;
     seL4_Word msg3 = 0;
 
-    riscv_sys_recv(seL4_SysRecv, src, &badge, &info.words[0], &msg0, &msg1, &msg2, &msg3, LIBSEL4_MCS_REPLY);
+    loongarch_sys_recv(seL4_SysRecv, src, &badge, &info.words[0], &msg0, &msg1, &msg2, &msg3, LIBSEL4_MCS_REPLY);
 
     /* Write the message back out to memory. */
     if (mr0 != seL4_Null) {
@@ -332,7 +332,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_NBRecv(seL4_CPtr src, seL4_Word *sen
     seL4_Word msg2;
     seL4_Word msg3;
 
-    riscv_sys_recv(seL4_SysNBRecv, src, &badge, &info.words[0], &msg0, &msg1, &msg2, &msg3, LIBSEL4_MCS_REPLY);
+    loongarch_sys_recv(seL4_SysNBRecv, src, &badge, &info.words[0], &msg0, &msg1, &msg2, &msg3, LIBSEL4_MCS_REPLY);
 
     seL4_SetMR(0, msg0);
     seL4_SetMR(1, msg1);
@@ -534,7 +534,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_NBSendRecv(seL4_CPtr dest, seL4_Mess
     msg2 = seL4_GetMR(2);
     msg3 = seL4_GetMR(3);
 
-    riscv_sys_nbsend_recv(seL4_SysNBSendRecv, dest, src, &badge, msgInfo.words[0], &info.words[0], &msg0, &msg1, &msg2,
+    loongarch_sys_nbsend_recv(seL4_SysNBSendRecv, dest, src, &badge, msgInfo.words[0], &info.words[0], &msg0, &msg1, &msg2,
                           &msg3,
                           reply);
 
@@ -576,7 +576,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_NBSendRecvWithMRs(seL4_CPtr dest, se
         msg3 = *mr3;
     }
 
-    riscv_sys_nbsend_recv(seL4_SysNBSendRecv, dest, src, &badge, msgInfo.words[0], &info.words[0], &msg0, &msg1, &msg2,
+    loongarch_sys_nbsend_recv(seL4_SysNBSendRecv, dest, src, &badge, msgInfo.words[0], &info.words[0], &msg0, &msg1, &msg2,
                           &msg3,
                           reply);
 
@@ -618,7 +618,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_NBSendWait(seL4_CPtr dest, seL4_Mess
     msg2 = seL4_GetMR(2);
     msg3 = seL4_GetMR(3);
 
-    riscv_sys_nbsend_recv(seL4_SysNBSendWait, 0, src, &badge, msgInfo.words[0], &info.words[0], &msg0, &msg1, &msg2, &msg3,
+    loongarch_sys_nbsend_recv(seL4_SysNBSendWait, 0, src, &badge, msgInfo.words[0], &info.words[0], &msg0, &msg1, &msg2, &msg3,
                           dest);
 
     /* Write the message back out to memory. */
@@ -659,7 +659,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_NBSendWaitWithMRs(seL4_CPtr dest, se
         msg3 = *mr3;
     }
 
-    riscv_sys_nbsend_recv(seL4_SysNBSendRecv, 0, src, &badge, msgInfo.words[0], &info.words[0], &msg0, &msg1, &msg2, &msg3,
+    loongarch_sys_nbsend_recv(seL4_SysNBSendRecv, 0, src, &badge, msgInfo.words[0], &info.words[0], &msg0, &msg1, &msg2, &msg3,
                           dest);
 
     /* Write out the data back to memory. */
@@ -688,7 +688,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_NBSendWaitWithMRs(seL4_CPtr dest, se
 LIBSEL4_INLINE_FUNC void seL4_Yield(void)
 {
     register seL4_Word scno asm("a7") = seL4_SysYield;
-    asm volatile("seL4_Yield-ecall" :: "r"(scno));
+    asm volatile("syscall 0" :: "r"(scno));
 }
 
 #ifdef CONFIG_KERNEL_MCS
@@ -701,7 +701,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_Wait(seL4_CPtr src, seL4_Word *sende
     seL4_Word msg2;
     seL4_Word msg3;
 
-    riscv_sys_recv(seL4_SysWait, src, &badge, &info.words[0], &msg0, &msg1, &msg2, &msg3, 0);
+    loongarch_sys_recv(seL4_SysWait, src, &badge, &info.words[0], &msg0, &msg1, &msg2, &msg3, 0);
 
     seL4_SetMR(0, msg0);
     seL4_SetMR(1, msg1);
@@ -725,7 +725,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_WaitWithMRs(seL4_CPtr src, seL4_Word
     seL4_Word msg2 = 0;
     seL4_Word msg3 = 0;
 
-    riscv_sys_recv(seL4_SysWait, src, &badge, &info.words[0], &msg0, &msg1, &msg2, &msg3, 0);
+    loongarch_sys_recv(seL4_SysWait, src, &badge, &info.words[0], &msg0, &msg1, &msg2, &msg3, 0);
 
     /* Write the message back out to memory. */
     if (mr0 != seL4_Null) {
@@ -757,7 +757,7 @@ LIBSEL4_INLINE_FUNC seL4_MessageInfo_t seL4_NBWait(seL4_CPtr src, seL4_Word *sen
     seL4_Word msg2;
     seL4_Word msg3;
 
-    riscv_sys_recv(seL4_SysNBWait, src, &badge, &info.words[0], &msg0, &msg1, &msg2, &msg3, 0);
+    loongarch_sys_recv(seL4_SysNBWait, src, &badge, &info.words[0], &msg0, &msg1, &msg2, &msg3, 0);
 
     seL4_SetMR(0, msg0);
     seL4_SetMR(1, msg1);
@@ -809,16 +809,16 @@ LIBSEL4_INLINE_FUNC void seL4_DebugDumpScheduler(void)
 #endif
 
 #ifdef CONFIG_DEBUG_BUILD
-LIBSEL4_INLINE_FUNC void seL4_DebugHalt(void)
+LIBSEL4_INLINE_FUNC void c(void)
 {
     register seL4_Word scno asm("a7") = seL4_SysDebugHalt;
-    asm volatile("seL4_DebugHalt-ecall" :: "r"(scno) : "memory");
+    asm volatile("syscall 0" :: "r"(scno) : "memory");
 }
 
 LIBSEL4_INLINE_FUNC void seL4_DebugSnapshot(void)
 {
     register seL4_Word scno asm("a7") = seL4_SysDebugSnapshot;
-    asm volatile("seL4_DebugSnapshot-ecall" ::"r"(scno) : "memory");
+    asm volatile("syscall 0" ::"r"(scno) : "memory");
 }
 
 LIBSEL4_INLINE_FUNC seL4_Uint32 seL4_DebugCapIdentify(seL4_CPtr cap)
@@ -857,7 +857,7 @@ LIBSEL4_INLINE_FUNC void seL4_DebugRun(void (* userfn)(void *), void *userarg)
     register seL4_Word arg1 asm("a0") = (seL4_Word)userfn;
     register seL4_Word arg2 asm("a1") = (seL4_Word)userarg;
     register seL4_Word scno asm("a7") = seL4_SysDebugRun;
-    asm volatile("seL4_DebugRun-ecall" : "+r"(arg1) : "r"(arg2), "r"(scno));
+    asm volatile("syscall 0" : "+r"(arg1) : "r"(arg2), "r"(scno));
 }
 #endif
 
@@ -908,19 +908,19 @@ LIBSEL4_INLINE_FUNC seL4_Error seL4_BenchmarkSetLogBuffer(seL4_Word frame_cptr)
 
 LIBSEL4_INLINE_FUNC void seL4_BenchmarkNullSyscall(void)
 {
-    riscv_sys_null(seL4_SysBenchmarkNullSyscall);
+    loongarch_sys_null(seL4_SysBenchmarkNullSyscall);
     asm volatile("" ::: "memory");
 }
 
 LIBSEL4_INLINE_FUNC void seL4_BenchmarkFlushCaches(void)
 {
-    riscv_sys_send_null(seL4_SysBenchmarkFlushCaches, 0, 0);
+    loongarch_sys_send_null(seL4_SysBenchmarkFlushCaches, 0, 0);
     asm volatile("" ::: "memory");
 }
 
 LIBSEL4_INLINE_FUNC void seL4_BenchmarkFlushL1Caches(seL4_Word cache_type)
 {
-    riscv_sys_send_null(seL4_SysBenchmarkFlushCaches, 1, cache_type);
+    loongarch_sys_send_null(seL4_SysBenchmarkFlushCaches, 1, cache_type);
     asm volatile("" ::: "memory");
 }
 
@@ -983,7 +983,7 @@ LIBSEL4_INLINE_FUNC void seL4_BenchmarkResetAllThreadsUtilisation(void)
 #ifdef CONFIG_SET_TLS_BASE_SELF
 LIBSEL4_INLINE_FUNC void seL4_SetTLSBase(seL4_Word tls_base)
 {
-    riscv_sys_send_null(seL4_SysSetTLSBase, tls_base, 0);
+    loongarch_sys_send_null(seL4_SysSetTLSBase, tls_base, 0);
     asm volatile("" ::: "memory");
 }
 #endif /* CONFIG_SET_TLS_BASE_SELF */

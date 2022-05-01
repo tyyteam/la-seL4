@@ -10,9 +10,9 @@
 #include <autoconf.h>
 
 typedef enum _object {
-    seL4_RISCV_4K_Page = seL4_ModeObjectTypeCount,
-    seL4_RISCV_Mega_Page,
-    seL4_RISCV_PageTableObject,
+    seL4_LOONGARCH_16K_Page = seL4_ModeObjectTypeCount,
+    seL4_LOONGARCH_Mega_Page,
+    seL4_LOONGARCH_PageTableObject,
     seL4_ObjectTypeCount
 } seL4_ArchObjectType;
 
