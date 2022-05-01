@@ -359,13 +359,13 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 #define  CSR_PWCH_DIR3WIDTH		(UL_CONST(0x0) << CSR_PWCH_DIR3WIDTH_SHIFT)
 #define  CSR_PWCH_DIR3BASE_SHIFT	12
 #define  CSR_PWCH_DIR3BASE_WIDTH	6
-#define  CSR_PWCH_DIR3BASE		(UL_CONST(0x0) << CSR_PWCL_DIR3BASE_SHIFT)
+#define  CSR_PWCH_DIR3BASE		(UL_CONST(0x0) << CSR_PWCH_DIR3BASE_SHIFT)
 #define  CSR_PWCH_DIR2WIDTH_SHIFT	6
 #define  CSR_PWCH_DIR2WIDTH_WIDTH	6
 #define  CSR_PWCH_DIR2WIDTH		(UL_CONST(0xb) << CSR_PWCH_DIR2WIDTH_SHIFT)
 #define  CSR_PWCH_DIR2BASE_SHIFT	0
 #define  CSR_PWCH_DIR2BASE_WIDTH	6
-#define  CSR_PWCH_DIR2BASE		(UL_CONST(0x24) << CSR_PWCL_DIR2BASE_SHIFT)
+#define  CSR_PWCH_DIR2BASE		(UL_CONST(0x24) << CSR_PWCH_DIR2BASE_SHIFT)
 #define  INIT_CSR_PWCH          (CSR_PWCH_DIR3WIDTH | CSR_PWCH_DIR3BASE | CSR_PWCH_DIR2WIDTH | CSR_PWCH_DIR2BASE)
 
 #define LOONGARCH_CSR_STLBPGSIZE	0x1e
@@ -1323,6 +1323,7 @@ void setup_pw(void);
 void initTimer(void);
 void initLocalIRQController(void);
 void initIRQController(void);
+void setIRQTrigger(irq_t irq, bool_t trigger);
 
 void trap_init(void);
 
