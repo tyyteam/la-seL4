@@ -297,34 +297,34 @@ BOOT_CODE void write_it_asid_pool(cap_t it_ap_cap, cap_t it_lvl1pt_cap)
 
 /* ==================== BOOT CODE FINISHES HERE ==================== */
 
-static findVSpaceForASID_ret_t findVSpaceForASID(asid_t asid)
-{
-    findVSpaceForASID_ret_t ret;
-    // asid_pool_t        *poolPtr;
-    // pde_t     *vspace_root;
+// static findVSpaceForASID_ret_t findVSpaceForASID(asid_t asid)
+// {
+//     findVSpaceForASID_ret_t ret;
+//     // asid_pool_t        *poolPtr;
+//     // pde_t     *vspace_root;
 
-    // poolPtr = riscvKSASIDTable[asid >> asidLowBits];
-    // if (!poolPtr) {
-    //     current_lookup_fault = lookup_fault_invalid_root_new();
+//     // poolPtr = riscvKSASIDTable[asid >> asidLowBits];
+//     // if (!poolPtr) {
+//     //     current_lookup_fault = lookup_fault_invalid_root_new();
 
-    //     ret.vspace_root = NULL;
-    //     ret.status = EXCEPTION_LOOKUP_FAULT;
-    //     return ret;
-    // }
+//     //     ret.vspace_root = NULL;
+//     //     ret.status = EXCEPTION_LOOKUP_FAULT;
+//     //     return ret;
+//     // }
 
-    // vspace_root = poolPtr->array[asid & MASK(asidLowBits)];
-    // if (!vspace_root) {
-    //     current_lookup_fault = lookup_fault_invalid_root_new();
+//     // vspace_root = poolPtr->array[asid & MASK(asidLowBits)];
+//     // if (!vspace_root) {
+//     //     current_lookup_fault = lookup_fault_invalid_root_new();
 
-    //     ret.vspace_root = NULL;
-    //     ret.status = EXCEPTION_LOOKUP_FAULT;
-    //     return ret;
-    // }
+//     //     ret.vspace_root = NULL;
+//     //     ret.status = EXCEPTION_LOOKUP_FAULT;
+//     //     return ret;
+//     // }
 
-    // ret.vspace_root = vspace_root;
-    // ret.status = EXCEPTION_NONE;
-    return ret;
-}
+//     // ret.vspace_root = vspace_root;
+//     // ret.status = EXCEPTION_NONE;
+//     return ret;
+// }
 
 void copyGlobalMappings(word_t *newLvl1pt)
 {
@@ -375,7 +375,8 @@ lookupPTSlot_ret_t lookupPTSlot(pde_t *lvl1pt, vptr_t vptr)
     lookupPTSlot_ret_t ret;
 
     word_t level = CONFIG_PT_LEVELS - 1;
-    pde_t *pt, *save_ptSlot = lvl1pt;
+    pde_t *pt = lvl1pt;
+    pde_t *save_ptSlot = lvl1pt;
 
     /* this is how many bits we potentially have left to decode. Initially we have the
      * full address space to decode, and every time we walk this will be reduced. The
@@ -529,35 +530,35 @@ void deleteASIDPool(asid_t asid_base, asid_pool_t *pool)
 //     // sfence();
 // }
 
-static pte_t pte_pte_invalid_new(void)
-{
-    return (pte_t) {
-        0
-    };
-}
+// static pte_t pte_pte_invalid_new(void)
+// {
+//     return (pte_t) {
+//         0
+//     };
+// }
 
-void unmapPage(vm_page_size_t page_size, asid_t asid, vptr_t vptr, pptr_t pptr)
-{
-    findVSpaceForASID_ret_t find_ret;
-    lookupPTSlot_ret_t  lu_ret;
+// void unmapPage(vm_page_size_t page_size, asid_t asid, vptr_t vptr, pptr_t pptr)
+// {
+//     findVSpaceForASID_ret_t find_ret;
+//     lookupPTSlot_ret_t  lu_ret;
 
-    find_ret = findVSpaceForASID(asid);
-    if (find_ret.status != EXCEPTION_NONE) {
-        return;
-    }
+//     find_ret = findVSpaceForASID(asid);
+//     if (find_ret.status != EXCEPTION_NONE) {
+//         return;
+//     }
 
-    lu_ret = lookupPTSlot(find_ret.vspace_root, vptr);
-    if (unlikely(lu_ret.ptBitsLeft != pageBitsForSize(page_size))) {
-        return;
-    }
-    if (!pte_ptr_get_valid(lu_ret.ptSlot) || isPTEPageTable(lu_ret.ptSlot)
-        || (pte_ptr_get_ppn(lu_ret.ptSlot) << seL4_PageBits) != pptr_to_paddr((void *)pptr)) {
-        return;
-    }
+//     lu_ret = lookupPTSlot(find_ret.vspace_root, vptr);
+//     if (unlikely(lu_ret.ptBitsLeft != pageBitsForSize(page_size))) {
+//         return;
+//     }
+//     if (!pte_ptr_get_valid(lu_ret.ptSlot) || isPTEPageTable(lu_ret.ptSlot)
+//         || (pte_ptr_get_ppn(lu_ret.ptSlot) << seL4_PageBits) != pptr_to_paddr((void *)pptr)) {
+//         return;
+//     }
 
-    lu_ret.ptSlot[0] = pte_pte_invalid_new();
-    // sfence();
-}
+//     lu_ret.ptSlot[0] = pte_pte_invalid_new();
+//     // sfence();
+// }
 
 // void setVMRoot(tcb_t *tcb)
 // {
