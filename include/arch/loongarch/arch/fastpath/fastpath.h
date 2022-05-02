@@ -162,7 +162,7 @@ static inline void NORETURN FORCE_INLINE fastpath_restore(word_t badge, word_t m
 
         "ld.d  $t1, $t0, 5*%[REGSIZE] \n"
         "ld.d  $t0, $t0, 4*%[REGSIZE] \n"
-        "sret"
+        "ertn"
         : /* no output */
         : "r"(cur_thread_reg),
         [REGSIZE] "i"(sizeof(word_t)),

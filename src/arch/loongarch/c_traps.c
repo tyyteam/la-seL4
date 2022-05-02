@@ -97,7 +97,7 @@ void VISIBLE NORETURN restore_user_context(void)
 
         "ld.d  $t1, $t0, 5*%[REGSIZE] \n"
         "ld.d  $t0, $t0, 4*%[REGSIZE] \n"
-        "sret"
+        "ertn"
         : /* no output */
         : [REGSIZE] "i"(sizeof(word_t)),
         [cur_thread] "r"(cur_thread_reg)
