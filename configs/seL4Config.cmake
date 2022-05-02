@@ -33,7 +33,7 @@ macro(declare_seL4_arch sel4_arch)
         "riscv64;KernelSel4ArchRiscV64;ARCH_RISCV64"
         "x86_64;KernelSel4ArchX86_64;ARCH_X86_64"
         "ia32;KernelSel4ArchIA32;ARCH_IA32"
-        "loongarch64;KernelSel4ArchLoongarch64;ARCH_Loongarch64"
+        "loongarch64;KernelSel4ArchLoongarch64;ARCH_LOONGARCH64"
     )
 
     if(KernelSel4ArchArmHyp)
@@ -50,7 +50,7 @@ macro(declare_seL4_arch sel4_arch)
         "arm;KernelArchARM;ARCH_ARM;KernelSel4ArchAarch32 OR KernelSel4ArchAarch64"
         "riscv;KernelArchRiscV;ARCH_RISCV;KernelSel4ArchRiscV32 OR KernelSel4ArchRiscV64"
         "x86;KernelArchX86;ARCH_X86;KernelSel4ArchX86_64 OR KernelSel4ArchIA32"
-        "loongarch;KernelArchLoongarch;ARCH_Loongarch;KernelSel4ArchLoongarch64"
+        "loongarch;KernelArchLoongarch;ARCH_LOONGARCH;KernelSel4ArchLoongarch64"
     )
 
     # Set kernel mode options
