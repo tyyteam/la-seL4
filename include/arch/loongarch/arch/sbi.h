@@ -60,7 +60,7 @@ static inline word_t sbi_call(word_t cmd,
     register word_t a2 asm("a2") = arg_2;
     register word_t a7 asm("a7") = cmd;
     register word_t result asm("a0");
-    asm volatile("ecall"
+    asm volatile("sbi_call-ecall"
                  : "=r"(result)
                  : "r"(a0), "r"(a1), "r"(a2), "r"(a7)
                  : "memory");
