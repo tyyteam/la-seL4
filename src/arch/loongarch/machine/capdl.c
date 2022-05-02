@@ -18,17 +18,17 @@ word_t get_tcb_sp(tcb_t *tcb)
 
 #ifdef CONFIG_PRINTING
 
-static void obj_asidpool_print_attrs(cap_t asid_cap);
-static void obj_frame_print_attrs(paddr_t paddr);
-static void riscv_obj_pt_print_slots(pte_t *lvl1pt, pte_t *pt, int level);
-static void cap_frame_print_attrs_vptr(word_t vptr, pte_t *lvl1pt);
-static void cap_frame_print_attrs_pt(pte_t *ptSlot);
+// static void obj_asidpool_print_attrs(cap_t asid_cap);
+// static void obj_frame_print_attrs(paddr_t paddr);
+// static void riscv_obj_pt_print_slots(pte_t *lvl1pt, pte_t *pt, int level);
+// static void cap_frame_print_attrs_vptr(word_t vptr, pte_t *lvl1pt);
+// static void cap_frame_print_attrs_pt(pte_t *ptSlot);
 
-static void obj_asidpool_print_attrs(cap_t asid_cap)
-{
-    asid_t asid = cap_asid_pool_cap_get_capASIDBase(asid_cap);
-    printf("(asid_high: 0x%lx)\n", ASID_HIGH(asid));
-}
+// static void obj_asidpool_print_attrs(cap_t asid_cap)
+// {
+//     asid_t asid = cap_asid_pool_cap_get_capASIDBase(asid_cap);
+//     printf("(asid_high: 0x%lx)\n", ASID_HIGH(asid));
+// }
 
 void print_ipc_buffer_slot(tcb_t *tcb)
 {
@@ -40,45 +40,45 @@ void print_ipc_buffer_slot(tcb_t *tcb)
     cap_frame_print_attrs_vptr(vptr, find_ret.vspace_root);
 }
 
-static void riscv_cap_pt_print_slots(pte_t *upperPtSlot, word_t ptIndex, int level)
-{
-    pte_t *pt;
-    if (level == CONFIG_PT_LEVELS) {
-        printf("%p_pd {\n", upperPtSlot);
-        pt = upperPtSlot;
-    } else {
-        printf("pt_%p_%04lu {\n", upperPtSlot, ptIndex);
-        pt = getPPtrFromHWPTE(upperPtSlot);
-    }
-    level -= 1;
+// static void riscv_cap_pt_print_slots(pte_t *upperPtSlot, word_t ptIndex, int level)
+// {
+//     pte_t *pt;
+//     if (level == CONFIG_PT_LEVELS) {
+//         printf("%p_pd {\n", upperPtSlot);
+//         pt = upperPtSlot;
+//     } else {
+//         printf("pt_%p_%04lu {\n", upperPtSlot, ptIndex);
+//         pt = getPPtrFromHWPTE(upperPtSlot);
+//     }
+//     level -= 1;
 
-    word_t ptBitsLeft = PT_INDEX_BITS * level + seL4_PageBits;
+//     word_t ptBitsLeft = PT_INDEX_BITS * level + seL4_PageBits;
 
-    /* - 1 to avoid overflowing */
-    for (word_t i = 0; i < BIT(ptBitsLeft + PT_INDEX_BITS) - 1; i += (1 << (ptBitsLeft))) {
-        word_t ptSlotIndex = ((i >> ptBitsLeft) & MASK(PT_INDEX_BITS));
-        pte_t *ptSlot = pt + ptSlotIndex;
-        if (pte_ptr_get_valid(ptSlot)) {
-            if (level) { /* pt */
-                printf("0x%lx: pt_%p_%04lu\n", ptSlotIndex, ptSlot, ptSlotIndex);
-            } else { /* frame */
-                printf("0x%lx: frame_%p_%04lu", ptSlotIndex, ptSlot, ptSlotIndex);
-                cap_frame_print_attrs_pt(ptSlot);
-            }
-        }
-    }
-    printf("}\n"); /* lvl1pt/pt */
+//     /* - 1 to avoid overflowing */
+//     for (word_t i = 0; i < BIT(ptBitsLeft + PT_INDEX_BITS) - 1; i += (1 << (ptBitsLeft))) {
+//         word_t ptSlotIndex = ((i >> ptBitsLeft) & MASK(PT_INDEX_BITS));
+//         pte_t *ptSlot = pt + ptSlotIndex;
+//         if (pte_ptr_get_valid(ptSlot)) {
+//             if (level) { /* pt */
+//                 printf("0x%lx: pt_%p_%04lu\n", ptSlotIndex, ptSlot, ptSlotIndex);
+//             } else { /* frame */
+//                 printf("0x%lx: frame_%p_%04lu", ptSlotIndex, ptSlot, ptSlotIndex);
+//                 cap_frame_print_attrs_pt(ptSlot);
+//             }
+//         }
+//     }
+//     printf("}\n"); /* lvl1pt/pt */
 
-    for (word_t i = 0; i < BIT(ptBitsLeft + PT_INDEX_BITS) - 1; i += (1 << (ptBitsLeft))) {
-        word_t ptSlotIndex = ((i >> ptBitsLeft) & MASK(PT_INDEX_BITS));
-        pte_t *ptSlot = pt + ptSlotIndex;
-        if (pte_ptr_get_valid(ptSlot)) {
-            if (level) { /* pt */
-                riscv_cap_pt_print_slots(ptSlot, ptSlotIndex, level);
-            }
-        }
-    }
-}
+//     for (word_t i = 0; i < BIT(ptBitsLeft + PT_INDEX_BITS) - 1; i += (1 << (ptBitsLeft))) {
+//         word_t ptSlotIndex = ((i >> ptBitsLeft) & MASK(PT_INDEX_BITS));
+//         pte_t *ptSlot = pt + ptSlotIndex;
+//         if (pte_ptr_get_valid(ptSlot)) {
+//             if (level) { /* pt */
+//                 riscv_cap_pt_print_slots(ptSlot, ptSlotIndex, level);
+//             }
+//         }
+//     }
+// }
 
 void obj_vtable_print_slots(tcb_t *tcb)
 {
@@ -89,37 +89,37 @@ void obj_vtable_print_slots(tcb_t *tcb)
     }
 }
 
-static void cap_frame_print_attrs_pt(pte_t *ptSlot)
-{
-    printf("(");
+// static void cap_frame_print_attrs_pt(pte_t *ptSlot)
+// {
+//     printf("(");
 
-    /* rights */
-    if (pte_ptr_get_read(ptSlot)) {
-        printf("R");
-    }
+//     /* rights */
+//     if (pte_ptr_get_read(ptSlot)) {
+//         printf("R");
+//     }
 
-    if (pte_ptr_get_write(ptSlot)) {
-        printf("W");
-    }
+//     if (pte_ptr_get_write(ptSlot)) {
+//         printf("W");
+//     }
 
-    if (pte_ptr_get_execute(ptSlot)) {
-        printf("X");
-    }
+//     if (pte_ptr_get_execute(ptSlot)) {
+//         printf("X");
+//     }
 
-    /* cacheable not supported yet */
+//     /* cacheable not supported yet */
 
-    printf(")\n");
-}
+//     printf(")\n");
+// }
 
-static void cap_frame_print_attrs_vptr(word_t vptr, pte_t *lvl1pt)
-{
-    lookupPTSlot_ret_t lu_ret = lookupPTSlot(lvl1pt, vptr);
-    assert(lu_ret.ptBitsLeft == seL4_PageBits);
-    word_t slot = ((vptr >> lu_ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
+// static void cap_frame_print_attrs_vptr(word_t vptr, pte_t *lvl1pt)
+// {
+//     lookupPTSlot_ret_t lu_ret = lookupPTSlot(lvl1pt, vptr);
+//     assert(lu_ret.ptBitsLeft == seL4_PageBits);
+//     word_t slot = ((vptr >> lu_ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
 
-    printf("frame_%p_%04lu ", lu_ret.ptSlot, slot);
-    cap_frame_print_attrs_pt(lu_ret.ptSlot);
-}
+//     printf("frame_%p_%04lu ", lu_ret.ptSlot, slot);
+//     cap_frame_print_attrs_pt(lu_ret.ptSlot);
+// }
 
 void print_cap_arch(cap_t cap)
 {
@@ -165,10 +165,10 @@ void print_cap_arch(cap_t cap)
     }
 }
 
-static void obj_frame_print_attrs(paddr_t paddr)
-{
-    printf("(4k, paddr: 0x%p)\n", (void *)paddr);
-}
+// static void obj_frame_print_attrs(paddr_t paddr)
+// {
+//     printf("(4k, paddr: 0x%p)\n", (void *)paddr);
+// }
 
 void print_object_arch(cap_t cap)
 {
@@ -193,25 +193,25 @@ void print_object_arch(cap_t cap)
     }
 }
 
-static void riscv_obj_pt_print_slots(pte_t *lvl1pt, pte_t *pt, int level)
-{
-    word_t ptBitsLeft = PT_INDEX_BITS * level + seL4_PageBits;
+// static void riscv_obj_pt_print_slots(pte_t *lvl1pt, pte_t *pt, int level)
+// {
+//     word_t ptBitsLeft = PT_INDEX_BITS * level + seL4_PageBits;
 
-    for (word_t i = 0; i < BIT(ptBitsLeft + PT_INDEX_BITS); i += (1 << (ptBitsLeft))) {
-        word_t ptIndex = ((i >> ptBitsLeft) & MASK(PT_INDEX_BITS));
-        pte_t *ptSlot = pt + ptIndex;
-        if (pte_ptr_get_valid(ptSlot)) {
-            if (level) { /* pt */
-                printf("pt_%p_%04lu = pt\n", ptSlot, ptIndex);
-                riscv_obj_pt_print_slots(lvl1pt, getPPtrFromHWPTE(ptSlot), level - 1);
-            } else { /* frame */
-                paddr_t paddr = pte_ptr_get_ppn(ptSlot);
-                printf("frame_%p_%04lu = frame ", ptSlot, ptIndex);
-                obj_frame_print_attrs(paddr);
-            }
-        }
-    }
-}
+//     for (word_t i = 0; i < BIT(ptBitsLeft + PT_INDEX_BITS); i += (1 << (ptBitsLeft))) {
+//         word_t ptIndex = ((i >> ptBitsLeft) & MASK(PT_INDEX_BITS));
+//         pte_t *ptSlot = pt + ptIndex;
+//         if (pte_ptr_get_valid(ptSlot)) {
+//             if (level) { /* pt */
+//                 printf("pt_%p_%04lu = pt\n", ptSlot, ptIndex);
+//                 riscv_obj_pt_print_slots(lvl1pt, getPPtrFromHWPTE(ptSlot), level - 1);
+//             } else { /* frame */
+//                 paddr_t paddr = pte_ptr_get_ppn(ptSlot);
+//                 printf("frame_%p_%04lu = frame ", ptSlot, ptIndex);
+//                 obj_frame_print_attrs(paddr);
+//             }
+//         }
+//     }
+// }
 
 void obj_tcb_print_vtable(tcb_t *tcb)
 {
