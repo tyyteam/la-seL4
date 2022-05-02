@@ -61,6 +61,12 @@ static inline uint32_t read_cpucfg(uint32_t reg)
 	return __cpucfg(reg);
 }
 
+/*
+ * Registers a0, a1, a3 and a4 as passed to the kernel entry by firmware
+ */
+unsigned long fw_arg0, fw_arg1, fw_arg2, fw_arg3;
+
+
 #endif /* !__ASSEMBLER__ */
 
 #ifdef __ASSEMBLER__
