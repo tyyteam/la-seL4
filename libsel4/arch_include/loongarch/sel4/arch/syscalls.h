@@ -809,7 +809,7 @@ LIBSEL4_INLINE_FUNC void seL4_DebugDumpScheduler(void)
 #endif
 
 #ifdef CONFIG_DEBUG_BUILD
-LIBSEL4_INLINE_FUNC void c(void)
+LIBSEL4_INLINE_FUNC void seL4_DebugHalt(void)
 {
     register seL4_Word scno asm("a7") = seL4_SysDebugHalt;
     asm volatile("syscall 0" :: "r"(scno) : "memory");
