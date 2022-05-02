@@ -560,31 +560,31 @@ void deleteASIDPool(asid_t asid_base, asid_pool_t *pool)
 //     // sfence();
 // }
 
-// void setVMRoot(tcb_t *tcb)
-// {
-//     cap_t threadRoot;
-//     asid_t asid;
-//     pte_t *lvl1pt;
-//     findVSpaceForASID_ret_t  find_ret;
+void setVMRoot(tcb_t *tcb)
+{
+    // cap_t threadRoot;
+    // asid_t asid;
+    // pte_t *lvl1pt;
+    // findVSpaceForASID_ret_t  find_ret;
 
-//     threadRoot = TCB_PTR_CTE_PTR(tcb, tcbVTable)->cap;
+    // threadRoot = TCB_PTR_CTE_PTR(tcb, tcbVTable)->cap;
 
-//     if (cap_get_capType(threadRoot) != cap_page_table_cap) {
-//         setVSpaceRoot(kpptr_to_paddr(&kernel_level0_pd), 0);
-//         return;
-//     }
+    // if (cap_get_capType(threadRoot) != cap_page_table_cap) {
+    //     setVSpaceRoot(kpptr_to_paddr(&kernel_level0_pd), 0);
+    //     return;
+    // }
 
-//     lvl1pt = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(threadRoot));
+    // lvl1pt = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(threadRoot));
 
-//     asid = cap_page_table_cap_get_capPTMappedASID(threadRoot);
-//     find_ret = findVSpaceForASID(asid);
-//     if (unlikely(find_ret.status != EXCEPTION_NONE || find_ret.vspace_root != lvl1pt)) {
-//         setVSpaceRoot(kpptr_to_paddr(&kernel_level0_pd), 0);
-//         return;
-//     }
+    // asid = cap_page_table_cap_get_capPTMappedASID(threadRoot);
+    // find_ret = findVSpaceForASID(asid);
+    // if (unlikely(find_ret.status != EXCEPTION_NONE || find_ret.vspace_root != lvl1pt)) {
+    //     setVSpaceRoot(kpptr_to_paddr(&kernel_level0_pd), 0);
+    //     return;
+    // }
 
-//     setVSpaceRoot(addrFromPPtr(lvl1pt), asid);
-// }
+    // setVSpaceRoot(addrFromPPtr(lvl1pt), asid);
+}
 
 bool_t CONST isValidVTableRoot(cap_t cap)
 {

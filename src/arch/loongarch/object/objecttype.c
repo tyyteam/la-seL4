@@ -288,18 +288,18 @@ cap_t Arch_createObject(object_t t, void *regionBase, word_t userSize, bool_t
     }
 }
 
-exception_t Arch_decodeInvocation(
-    word_t label,
-    word_t length,
-    cptr_t cptr,
-    cte_t *slot,
-    cap_t cap,
-    bool_t call,
-    word_t *buffer
-)
-{
-    return decodeRISCVMMUInvocation(label, length, cptr, slot, cap, buffer);
-}
+// exception_t Arch_decodeInvocation(
+//     word_t label,
+//     word_t length,
+//     cptr_t cptr,
+//     cte_t *slot,
+//     cap_t cap,
+//     bool_t call,
+//     word_t *buffer
+// )
+// {
+//     return decodeRISCVMMUInvocation(label, length, cptr, slot, cap, buffer);
+// }
 
 void Arch_prepareThreadDelete(tcb_t *thread)
 {
