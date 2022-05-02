@@ -93,8 +93,11 @@ VISIBLE NORETURN;
 void handle_syscall(void)
 VISIBLE NORETURN;
 
+void do_page_fault(void)
+VISIBLE NORETURN;
 
-
+void swapper_pg_dir(void)
+VISIBLE NORETURN;
 
 
 

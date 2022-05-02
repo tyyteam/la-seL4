@@ -11,6 +11,9 @@
 #include <config.h>
 #include <arch/asm/linkage.h>
 
+.extern do_page_fault
+.extern swapper_pg_dir
+
 	.macro tlb_do_page_fault, write
 	SYM_FUNC_START(tlb_do_page_fault_\write)
 	SAVE_ALL

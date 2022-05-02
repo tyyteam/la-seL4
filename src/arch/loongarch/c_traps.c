@@ -192,6 +192,21 @@ void VISIBLE NORETURN handle_syscall(void){
     UNREACHABLE();
 }
 
+void VISIBLE NORETURN do_page_fault(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN swapper_pg_dir(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+
+
+
 void VISIBLE NORETURN c_handle_interrupt(void)
 {
     NODE_LOCK_IRQ_IF(getActiveIRQ() != irq_remote_call_ipi);
