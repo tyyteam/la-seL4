@@ -31,8 +31,8 @@ extern pde_t kernel_level0_pd[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBi
 /* We need to introduce a level2 pagetable in order to map OpenSBI to a separate
  * page entry to avoid PMP exception. */
 //#if __loongarch_xlen != 32
-extern pde_t kernel_level1_pd[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
-extern pte_t kernel_pt[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
+extern pde_t kernel_level1_pd[64 * BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
+extern pte_t kernel_pt[4096 * BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
 // #elif defined(CONFIG_KERNEL_LOG_BUFFER)
 // extern pte_t kernel_image_level2_log_buffer_pt[BIT(PT_INDEX_BITS)];
 //#endif
