@@ -65,6 +65,8 @@ add_sources(
         machine/registerset.c
         machine/io.c
         machine/fpu.c
+        machine/cache.c
+        machine/tlb.c
         model/statedata.c
         object/interrupt.c
         object/objecttype.c
