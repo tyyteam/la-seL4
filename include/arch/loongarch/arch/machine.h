@@ -11,6 +11,8 @@
 #include <util.h>
 #include <arch/machine/hardware.h>
 
+#define CONFIG_64BIT
+
 #ifndef __ASSEMBLER__
 #include <larchintrin.h>
 /*

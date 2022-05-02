@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-2.0-only
  */
 #include <arch/machine.h>
-#include <machine/tlb.h>
+#include <arch/machine/tlb.h>
 #include <linker.h>
 #include <string.h>
 #include <arch/kernel/traps.h>
