@@ -111,11 +111,6 @@ block vm_attributes {
     field riscvExecuteNever  1
 }
 
----- LOONGARCH-specific object types
-block pde {
-    field paddr            64
-}
-
 
 ---- RISCV-specific object types
 
