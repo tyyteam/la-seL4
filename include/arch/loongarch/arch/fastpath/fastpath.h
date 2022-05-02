@@ -114,53 +114,53 @@ static inline void NORETURN FORCE_INLINE fastpath_restore(word_t badge, word_t m
 
     register word_t badge_reg asm("a0") = badge;
     register word_t msgInfo_reg asm("a1") = msgInfo;
-    register word_t cur_thread_reg asm("t0") = TCB_REF(cur_thread);
+    register word_t cur_thread_reg asm("$t0") = TCB_REF(cur_thread);
 
     asm volatile(
-        LOAD_S "  ra, (0*%[REGSIZE])(t0)  \n"
-        LOAD_S "  sp, (1*%[REGSIZE])(t0)  \n"
-        LOAD_S "  gp, (2*%[REGSIZE])(t0)  \n"
+        "ld.d  $ra, $t0, 0*%[REGSIZE]  \n"
+        "ld.d  $sp, $t0, 1*%[REGSIZE]  \n"
+        "ld.d  $gp, $t0, 2*%[REGSIZE]  \n"
         /* skip tp */
-        /* skip x5/t0 */
-        LOAD_S "  t2, (6*%[REGSIZE])(t0)  \n"
-        LOAD_S "  s0, (7*%[REGSIZE])(t0)  \n"
-        LOAD_S "  s1, (8*%[REGSIZE])(t0)  \n"
-        LOAD_S "  a2, (11*%[REGSIZE])(t0) \n"
-        LOAD_S "  a3, (12*%[REGSIZE])(t0) \n"
-        LOAD_S "  a4, (13*%[REGSIZE])(t0) \n"
-        LOAD_S "  a5, (14*%[REGSIZE])(t0) \n"
-        LOAD_S "  a6, (15*%[REGSIZE])(t0) \n"
-        LOAD_S "  a7, (16*%[REGSIZE])(t0) \n"
-        LOAD_S "  s2, (17*%[REGSIZE])(t0) \n"
-        LOAD_S "  s3, (18*%[REGSIZE])(t0) \n"
-        LOAD_S "  s4, (19*%[REGSIZE])(t0) \n"
-        LOAD_S "  s5, (20*%[REGSIZE])(t0) \n"
-        LOAD_S "  s6, (21*%[REGSIZE])(t0) \n"
-        LOAD_S "  s7, (22*%[REGSIZE])(t0) \n"
-        LOAD_S "  s8, (23*%[REGSIZE])(t0) \n"
-        LOAD_S "  s9, (24*%[REGSIZE])(t0) \n"
-        LOAD_S "  s10, (25*%[REGSIZE])(t0)\n"
-        LOAD_S "  s11, (26*%[REGSIZE])(t0)\n"
-        LOAD_S "  t3, (27*%[REGSIZE])(t0) \n"
-        LOAD_S "  t4, (28*%[REGSIZE])(t0) \n"
-        LOAD_S "  t5, (29*%[REGSIZE])(t0) \n"
-        LOAD_S "  t6, (30*%[REGSIZE])(t0) \n"
+        /* skip x5/$t0 */
+        "ld.d  $t2, $t0, 6*%[REGSIZE]  \n"
+        "ld.d  $s0, $t0, 7*%[REGSIZE]  \n"
+        "ld.d  $s1, $t0, 8*%[REGSIZE]  \n"
+        "ld.d  $a2, $t0, 11*%[REGSIZE] \n"
+        "ld.d  $a3, $t0, 12*%[REGSIZE] \n"
+        "ld.d  $a4, $t0, 13*%[REGSIZE] \n"
+        "ld.d  $a5, $t0, 14*%[REGSIZE] \n"
+        "ld.d  $a6, $t0, 15*%[REGSIZE] \n"
+        "ld.d  $a7, $t0, 16*%[REGSIZE] \n"
+        "ld.d  $s2, $t0, 17*%[REGSIZE] \n"
+        "ld.d  $s3, $t0, 18*%[REGSIZE] \n"
+        "ld.d  $s4, $t0, 19*%[REGSIZE] \n"
+        "ld.d  $s5, $t0, 20*%[REGSIZE] \n"
+        "ld.d  $s6, $t0, 21*%[REGSIZE] \n"
+        "ld.d  $s7, $t0, 22*%[REGSIZE] \n"
+        "ld.d  $s8, $t0, 23*%[REGSIZE] \n"
+        "ld.d  $s9, $t0, 24*%[REGSIZE] \n"
+        "ld.d  $s10, $t0, 25*%[REGSIZE]\n"
+        "ld.d  $s11, $t0, 26*%[REGSIZE]\n"
+        "ld.d  $t3, $t0, 27*%[REGSIZE] \n"
+        "ld.d  $t4, $t0, 28*%[REGSIZE] \n"
+        "ld.d  $t5, $t0, 29*%[REGSIZE] \n"
+        "ld.d  $t6, $t0, 30*%[REGSIZE] \n"
         /* Get next restored tp */
-        LOAD_S "  t1, (3*%[REGSIZE])(t0)  \n"
+        "ld.d  $t1, $t0, 3*%[REGSIZE]  \n"
         /* get restored tp */
-        "add tp, t1, x0  \n"
-        /* get sepc */
-        LOAD_S "  t1, (34*%[REGSIZE])(t0)\n"
-        "csrw sepc, t1  \n"
+        "add.d $tp, $t1, $r0  \n"
+        /* get badv */  //it is sepc in riscv
+        "ld.d  $t1, $t0, 34*%[REGSIZE]\n"
+        "csrw $badv, $t1  \n"
 #ifndef ENABLE_SMP_SUPPORT
         /* Write back sscratch with cur_thread_reg to get it back on the next trap entry */
-        "csrw sscratch, t0\n"
+        "csrw sscratch, $t0\n"
 #endif
-        LOAD_S "  t1, (32*%[REGSIZE])(t0) \n"
-        "csrw sstatus, t1\n"
+        "ld.d  $t1, $t0, 32*%[REGSIZE] \n"
+        "csrw sstatus, $t1\n"
 
-        LOAD_S "  t1, (5*%[REGSIZE])(t0) \n"
-        LOAD_S "  t0, (4*%[REGSIZE])(t0) \n"
+        "ld.d  t1, $t0, 5*%[REGSIZE] \n"
+        "ld.d  $t0, $t0, 4*%[REGSIZE] \n"
         "sret"
         : /* no output */
         : "r"(cur_thread_reg),

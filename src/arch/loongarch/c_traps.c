@@ -48,10 +48,12 @@ void VISIBLE NORETURN restore_user_context(void)
         /* skip x5/$t0 */
         /* no-op store conditional to clear monitor state */
         /* this may succeed in implementations with very large reservations, but the saved ra is dead */
-        "sc.w zero, zero, ($t0)\n"
+        "sc.w $zero, $zero, $t0\n"
         "ld.d  $t2, $t0, 6*%[REGSIZE]  \n"
-        "ld.d  $s9, $t0, 7*%[REGSIZE]  \n"
-        "ld.d  $s1, $t0, 8*%[REGSIZE]  \n"
+
+        "ld.d  $fp, $t0, 7*%[REGSIZE]  \n"
+
+        "ld.d  $s0, $t0, 8*%[REGSIZE]  \n"
         "ld.d  $a0, $t0, 9*%[REGSIZE] \n"
         "ld.d  $a1, $t0, 10*%[REGSIZE] \n"
         "ld.d  $a2, $t0, 11*%[REGSIZE] \n"
@@ -60,14 +62,14 @@ void VISIBLE NORETURN restore_user_context(void)
         "ld.d  $a5, $t0, 14*%[REGSIZE] \n"
         "ld.d  $a6, $t0, 15*%[REGSIZE] \n"
         "ld.d  $a7, $t0, 16*%[REGSIZE] \n"
-        "ld.d  $s2, $t0, 17*%[REGSIZE] \n"
-        "ld.d  $s3, $t0, 18*%[REGSIZE] \n"
-        "ld.d  $s4, $t0, 19*%[REGSIZE] \n"
-        "ld.d  $s5, $t0, 20*%[REGSIZE] \n"
-        "ld.d  $s6, $t0, 21*%[REGSIZE] \n"
-        "ld.d  $s7, $t0, 22*%[REGSIZE] \n"
-        "ld.d  $s8, $t0, 23*%[REGSIZE] \n"
-        "ld.d  $s9, $t0, 24*%[REGSIZE] \n"
+        "ld.d  $s1, $t0, 17*%[REGSIZE] \n"
+        "ld.d  $s2, $t0, 18*%[REGSIZE] \n"
+        "ld.d  $s3, $t0, 19*%[REGSIZE] \n"
+        "ld.d  $s4, $t0, 20*%[REGSIZE] \n"
+        "ld.d  $s5, $t0, 21*%[REGSIZE] \n"
+        "ld.d  $s6, $t0, 22*%[REGSIZE] \n"
+        "ld.d  $s7, $t0, 23*%[REGSIZE] \n"
+        "ld.d  $s8, $t0, 24*%[REGSIZE] \n"
 
         //"ld.d  s10, $t0, 25*%[REGSIZE]\n"
         //"ld.d  s11, $t0, 26*%[REGSIZE]\n"
@@ -84,13 +86,13 @@ void VISIBLE NORETURN restore_user_context(void)
         /* get restored tp */
         "add $tp, $t1, $r0  \n"
         /* get badv */  //it is sepc in riscv
-        "ld.d  $t1, (34*%[REGSIZE])($t0)\n"
+        "ld.d  $t1, $t0, 34*%[REGSIZE]\n"
         "csrw $badv, $t1  \n"
 #ifndef ENABLE_SMP_SUPPORT
         /* Write back sscratch with cur_thread_reg to get it back on the next trap entry */
         "csrw sscratch, $t0         \n"
 #endif
-        "ld.d  $t1, (32*%[REGSIZE])($t0) \n"
+        "ld.d  $t1, $t0, 32*%[REGSIZE] \n"
         "csrw sstatus, $t1\n"
 
         "ld.d  $t1, $t0, 5*%[REGSIZE] \n"
