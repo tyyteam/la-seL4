@@ -25,7 +25,7 @@ void VISIBLE NO_INLINE halt(void)
 #endif /* CONFIG_DEBUG_BUILD */
 #endif /* CONFIG_PRINTING */
 
-    sbi_shutdown();
+    //sbi_shutdown();	unset by tyy team
 
     UNREACHABLE();
 }

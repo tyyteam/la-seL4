@@ -226,13 +226,13 @@ static inline void ackInterrupt(irq_t irq)
 #ifndef CONFIG_KERNEL_MCS
 void resetTimer(void)
 {
-    uint64_t target;
+    //uint64_t target;
     // repeatedly try and set the timer in a loop as otherwise there is a race and we
     // may set a timeout in the past, resulting in it never getting triggered
-    do {
-        target = loongarch_read_time() + RESET_CYCLES;
-        sbi_set_timer(target);
-    } while (loongarch_read_time() > target);
+    // do {
+    //     target = loongarch_read_time() + RESET_CYCLES;
+    //     sbi_set_timer(target);
+    // } while (loongarch_read_time() > target);
 }
 
 /**
@@ -240,7 +240,7 @@ void resetTimer(void)
  */
 BOOT_CODE void initTimer(void)
 {
-    sbi_set_timer(loongarch_read_time() + RESET_CYCLES);
+    //sbi_set_timer(loongarch_read_time() + RESET_CYCLES);
 }
 #endif /* !CONFIG_KERNEL_MCS */
 

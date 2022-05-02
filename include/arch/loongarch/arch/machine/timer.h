@@ -50,7 +50,7 @@ static inline CONST time_t getMaxUsToTicks(void)
 /* Read the current time from the timer. */
 static inline ticks_t getCurrentTime(void)
 {
-    return riscv_read_time();
+    return loongarch_read_time();
 }
 
 /* set the next deadline irq - deadline is absolute */
@@ -58,7 +58,7 @@ static inline void setDeadline(ticks_t deadline)
 {
     assert(deadline > NODE_STATE(ksCurTime));
     /* Setting the timer acknowledges any existing IRQs */
-    sbi_set_timer(deadline);
+    //sbi_set_timer(deadline);
 }
 
 /* ack previous deadline irq */

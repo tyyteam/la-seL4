@@ -18,7 +18,7 @@ void kernel_putDebugChar(unsigned char c)
      * it, while OpenSBI takes care of this internally. Since we dropped BBL
      * support in favor of OpenSBI, we do not print a '\r' (CR) here.
      */
-    sbi_console_putchar(c);
+    //sbi_console_putchar(c);
 }
 #endif /* CONFIG_PRINTING */
 
@@ -26,6 +26,7 @@ void kernel_putDebugChar(unsigned char c)
 unsigned char kernel_getDebugChar(void)
 {
     /* Don't use UART, but read from the SBI console. */
-    return sbi_console_getchar();
+    //return sbi_console_getchar(); unset by leon
+    return 'a';
 }
 #endif /* CONFIG_DEBUG_BUILD */
