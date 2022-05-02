@@ -351,7 +351,7 @@ __iocsrwr_d (unsigned long int _1, unsigned int _2)
   { \
     __asm__ volatile ("syscall %0\n\t" ::"I"(a)); \
   }
-//#define __syscall __builtin_loongarch_syscall
+#define __syscall __builtin_loongarch_syscall
 
 #define __builtin_loongarch_break(a) \
   { \
