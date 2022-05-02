@@ -11,7 +11,7 @@
 void idle_thread(void)
 {
     while (1) {
-        asm volatile("loongarch-wfi");
+        asm volatile("idle 0");
     }
 }
 
