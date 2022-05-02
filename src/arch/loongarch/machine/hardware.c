@@ -337,7 +337,7 @@ BOOT_CODE void init_trap(void)
 	set_handler(EXCCODE_BTDIS * VECSIZE, handle_lbt, VECSIZE);
 	set_handler(EXCCODE_WATCH * VECSIZE, handle_watch, VECSIZE);
 
-	cache_error_setup();
+	// cache_error_setup();
 
 	local_flush_icache_range(eentry, eentry + 0x400);
 }

@@ -399,30 +399,32 @@ lookupPTSlot_ret_t lookupPTSlot(pde_t *lvl1pt, vptr_t vptr)
     return ret;
 }
 
-// exception_t handleVMFault(tcb_t *thread, vm_fault_type_t vm_faultType)
-// {
-//     uint64_t addr;
+exception_t handleVMFault(tcb_t *thread, vm_fault_type_t vm_faultType)
+{
+    // uint64_t addr;
 
-//     addr = read_stval();
+    // addr = read_stval();
 
-//     switch (vm_faultType) {
-//     case RISCVLoadPageFault:
-//     case RISCVLoadAccessFault:
-//         current_fault = seL4_Fault_VMFault_new(addr, RISCVLoadAccessFault, false);
-//         return EXCEPTION_FAULT;
-//     case RISCVStorePageFault:
-//     case RISCVStoreAccessFault:
-//         current_fault = seL4_Fault_VMFault_new(addr, RISCVStoreAccessFault, false);
-//         return EXCEPTION_FAULT;
-//     case RISCVInstructionPageFault:
-//     case RISCVInstructionAccessFault:
-//         current_fault = seL4_Fault_VMFault_new(addr, RISCVInstructionAccessFault, true);
-//         return EXCEPTION_FAULT;
+    // switch (vm_faultType) {
+    // case RISCVLoadPageFault:
+    // case RISCVLoadAccessFault:
+    //     current_fault = seL4_Fault_VMFault_new(addr, RISCVLoadAccessFault, false);
+    //     return EXCEPTION_FAULT;
+    // case RISCVStorePageFault:
+    // case RISCVStoreAccessFault:
+    //     current_fault = seL4_Fault_VMFault_new(addr, RISCVStoreAccessFault, false);
+    //     return EXCEPTION_FAULT;
+    // case RISCVInstructionPageFault:
+    // case RISCVInstructionAccessFault:
+    //     current_fault = seL4_Fault_VMFault_new(addr, RISCVInstructionAccessFault, true);
+    //     return EXCEPTION_FAULT;
 
-//     default:
-//         fail("Invalid VM fault type");
-//     }
-// }
+    // default:
+    //     fail("Invalid VM fault type");
+    // }
+    /*CY 自己加的 */
+    return EXCEPTION_FAULT;
+}
 
 void deleteASIDPool(asid_t asid_base, asid_pool_t *pool)
 {
@@ -1133,35 +1135,35 @@ static inline bool_t CONST checkVPAlignment(vm_page_size_t sz, word_t w)
 //     return EXCEPTION_NONE;
 // }
 
-// #ifdef CONFIG_PRINTING
-// void Arch_userStackTrace(tcb_t *tptr)
-// {
-//     cap_t threadRoot = TCB_PTR_CTE_PTR(tptr, tcbVTable)->cap;
-//     if (!isValidVTableRoot(threadRoot)) {
-//         printf("Invalid vspace\n");
-//         return;
-//     }
+#ifdef CONFIG_PRINTING
+void Arch_userStackTrace(tcb_t *tptr)
+{
+    // cap_t threadRoot = TCB_PTR_CTE_PTR(tptr, tcbVTable)->cap;
+    // if (!isValidVTableRoot(threadRoot)) {
+    //     printf("Invalid vspace\n");
+    //     return;
+    // }
 
-//     word_t sp = getRegister(tptr, SP);
-//     if (!IS_ALIGNED(sp, seL4_WordSizeBits)) {
-//         printf("SP %p not aligned", (void *) sp);
-//         return;
-//     }
+    // word_t sp = getRegister(tptr, SP);
+    // if (!IS_ALIGNED(sp, seL4_WordSizeBits)) {
+    //     printf("SP %p not aligned", (void *) sp);
+    //     return;
+    // }
 
-//     pte_t *vspace_root = PTE_PTR(pptr_of_cap(threadRoot));
-//     for (int i = 0; i < CONFIG_USER_STACK_TRACE_LENGTH; i++) {
-//         word_t address = sp + (i * sizeof(word_t));
-//         lookupPTSlot_ret_t ret = lookupPTSlot(vspace_root, address);
-//         if (pte_ptr_get_valid(ret.ptSlot) && !isPTEPageTable(ret.ptSlot)) {
-//             pptr_t pptr = (pptr_t)(getPPtrFromHWPTE(ret.ptSlot));
-//             word_t *value = (word_t *)((word_t)pptr + (address & MASK(ret.ptBitsLeft)));
-//             printf("0x%lx: 0x%lx\n", (long) address, (long) *value);
-//         } else {
-//             printf("0x%lx: INVALID\n", (long) address);
-//         }
-//     }
-// }
-// #endif
+    // pte_t *vspace_root = PTE_PTR(pptr_of_cap(threadRoot));
+    // for (int i = 0; i < CONFIG_USER_STACK_TRACE_LENGTH; i++) {
+    //     word_t address = sp + (i * sizeof(word_t));
+    //     lookupPTSlot_ret_t ret = lookupPTSlot(vspace_root, address);
+    //     if (pte_ptr_get_valid(ret.ptSlot) && !isPTEPageTable(ret.ptSlot)) {
+    //         pptr_t pptr = (pptr_t)(getPPtrFromHWPTE(ret.ptSlot));
+    //         word_t *value = (word_t *)((word_t)pptr + (address & MASK(ret.ptBitsLeft)));
+    //         printf("0x%lx: 0x%lx\n", (long) address, (long) *value);
+    //     } else {
+    //         printf("0x%lx: INVALID\n", (long) address);
+    //     }
+    // }
+}
+#endif
 
 // #ifdef CONFIG_KERNEL_LOG_BUFFER
 // exception_t benchmark_arch_map_logBuffer(word_t frame_cptr)
