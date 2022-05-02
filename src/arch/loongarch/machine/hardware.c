@@ -230,9 +230,9 @@ void resetTimer(void)
     // repeatedly try and set the timer in a loop as otherwise there is a race and we
     // may set a timeout in the past, resulting in it never getting triggered
     do {
-        target = riscv_read_time() + RESET_CYCLES;
+        target = loongarch_read_time() + RESET_CYCLES;
         sbi_set_timer(target);
-    } while (riscv_read_time() > target);
+    } while (loongarch_read_time() > target);
 }
 
 /**
@@ -240,7 +240,7 @@ void resetTimer(void)
  */
 BOOT_CODE void initTimer(void)
 {
-    sbi_set_timer(riscv_read_time() + RESET_CYCLES);
+    sbi_set_timer(loongarch_read_time() + RESET_CYCLES);
 }
 #endif /* !CONFIG_KERNEL_MCS */
 

@@ -84,7 +84,7 @@ void VISIBLE NORETURN restore_user_context(void)
         /* Get next restored tp */
         "ld.d  $t1, $t0, 3*%[REGSIZE]  \n"
         /* get restored tp */
-        "add $tp, $t1, $r0  \n"
+        "add.d $tp, $t1, $r0  \n"
         /* get badv */  //it is sepc in riscv
         "ld.d  $t1, $t0, 34*%[REGSIZE]\n"
         "csrw $badv, $t1  \n"
