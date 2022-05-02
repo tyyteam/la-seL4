@@ -112,8 +112,8 @@ static inline void NORETURN FORCE_INLINE fastpath_restore(word_t badge, word_t m
     set_tcb_fs_state(NODE_STATE(ksCurThread), isFpuEnable());
 #endif
 
-    register word_t badge_reg asm("a0") = badge;
-    register word_t msgInfo_reg asm("a1") = msgInfo;
+    register word_t badge_reg asm("$a0") = badge;
+    register word_t msgInfo_reg asm("$a1") = msgInfo;
     register word_t cur_thread_reg asm("$t0") = TCB_REF(cur_thread);
 
     asm volatile(
@@ -152,13 +152,13 @@ static inline void NORETURN FORCE_INLINE fastpath_restore(word_t badge, word_t m
         "add.d $tp, $t1, $r0  \n"
         /* get badv */  //it is sepc in riscv
         "ld.d  $t1, $t0, 34*%[REGSIZE]\n"
-        "csrwr  $t1, 7  \n"
+        "csrwr  $t1, 0x7  \n"
 #ifndef ENABLE_SMP_SUPPORT
         /* Write back sscratch with cur_thread_reg to get it back on the next trap entry */
         "csrw sscratch, $t0\n"
 #endif
         "ld.d  $t1, $t0, 32*%[REGSIZE] \n"
-        "csrw sstatus, $t1\n"
+        "csrwr $t1, 0x4 \n" //ECFG
 
         "ld.d  $t1, $t0, 5*%[REGSIZE] \n"
         "ld.d  $t0, $t0, 4*%[REGSIZE] \n"
