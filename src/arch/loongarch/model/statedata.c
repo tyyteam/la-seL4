@@ -19,7 +19,7 @@
 asid_pool_t *riscvKSASIDTable[BIT(asidHighBits)];
 
 /* Kernel Page Tables */
-word_t kernel_level0_pd[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
+pde_t kernel_level0_pd[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
 
 /*rv
 #if __loongarch_xlen != 32
@@ -30,8 +30,8 @@ pte_t kernel_image_level2_log_buffer_pt[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_P
 #endif
 */
 
-word_t kernel_level1_pd[BIT(PT_INDEX_BITS * 2)] ALIGN_BSS(BIT(seL4_PageTableBits));
-pte_t kernel_pt[BIT(PT_INDEX_BITS * 3)] ALIGN_BSS(BIT(seL4_PageTableBits));
+pde_t kernel_level1_pd[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
+pte_t kernel_pt[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
 
 /*rv 暂时不知道作用，不用
 SMP_STATE_DEFINE(core_map_t, coreMap);
