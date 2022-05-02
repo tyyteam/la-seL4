@@ -152,7 +152,7 @@ static inline void NORETURN FORCE_INLINE fastpath_restore(word_t badge, word_t m
         "add.d $tp, $t1, $r0  \n"
         /* get badv */  //it is sepc in riscv
         "ld.d  $t1, $t0, 34*%[REGSIZE]\n"
-        "csrw $badv, $t1  \n"
+        "csrwr  $t1, 7  \n"
 #ifndef ENABLE_SMP_SUPPORT
         /* Write back sscratch with cur_thread_reg to get it back on the next trap entry */
         "csrw sscratch, $t0\n"

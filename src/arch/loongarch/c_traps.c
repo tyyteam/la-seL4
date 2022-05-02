@@ -13,6 +13,7 @@
 #include <api/syscall.h>
 #include <util.h>
 #include <arch/machine/hardware.h>
+#include <arch/machine.h>
 #include <machine/fpu.h>
 
 #include <benchmark/benchmark_track.h>
@@ -87,7 +88,7 @@ void VISIBLE NORETURN restore_user_context(void)
         "add.d $tp, $t1, $r0  \n"
         /* get badv */  //it is sepc in riscv
         "ld.d  $t1, $t0, 34*%[REGSIZE]\n"
-        "csrw $badv, $t1  \n"
+        "csrwr $t1, 7  \n"
 #ifndef ENABLE_SMP_SUPPORT
         /* Write back sscratch with cur_thread_reg to get it back on the next trap entry */
         "csrw sscratch, $t0         \n"
