@@ -51,6 +51,56 @@ VISIBLE NORETURN;
 void c_handle_syscall(word_t cptr, word_t msgInfo, syscall_t syscall)
 VISIBLE NORETURN;
 
+void do_vint(void)
+VISIBLE NORETURN;
+
+void cache_parity_error(void)
+VISIBLE NORETURN;
+
+void do_ade(void)
+VISIBLE NORETURN;
+
+void do_ale(void)
+VISIBLE NORETURN;
+
+void do_bp(void)
+VISIBLE NORETURN;
+
+void do_fpe(void)
+VISIBLE NORETURN;
+
+void do_fpu(void)
+VISIBLE NORETURN;
+
+void do_lsx(void)
+VISIBLE NORETURN;
+
+void do_lasx(void)
+VISIBLE NORETURN;
+
+void do_lbt(void)
+VISIBLE NORETURN;
+
+void do_ri(void)
+VISIBLE NORETURN;
+
+void do_watch(void)
+VISIBLE NORETURN;
+
+void do_reserved(void)
+VISIBLE NORETURN;
+
+void handle_syscall(void)
+VISIBLE NORETURN;
+
+
+
+
+
+
+
+
+
 void c_handle_interrupt(void)
 VISIBLE NORETURN;
 

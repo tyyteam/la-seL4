@@ -18,6 +18,21 @@
 #include <arch/asm/thread_info.h>
 #include <arch/asm/linkage.h>
 
+.extern do_vint
+.extern cache_parity_error
+.extern do_ade
+.extern do_ale
+.extern do_bp
+.extern do_fpe
+.extern do_fpu
+.extern do_lsx
+.extern do_lasx
+.extern do_lbt
+.extern do_ri
+.extern do_watch
+.extern do_reserved
+.extern handle_syscall
+
 	.align	5
 SYM_FUNC_START(__arch_cpu_idle)
 	/* start of rollback region */

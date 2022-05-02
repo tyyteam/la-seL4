@@ -108,6 +108,90 @@ void VISIBLE NORETURN restore_user_context(void)
     UNREACHABLE();
 }
 
+void VISIBLE NORETURN do_vint(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN cache_parity_error(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN do_ade(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN do_ale(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN do_bp(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN do_fpe(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN do_fpu(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN do_lsx(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN do_lasx(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN do_lbt(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN do_ri(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN do_watch(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN do_reserved(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
+void VISIBLE NORETURN handle_syscall(void){
+    //TODO
+    printf("not supported yet, will be supported soon.");
+    UNREACHABLE();
+}
+
 void VISIBLE NORETURN c_handle_interrupt(void)
 {
     NODE_LOCK_IRQ_IF(getActiveIRQ() != irq_remote_call_ipi);
