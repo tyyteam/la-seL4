@@ -49,7 +49,7 @@ void VISIBLE NORETURN restore_user_context(void)
         /* skip x5/$t0 */
         /* no-op store conditional to clear monitor state */
         /* this may succeed in implementations with very large reservations, but the saved ra is dead */
-        "sc.w $zero, $zero, $t0\n"
+        "st.d  $zero, $t0, 0\n"
         "ld.d  $t2, $t0, 6*%[REGSIZE]  \n"
 
         "ld.d  $fp, $t0, 7*%[REGSIZE]  \n"
