@@ -12,7 +12,6 @@
             <member name="pc"/>
             <member name="ra"/>
             <member name="sp"/>
-            <member name="gp"/>
             <member name="s0"/>
             <member name="s1"/>
             <member name="s2"/>

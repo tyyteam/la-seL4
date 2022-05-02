@@ -375,7 +375,7 @@ def init_arch_types(wordsize):
             CapType("seL4_LOONGARCH_PageTable", wordsize),
             CapType("seL4_LOONGARCH_ASIDControl", wordsize),
             CapType("seL4_LOONGARCH_ASIDPool", wordsize),
-            StructType("seL4_UserContext", wordsize * 32, wordsize),
+            StructType("seL4_UserContext", wordsize * 31, wordsize),
         ]
     }
 
