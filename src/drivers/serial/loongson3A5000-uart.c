@@ -21,7 +21,7 @@
 #define UART_REG_LSR_TFE BIT(5)
 #define UART_REG_LSR_DR BIT(0)
 
-#define UART0 (0x1fe001e0L)
+long UART0 = 0x1fe001e0L;
 
 #define UART_REG(reg) ((volatile uint8_t *) (UART0 + (reg)))
 #define uart_read_reg(reg) (*(UART_REG(reg)))
