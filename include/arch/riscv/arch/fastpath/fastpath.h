@@ -154,7 +154,7 @@ static inline void NORETURN FORCE_INLINE fastpath_restore(word_t badge, word_t m
         "csrw sepc, t1  \n"
 #ifndef ENABLE_SMP_SUPPORT
         /* Write back sscratch with cur_thread_reg to get it back on the next trap entry */
-        "csrwr $t0, 0x30\n"
+        "csrw sscratch, t0\n"
 #endif
         LOAD_S "  t1, (32*%[REGSIZE])(t0) \n"
         "csrw sstatus, t1\n"
