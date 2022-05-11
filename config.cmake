@@ -194,7 +194,6 @@ if(DEFINED KernelDTSList AND (NOT "${KernelDTSList}" STREQUAL ""))
         endif()
     endif()
     file(READ "${compatibility_outfile}" compatibility_strings)
-
     # Mark all file dependencies as CMake rerun dependencies.
     set(cmake_deps ${deps} ${KernelDTSIntermediate} ${KernelDTSList} ${compatibility_outfile})
     set_property(
