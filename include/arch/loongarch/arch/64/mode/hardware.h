@@ -31,7 +31,7 @@
  * be on a 1gb boundary as we currently require being able to creating a mapping to this address
  * as the largest frame size */
 /*CY physBase好像是python生成的 */
-#define KERNEL_ELF_PADDR_BASE (physBase + UL_CONST(0x4000000))
+#define KERNEL_ELF_PADDR_BASE (physBase + UL_CONST(0x14000000))
 
 /* The base address in virtual memory to use for the kernel ELF mapping */
 

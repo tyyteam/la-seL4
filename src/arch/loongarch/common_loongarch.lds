@@ -66,7 +66,7 @@ SECTIONS
         *(.data)
     }
 
-    __bss_start = .;
+    __bss_start = . - KERNEL_OFFSET;
     .bss . : AT(ADDR(.bss) - KERNEL_OFFSET)
     {
         *(.bss)
@@ -81,7 +81,7 @@ SECTIONS
         /* large data such as the globals frame and global PD */
         *(.bss.aligned)
     }
-    __bss_stop = .;
+    __bss_stop = . - KERNEL_OFFSET;
 
     . = ALIGN(4K);
     ki_end = .;
