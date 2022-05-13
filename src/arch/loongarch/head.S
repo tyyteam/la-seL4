@@ -41,10 +41,11 @@ _start:                   # kernel entry point
 0:
 	la		t0, __bss_start		# clear .bss
 	st.d		zero, t0, 0
-	la 		t2, __bss_stop
-	addi.d    t2, t2, -LONGSIZE
-	add.d     t1, t2, zero
-	add.d     t2, zero, zero
+	# la		t1, __bss_stop - LONGSIZE
+	la 		t1, __bss_stop
+	move    t2, zero
+	addi.d    t2, t2, LONGSIZE
+	sub.d     t1, t1, t2
 1:
 	addi.d		t0, t0, LONGSIZE
 	st.d		zero, t0, 0
