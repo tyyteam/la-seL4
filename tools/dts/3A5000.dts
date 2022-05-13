@@ -16,16 +16,24 @@
   compatible = "linux,dummy-loongson3";
 
   chosen {
-    bootargs = "";
+    stdout-path = "serial0:115200n8";    
+    seL4,elfloader-devices ="serial0";
+		seL4,kernel-devices ="serial0";
   };
 
-  uart0: serial@1fe001e0 {
+  aliases {
+		serial0 = "/serial@1fe001e0";
+  };
+
+
+  serial@1fe001e0 {
     device_type = "serial";
     compatible = "3A5000,loongson3A5000-uart";
-    reg = <0x1fe001e0 0x100>;
-    clock-frequency = <50000000>;
-    interrupts = <72>;
-    no-loopback-test;
+    reg = < 0x0 0x1fe001e0 0x0 0x00000100 >;
+    clock-frequency = < 50000000 >;
+    interrupts = < 72 >;
+    status = "okay";
+    pinctrl-names = "default";
   };
 
 
@@ -69,18 +77,9 @@
 		compatible = "pci-host-ecam-generic";
 	};
 
-  memory@80000000 {
+  memory@90000000 {
     device_type = "memory";
-    reg = <0x00000000 0x80000000 0x00000000 0x80000000>;
+    reg = <0x00 0x90000000 0x00 0xefffffff>;       
   };
-
-
-
-	// uart@1fe001e0 {
-	// 	compatible = "ns16550a";
-	// 	reg = < 0x1fe001e0 0x8 >;
-	// 	interrupts = < 72 >;
-  //   clock-frequency = <50000000>;
-	// };
 
 };
