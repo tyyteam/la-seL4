@@ -13,43 +13,73 @@
 / {
   #address-cells = <0x00000002>;
   #size-cells = <0x00000002>;
-  compatible = "ucbbar,3A5000-bare-dev";
-  model = "ucbbar,3A5000-bare,qemu";
+  compatible = "linux,dummy-loongson3";
+
   chosen {
-    bootargs = "";
+    stdout-path = "serial0:115200n8";    
+    seL4,elfloader-devices ="serial0";
+		seL4,kernel-devices ="serial0";
   };
-  cpus {
-    #address-cells = <0x00000001>;
-    #size-cells = <0x00000000>;
-    timebase-frequency = <0x00989680>;
-    cpu@0 {
-      device_type = "cpu";
-      reg = <0x00000000>;
-      status = "okay";
-      compatible = "loongarch";
-      loongarch,isa = "la64imafdcsu";
-      mmu-type = "loongarch";
-      clock-frequency = <0x3b9aca00>;
-      interrupt-controller {
-        #interrupt-cells = <0x00000001>;
-        interrupt-controller;
-        compatible = "loongarch,cpu-intc";
-        linux,phandle = <0x00000001>;
-        phandle = <0x00000001>;
-      };
-    };
+
+  aliases {
+		serial0 = "/serial@1fe001e0";
   };
-  memory@80000000 {
+
+
+  serial@1fe001e0 {
+    device_type = "serial";
+    compatible = "3A5000,loongson3A5000-uart";
+    reg = < 0x0 0x1fe001e0 0x0 0x00000100 >;
+    clock-frequency = < 50000000 >;
+    interrupts = < 72 >;
+    status = "okay";
+    pinctrl-names = "default";
+  };
+
+
+	cpus {
+		#size-cells = <0x00>;
+		#address-cells = <0x01>;
+
+		cpu-map {
+
+			socket0 {
+
+				core0 {
+					cpu = <0x8000>;
+				};
+			};
+		};
+
+		cpu@0 {
+			phandle = <0x8000>;
+			reg = <0x00>;
+			compatible = "loongarch,Loongson-3A5000";
+			device_type = "cpu";
+		};
+	};
+
+  fw_cfg@1e020000 {
+		dma-coherent;
+		reg = <0x00 0x1e020000 0x00 0x08>;
+		compatible = "qemu,fw-cfg-mmio";
+	};
+
+  pcie@20000000 {
+		ranges = <0x1000000 0x00 0x4000 0x00 0x18004000 0x00 0xc000 0x2000000 0x00 0x40000000 0x00 0x40000000 0x00 0x40000000>;
+		reg = <0x00 0x20000000 0x00 0x8000000>;
+		dma-coherent;
+		bus-range = <0x00 0x7f>;
+		linux,pci-domain = <0x00>;
+		#size-cells = <0x02>;
+		#address-cells = <0x03>;
+		device_type = "pci";
+		compatible = "pci-host-ecam-generic";
+	};
+
+  memory@90000000 {
     device_type = "memory";
-    reg = <0x00000000 0x80000000 0x00000000 0xfff00000>;
+    reg = <0x00 0x90000000 0x00 0xefffffff>;       
   };
-  soc {
-    #address-cells = <0x00000002>;
-    #size-cells = <0x00000002>;
-    compatible = "simple-bus";
-    ranges;
-  };
-  htif {
-    compatible = "ucb,htif0";
-  };
+
 };

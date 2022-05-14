@@ -33,13 +33,13 @@ SECTIONS
     {
         *(.boot.data)
     }
-    . = ALIGN(4K);
+    . = ALIGN(16K);
 
     ki_boot_end = .;
 
     .text . : AT(ADDR(.text) - KERNEL_OFFSET)
     {
-        . = ALIGN(4K);
+        . = ALIGN(16K);
 
 
         /* Standard kernel */
@@ -66,7 +66,8 @@ SECTIONS
         *(.data)
     }
 
-    __bss_start = . - KERNEL_OFFSET;
+    . = ALIGN(16K);
+    __bss_start = .;
     .bss . : AT(ADDR(.bss) - KERNEL_OFFSET)
     {
         *(.bss)
@@ -81,9 +82,10 @@ SECTIONS
         /* large data such as the globals frame and global PD */
         *(.bss.aligned)
     }
-    __bss_stop = . - KERNEL_OFFSET;
+    . = ALIGN(16K);
+    __bss_stop = .;
 
-    . = ALIGN(4K);
+    . = ALIGN(16K);
     ki_end = .;
     
 }

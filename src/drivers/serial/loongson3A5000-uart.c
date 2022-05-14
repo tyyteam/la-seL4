@@ -21,29 +21,28 @@
 #define UART_REG_LSR_TFE BIT(5)
 #define UART_REG_LSR_DR BIT(0)
 
-long UART0=0x1fe001e0L;
-// #define UART0 0x1fe001e0L will cause warning due to [-Warray-bounds] or [-Wall]
-
-#define UART_REG(reg) ((volatile uint8_t *)(UART0 + (reg)))
-#define uart_read_reg(reg) (*(UART_REG(reg)))
-#define uart_write_reg(reg, v) (*(UART_REG(reg)) = (v))
+#define UART_REG(x) ((volatile uint32_t *)(UART_PPTR + (x)))
+// #define uart_read_reg(reg) (*(UART_REG(reg)))
+// #define uart_write_reg(reg, v) (*(UART_REG(reg)) = (v))
 
 #ifdef CONFIG_PRINTING
 void uart_drv_putchar(unsigned char c)
 {
-    while( (uart_read_reg(UART_REG_LSR) & UART_REG_LSR_TFE) == 0 );
-    //while(!(*((volatile uint32_t *)0x1fe001e5L) & UART_REG_LSR_TFE));
-    //while(!(*UART_REG(UART_REG_LSR) & UART_REG_LSR_TFE));
-    //*UART_REG(UART_REG_DAT) = (c & 0xff);
-    uart_write_reg(UART_REG_DAT,c);
+    // while(!(*UART_REG(UART_REG_LSR)&UART_REG_LSR_TFE));
+    // *UART_REG(UART_REG_DAT) = (c & 0xff);
+    // while( (uart_read_reg(UART_REG_LSR) & UART_REG_LSR_TFE) == 0 );
+    // uart_write_reg(UART_REG_DAT,c);
 }
 #endif /* CONFIG_PRINTING */
 
 #ifdef CONFIG_DEBUG_BUILD
 unsigned char uart_drv_getchar(void)
 {
-    while((uart_read_reg(UART_REG_LSR) & UART_REG_LSR_DR)==0);
-    return uart_read_reg(UART_REG_DAT);
+    // while(!(*UART_REG(UART_REG_LSR) & UART_REG_LSR_DR));
+    // return *UART_REG(UART_REG_DAT);
+    // while((uart_read_reg(UART_REG_LSR) & UART_REG_LSR_DR)==0);
+    // return uart_read_reg(UART_REG_DAT);
+    return 'c';
 }
 #endif /* CONFIG_DEBUG_BUILD */
 

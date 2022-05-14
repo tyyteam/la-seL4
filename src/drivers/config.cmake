@@ -20,10 +20,10 @@ include(src/drivers/serial/config.cmake)
 include(src/drivers/smmu/config.cmake)
 include(src/drivers/timer/config.cmake)
 
-# for loongson, we didn`t use dts to support uart
-add_sources(
-    DEP "KernelArchLoongarch"
-    PREFIX src/drivers/serial
-    CFILES
-        loongson3A5000-uart.c
-)
+# for loongson testing
+# add_sources(
+#     DEP "KernelArchLoongarch"
+#     PREFIX src/drivers/serial
+#     CFILES
+#         loongson3A5000-uart.c
+# )

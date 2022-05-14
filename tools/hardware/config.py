@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 #
 from typing import List, Set
+
 from hardware.memory import Region
 
 
@@ -111,7 +112,8 @@ class RISCVConfig(Config):
 class LoongarchConfig(Config):
     ''' Config class for Loongarch '''
     arch = 'loongarch'
-    RESERVED_SPACE = 2**26  # 2^26= 64 MiByte
+    # RESERVED_SPACE = 2**26  # 2^26= 64 MiByte
+    RESERVED_SPACE = 0
 
     def get_bootloader_reserve(self) -> int:
         return self.RESERVED_SPACE
