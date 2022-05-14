@@ -28,8 +28,8 @@
 #ifdef CONFIG_PRINTING
 void uart_drv_putchar(unsigned char c)
 {
-    // while(!(*UART_REG(UART_REG_LSR)&UART_REG_LSR_TFE));
-    // *UART_REG(UART_REG_DAT) = (c & 0xff);
+    while(!*UART_REG(UART_REG_LSR)&UART_REG_LSR_TFE);
+    *UART_REG(UART_REG_DAT) = (c & 0xff);
     // while( (uart_read_reg(UART_REG_LSR) & UART_REG_LSR_TFE) == 0 );
     // uart_write_reg(UART_REG_DAT,c);
 }
@@ -38,8 +38,8 @@ void uart_drv_putchar(unsigned char c)
 #ifdef CONFIG_DEBUG_BUILD
 unsigned char uart_drv_getchar(void)
 {
-    // while(!(*UART_REG(UART_REG_LSR) & UART_REG_LSR_DR));
-    // return *UART_REG(UART_REG_DAT);
+    while(!(*UART_REG(UART_REG_LSR) & UART_REG_LSR_DR));
+    return *UART_REG(UART_REG_DAT);
     // while((uart_read_reg(UART_REG_LSR) & UART_REG_LSR_DR)==0);
     // return uart_read_reg(UART_REG_DAT);
     return 'c';
