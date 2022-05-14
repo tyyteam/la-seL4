@@ -127,8 +127,8 @@ BOOT_CODE static void init_fpu(void)
 BOOT_CODE static void init_cpu(void)
 {
 
-    activate_kernel_vspace();
-    setup_pw();
+    // activate_kernel_vspace();
+    // setup_pw();
 
     /* irq related*/
     setup_vint_size(VECSIZE);
@@ -139,7 +139,7 @@ BOOT_CODE static void init_cpu(void)
         set_handler(i * VECSIZE, handle_reserved, VECSIZE);
         
     /*tlb related exceptions*/
-    init_tlb();
+    // init_tlb();
     /*other exceptions*/
     init_trap();    
     /*local irqs*/

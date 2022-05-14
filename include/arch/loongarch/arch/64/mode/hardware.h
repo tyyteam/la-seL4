@@ -42,7 +42,7 @@
 
 /* Place the kernel log buffer at the end of the kernel device page table */
 /*CY 但是没考虑这个，暂定这个数 */
-#define KS_LOG_PPTR UL_CONST(0xFFFF80007FE00000)
+#define KS_LOG_PPTR UL_CONST(0x900000000F000000)
 
 #else
 #error //Only PT_LEVELS == 3 is supported
