@@ -142,6 +142,7 @@ elseif(KernelArchLoongarch)
     string(APPEND common_flags " -march=loongarch64 -mabi=lp64d -mtune=loongarch64")
     if(KernelSel4ArchLoongarch64)
         # nothing special
+        string(APPEND common_flags " -Wno-error=array-bounds")
     else()
         message(FATAL_ERROR "unknown Loongarch KernelSel4Arch '${KernelSel4Arch}'")
     endif()

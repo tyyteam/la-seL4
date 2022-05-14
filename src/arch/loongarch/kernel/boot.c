@@ -230,8 +230,8 @@ static BOOT_CODE bool_t try_init_kernel(
     ipcbuf_vptr = ui_v_reg.end;
     bi_frame_vptr = ipcbuf_vptr + BIT(PAGE_BITS);
     extra_bi_frame_vptr = bi_frame_vptr + BIT(BI_FRAME_SIZE_BITS);
-
-    map_kernel_window();
+    
+    // map_kernel_window(); //TODO will be finished 
 
     /* disable local irq and do necessary setups, then enable them.*/
     local_irq_disable();

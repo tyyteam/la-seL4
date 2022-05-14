@@ -21,15 +21,15 @@
 #define UART_REG_LSR_TFE BIT(5)
 #define UART_REG_LSR_DR BIT(0)
 
-#define UART_REG(x) ((volatile uint32_t *)(UART_PPTR + (x)))
+#define UART_REG(x) ((volatile uint8_t *)((UART_PPTR) + (x)))
 // #define uart_read_reg(reg) (*(UART_REG(reg)))
 // #define uart_write_reg(reg, v) (*(UART_REG(reg)) = (v))
 
 #ifdef CONFIG_PRINTING
 void uart_drv_putchar(unsigned char c)
 {
-    // while(!(*UART_REG(UART_REG_LSR)&UART_REG_LSR_TFE));
-    // *UART_REG(UART_REG_DAT) = (c & 0xff);
+    while(!(*UART_REG(UART_REG_LSR) & UART_REG_LSR_TFE));
+    *UART_REG(UART_REG_DAT) = (c & 0xff);
     // while( (uart_read_reg(UART_REG_LSR) & UART_REG_LSR_TFE) == 0 );
     // uart_write_reg(UART_REG_DAT,c);
 }
@@ -38,11 +38,11 @@ void uart_drv_putchar(unsigned char c)
 #ifdef CONFIG_DEBUG_BUILD
 unsigned char uart_drv_getchar(void)
 {
-    // while(!(*UART_REG(UART_REG_LSR) & UART_REG_LSR_DR));
-    // return *UART_REG(UART_REG_DAT);
+    while(!(*UART_REG(UART_REG_LSR) & UART_REG_LSR_DR));
+    return *UART_REG(UART_REG_DAT);
     // while((uart_read_reg(UART_REG_LSR) & UART_REG_LSR_DR)==0);
     // return uart_read_reg(UART_REG_DAT);
-    return 'c';
+    // return 'c';
 }
 #endif /* CONFIG_DEBUG_BUILD */
 

@@ -38,7 +38,7 @@
 #define KERNEL_ELF_BASE (PPTR_BASE_OFFSET + physBase)
 /* The base address in virtual memory to use for the kernel device
  * mapping region. These are mapped in the kernel page table. */
-#define KDEV_BASE UL_CONST(0xFFFF900040000000)
+#define KDEV_BASE UL_CONST(0x900000001FE00000)
 
 /* Place the kernel log buffer at the end of the kernel device page table */
 /*CY 但是没考虑这个，暂定这个数 */
