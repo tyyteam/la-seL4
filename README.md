@@ -105,10 +105,8 @@
 非常感谢张老师为seL4移植工作给予的指导。
 
 # 中期开发状态说明
+点击[此处](https://pan.baidu.com/s/1c8KKPdG0Ri_AbR2taWWPSw?pwd=2qdg)查看演示视频及文字说明
 
-演示视频及文字说明
-
-<iframe src="https://raw.githubusercontent.com/GooTal/picBed/master/myPics/项目期中检查-作品演示.mp4" scrolling="no" frameborder="no" framespacing="0" allowfullscreen="true" ></iframe>
 
 # 参考资料
 
