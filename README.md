@@ -10,7 +10,7 @@
 
 [seL4微内核](https://sel4.systems/)，是[L4微核家族](https://en.wikipedia.org/wiki/L4_microkernel_family)的经典实现版本，也是首个通过完整形式化验证的微核。它具有安全可靠、高性能等特点，通常用作安全系统的底层模块。
 
-相比于xv6等教学操作系统或广泛应用的linux系统，seL4微核的底层架构文档较少。针对本赛题，团队调研资料如下：
+相比于xv6等教学操作系统或应用广泛的linux系统，seL4微核的底层架构文档较少。针对本赛题，团队调研资料如下：
 
 * [seL4的设计思想](https://docs.sel4.systems/projects/sel4/documentation.html)。
 
@@ -106,6 +106,41 @@
 
 非常感谢张老师为seL4移植工作给予的指导。
 
+# 项目构建和编译方法
+
+seL4官方给出的依赖包：[Dependencies(seL4 docs)](https://docs.sel4.systems/projects/buildsystem/host-dependencies.html)。
+
+创建并进入`sel4test`目录，用repo命令获取官方库：
+```shell
+mkdir sel4test
+cd sel4test
+repo init -u https://github.com/seL4/sel4test-manifest.git
+repo sync
+```
+
+在```sel4test```目录下，用wget获取并执行```init_loongarch_seL4-test_dev.sh```：
+
+```shell
+wget home.ustc.edu.cn/~le24/shell/init_loongarch_seL4-test_dev.sh
+chmod u+x init_loongarch_seL4-test_dev.sh
+./init_loongarch-seL4-test_dev.sh ssh
+```
+
+在```sel4test```目录下，创建build_3A5000文件夹：
+
+```shell
+mkdir build_3A5000
+cd build_3A5000
+../init-build.sh -DPLATFORM=3A5000 -DLoongarch64=1 -DSIMULATION=1
+```
+
+编译：
+
+```shell
+ninja
+```
+
+如果需要拉取和推送代码，我们在[这里](https://github.com/tyyteam/seL4-oscompProblemSolutions/blob/leiyang/04.11%20sel4-test%20dev%E4%BB%93%E5%BA%93%E8%AE%BE%E7%BD%AE.md)提供脚本帮助简化这一过程。
 # 中期开发状态
 [点击此处](https://pan.baidu.com/s/1c8KKPdG0Ri_AbR2taWWPSw?pwd=2qdg)查看演示视频及文字说明
 
