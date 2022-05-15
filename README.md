@@ -108,7 +108,7 @@
 
 演示视频及文字说明
 
-<video controls height='100%' width='100%' src="https://raw.githubusercontent.com/GooTal/picBed/master/myPics/项目期中检查-作品演示.mp4"></video>
+<iframe controls height='100%' width='100%' src="https://raw.githubusercontent.com/GooTal/picBed/master/myPics/项目期中检查-作品演示.mp4"></iframe>
 
 # 参考资料
 
