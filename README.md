@@ -29,6 +29,7 @@
 
 * 虚拟地址设计
 ![虚拟地址空间设计](https://raw.githubusercontent.com/GooTal/picBed/master/myPics/虚拟地址空间设计.png)
+图：虚拟地址空间设计
 
 物理地址空间：
 1. 内存空间分为低地址段和高地址段，当前我们在qemu模拟使用4GB内存，对应的地址段分别为0x00000000-0x0FFFFFFF（低256MB），0x90000000-0x17FFFFFFF（剩余4GB-256MB），内核的装载地址为0x900000000
@@ -44,23 +45,68 @@
 
 现有代码是参考龙芯架构linux的例外和中断，但是结构比较复杂。接下来打算参考xv6-riscv等操作系统，实现基础的例外和中断处理。
 
-* cmake分析--雷
+* cmake分析
+![cmake1](https://raw.githubusercontent.com/GooTal/picBed/master/myPics/cmake1.png)
+图：cmake分析(1)
+cmake分析(1)图是启动sel4test（微内核测试框架-以riscv-spike为例）项目构建的cmake执行逻辑，其中标注的是各脚本和cmake的一些主要行为，后半部分是sel4微内核测试框架依赖的sel4官方开源的库的cmake设置，因和内核关联不大，这里没有记录。
 
-  草稿和processOn的图
+![cmake2](https://raw.githubusercontent.com/GooTal/picBed/master/myPics/cmake2.png)
+图：cmake分析(2)
+cmake分析(2)图是sel4内核部分的cmake执行逻辑，其中很多配置会通过脚本和cmake宏或者函数生成头文件，供根据具体架构和平台构建的的微内核使用。cmake过程中的具体逻辑请查阅图片中各节点的叙述。
 
+* 代码目录结构图
+![seL4源码目录结构图](https://raw.githubusercontent.com/GooTal/picBed/master/myPics/seL4源码目录结构图.png)
+图：seL4源码目录结构图
+
+各仓库源码见文档[seL4仓库及镜像说明](#seL4仓库及镜像说明)。
   
+* riscv-loongarch寄存器和重点汇编指令对照表
 
-* 代码目录结构图--雷
+表：riscv-loongarch寄存器映射方式
+| RISCV | LA   | RISCV | LA                  |
+| ----- | ---- | ----- | ------------------- |
+| s1    | s0   | t4    | t4                  |
+| s2    | s1   | t5    | t5                  |
+| s3    | s2   | t6    | t6                  |
+| s4    | s3   | t7    | t7                  |
+| s5    | s4   | ra    | ra                  |
+| s6    | s5   | sp    | sp                  |
+| s7    | s6   | gp    | r21(保留，不可分配) |
+| s8    | s7   | tp    | tp                  |
+| s9    | s8   | a0    | a0                  |
+| s0    | s9   | a1    | a1                  |
+| s10   | t7   | a2    | a2                  |
+| s11   | t8   | a3    | a3                  |
+| t0    | t0   | a4    | a4                  |
+| t1    | t1   | a5    | a5                  |
+| t2    | t2   | a6    | a6                  |
+| t3    | t3   | a7    | a7                  |
 
-  可以说明图中是重点修改的文件。对于所有的改动，我们最终打算用diff查看我们的修改。github提交图也可以查看并贴上。
+表：riscv-loongarch重点汇编指令对照表
 
-  说一下我们fork了很多seL4仓库，各个仓库地址见下文github镜像部分。
-  
-  
-  
-* riscv-loongarch寄存器和重点特殊汇编指令对应--雷
 
-  参考腾讯文档。
+| RISCV指令                      | LA指令                                                       | riscv指令解释                                                | LA指令解释                                                   |
+| ------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ecall                          | syscall 0                                                    | 从S切换到M                                                   | 0是保留错误码                                                |
+| mv rd, rs                      | move rd, rs                                                  | x[rs]->x[rd]                                                 | x[rs]->x[rd]                                                 |
+| wfi                            | idle level                                                   | 当前硬件线程可以被暂停直到需要处理一个中断                   | 处理器核停止取指令，进入等待状态，直至被中断唤醒或被复位，然后执行idle指令的下一条指令 |
+| STORE_S rd, offset(rs)         | st.d rd, rs, offset                                          | x[rd] -> M[ x[rs]+offset ]                                   | x[rd] -> M[ x[rs]+offset ]                                   |
+| LOAD_S rd, offset(rs)          | ld.d rd, rs, offset                                          | LOAD_S宏展开后是LOAD字符串，M[x[rs] +offset] -> x[rd]  ,M表示内存 | M[ x[rs]+offset ] -> x[rd]                                   |
+| j offset                       | b offset                                                     | 跳转到pc+offset                                              | 同左                                                         |
+| jalr x1, 0(rs1) 用法：jalr rs1 | jirl rd, rj, offs16 等效用法：jirl ra, rj, 0 此处ra特指返回地址寄存器，rj等效于左侧rs1 | pc+4存入x[1](ra中)，跳转到rs1处。                            | pc+4存入rd中，跳转地址：rj的值+offs16逻辑左移两位再符号扩展。 |
+| li rd, imm                     | li.w/li.d rd, imm                                            | load立即数                                                   | 同左                                                         |
+| bne rs1, rs2, offset           | 同左                                                         | 不相等时分支（x[rs1] != x[rs2]）                             | 同左                                                         |
+| rdtime rd                      | rdtime.d rd, rj                                              | 读出时间相关寄存器到rd                                       | 读出时间相关寄存器到rd，需要返回；rj保存counter ID号，可以不返回， |
+| rdcycle rd                     | 暂时用rdtime替代                                             |                                                              |                                                              |
+| sfence.vma                     | dbar 0                                                       | 清理掉TLB和Page Table Cache和硬件流水线上的指令              | 用于完成load/store访存操作之间的栅障功能。该指令之前的所有load/store操作执行完成，才执行当前指令，再执行其后所有load/store访存操作 |
+| fence.i                        | ibar 0                                                       | 在 Fence.I 之后所有指令的取指令操作，一定能够观测到在 Fence.I 之前所有指令造成的访存结果 | 用于单核内部store操作与取指操作之间的同步。确保该指令之后的取值一定能够观察到该指令之前所有store操作的执行效果 |
+| jal offset                     | bl offset                                                    | pc+4存入ra，pc=pc+offset                                     | 同左                                                         |
+| bnez rj, offset                | bnez rj, offset                                              | 不等于0跳转                                                  | 同左                                                         |
+| bnqz rj, offset                | bnqz rj, offset                                              | 等于0跳转                                                    | 同左                                                         |
+| beq rj, rd, offset             | beq rj, rd, offset                                           | 相等时跳转                                                   | 同左                                                         |
+| beqz rj, offset                | beqz rj, offset                                              | rj==0，跳转到offset                                          | 同左                                                         |
+| jr rj                          | jirl zero, rj, 0                                             | 寄存器跳转 pc=x[]                                            | 同左                                                         |
+| la                             | la                                                           | 加载符号地址                                                 | 同左                                                         |
 
 # seL4仓库及镜像说明
 
@@ -76,19 +122,42 @@
 |  la-seL4_libs  |              在seL4微内核上编写用户程序的程序库              | [la-seL4_libs-dev](https://gitlab.eduxiji.net/qtliu/la-seL4_libs/-/tree/dev) | [la-seL4_libs-dev](https://github.com/tyyteam/la-seL4_libs/tree/dev) |
 |  la-util_libs  | seL4微内核使用的程序库，包括pci驱动库、驱动程序库、设备树库等 | [la-util_libs-dev](https://gitlab.eduxiji.net/qtliu/la-util_libs/-/tree/dev) | [la-util_libs-dev](https://github.com/tyyteam/la-util_libs/tree/dev) |
 
-# 开发计划
+# 开发进度和计划
 
-写时间节点，对应工作。从2月末写到5月末。
+- [x] 2022.02.25 - 2022.02.28 
+  调研学习阶段，虚拟机环境配置、软件安装与sel4的尝试运行。
+- [x] 2022.03.01 - 2022.03.03
+  调研学习阶段，尝试交叉编译不同架构下的sel4微内核并试运行，调研官方文档，建立开发仓库。
+- [x] 2022.03.04 - 2022.03.07
+  调研学习阶段，继续调研，确定了要将sel4test(sel4微内核测试框架)项目移植到龙芯平台。
+- [x] 2022.03.09 - 2022.03.11
+  调研学习阶段，学习sel4官方网站的资料，熟悉sel4设计模式和特点。
+- [x] 2022.03.12 - 2022.03.22
+  准备阶段，，完成龙芯交叉编译调试环境的配置，完成sel4官方网站给出的示例教程，阅读官方文档。
+- [x] 2022.03.23 - 2022.03.26
+  准备阶段，**明确了参考sel4在RISCV架构下的设计，将其移植到龙芯平台的开发模式**，搜集调研RISCV和龙芯开发文档，并尝试开始启动调试。建立了各思维导图(虚拟地址设计图、sel4源码目录结构图、sel4启动流程图等)、龙芯linux和sel4的源码注释仓库等，开始从阅读源码入手移植。
+- [x] 2022.03.27 - 2022.03.29
+  准备阶段，开会明确分工，刘、陈主要负责sel4龙芯架构相关技术细节设计，并从sel4内核启动开始移植，雷主要负责从cmake项目构建和编译开始移植。
+- [x] 2022.03.30 - 2022.04.12
+  移植阶段，补充龙芯架构缺少的文件，**完成了从运行脚本到架构相关的项目的构建流程**。
+- [x] 2022.04.13 - 2022.05.03
+  移植阶段，基本完成了龙芯架构相关技术细节的设计和移植，并调试**通过了ninja编译**。
+- [x] 2022.05.04 - 2022.05.15
+  调试和完善阶段，进行gdb调试，且已经**成功进入内核**。进行相关技术文档的撰写，迎接中期检查。
+- [ ] 2022.05.16 - 2022.03.31
+  调试和完善阶段，进一步调试和完善，争取在五月底完成移植工作，使sel4test成功运行。
+- [ ] 2022.06 - 以后
+  尝试增加更多细节以加以完善，如中断，运行示例等。
 
-如果进决赛，开发计划...
+更加详细的开发日志请见[腾讯文档](https://docs.qq.com/sheet/DWWxDdmJvUU9sanl1?scene=6d554d98c90461c289f4f9a1s1iQn1&tab=rc2xgg)，如没有权限查看请联系小组成员。
 
-# 比赛过程中的重要进展
+# 重要进展
 
-开发计划中已经做好的部分，此处展开写。
+待完善
 
 # 遇到的主要问题和解决方法
 
-可以放我们solutions仓库地址，加一些说明。
+团队从调研学习到调试阶段的问题和解决方案，全部记录在github仓库[oscompProblemSolutions](https://github.com/tyyteam/seL4-oscompProblemSolutions)，请切换分支查看各队员的记录。
 
 # 分工和协作
 
