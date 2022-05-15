@@ -105,155 +105,155 @@ finaliseCap_ret_t finaliseCap(cap_t cap, bool_t final, bool_t exposed)
 {
     finaliseCap_ret_t fc_ret;
 
-    if (isArchCap(cap)) {
-        return Arch_finaliseCap(cap, final);
-    }
+//     if (isArchCap(cap)) {
+//         return Arch_finaliseCap(cap, final);
+//     }
 
-    switch (cap_get_capType(cap)) {
-    case cap_endpoint_cap:
-        if (final) {
-            cancelAllIPC(EP_PTR(cap_endpoint_cap_get_capEPPtr(cap)));
-        }
+//     switch (cap_get_capType(cap)) {
+//     case cap_endpoint_cap:
+//         if (final) {
+//             cancelAllIPC(EP_PTR(cap_endpoint_cap_get_capEPPtr(cap)));
+//         }
 
-        fc_ret.remainder = cap_null_cap_new();
-        fc_ret.cleanupInfo = cap_null_cap_new();
-        return fc_ret;
+//         fc_ret.remainder = cap_null_cap_new();
+//         fc_ret.cleanupInfo = cap_null_cap_new();
+//         return fc_ret;
 
-    case cap_notification_cap:
-        if (final) {
-            notification_t *ntfn = NTFN_PTR(cap_notification_cap_get_capNtfnPtr(cap));
-#ifdef CONFIG_KERNEL_MCS
-            schedContext_unbindNtfn(SC_PTR(notification_ptr_get_ntfnSchedContext(ntfn)));
-#endif
-            unbindMaybeNotification(ntfn);
-            cancelAllSignals(ntfn);
-        }
-        fc_ret.remainder = cap_null_cap_new();
-        fc_ret.cleanupInfo = cap_null_cap_new();
-        return fc_ret;
+//     case cap_notification_cap:
+//         if (final) {
+//             notification_t *ntfn = NTFN_PTR(cap_notification_cap_get_capNtfnPtr(cap));
+// #ifdef CONFIG_KERNEL_MCS
+//             schedContext_unbindNtfn(SC_PTR(notification_ptr_get_ntfnSchedContext(ntfn)));
+// #endif
+//             unbindMaybeNotification(ntfn);
+//             cancelAllSignals(ntfn);
+//         }
+//         fc_ret.remainder = cap_null_cap_new();
+//         fc_ret.cleanupInfo = cap_null_cap_new();
+//         return fc_ret;
 
-    case cap_reply_cap:
-#ifdef CONFIG_KERNEL_MCS
-        if (final) {
-            reply_t *reply = REPLY_PTR(cap_reply_cap_get_capReplyPtr(cap));
-            if (reply && reply->replyTCB) {
-                switch (thread_state_get_tsType(reply->replyTCB->tcbState)) {
-                case ThreadState_BlockedOnReply:
-                    reply_remove(reply, reply->replyTCB);
-                    break;
-                case ThreadState_BlockedOnReceive:
-                    cancelIPC(reply->replyTCB);
-                    break;
-                default:
-                    fail("Invalid tcb state");
-                }
-            }
-        }
-        fc_ret.remainder = cap_null_cap_new();
-        fc_ret.cleanupInfo = cap_null_cap_new();
-        return fc_ret;
-#endif
-    case cap_null_cap:
-    case cap_domain_cap:
-        fc_ret.remainder = cap_null_cap_new();
-        fc_ret.cleanupInfo = cap_null_cap_new();
-        return fc_ret;
-    }
+//     case cap_reply_cap:
+// #ifdef CONFIG_KERNEL_MCS
+//         if (final) {
+//             reply_t *reply = REPLY_PTR(cap_reply_cap_get_capReplyPtr(cap));
+//             if (reply && reply->replyTCB) {
+//                 switch (thread_state_get_tsType(reply->replyTCB->tcbState)) {
+//                 case ThreadState_BlockedOnReply:
+//                     reply_remove(reply, reply->replyTCB);
+//                     break;
+//                 case ThreadState_BlockedOnReceive:
+//                     cancelIPC(reply->replyTCB);
+//                     break;
+//                 default:
+//                     fail("Invalid tcb state");
+//                 }
+//             }
+//         }
+//         fc_ret.remainder = cap_null_cap_new();
+//         fc_ret.cleanupInfo = cap_null_cap_new();
+//         return fc_ret;
+// #endif
+//     case cap_null_cap:
+//     case cap_domain_cap:
+//         fc_ret.remainder = cap_null_cap_new();
+//         fc_ret.cleanupInfo = cap_null_cap_new();
+//         return fc_ret;
+//     }
 
-    if (exposed) {
-        fail("finaliseCap: failed to finalise immediately.");
-    }
+//     if (exposed) {
+//         fail("finaliseCap: failed to finalise immediately.");
+//     }
 
-    switch (cap_get_capType(cap)) {
-    case cap_cnode_cap: {
-        if (final) {
-            fc_ret.remainder =
-                Zombie_new(
-                    1ul << cap_cnode_cap_get_capCNodeRadix(cap),
-                    cap_cnode_cap_get_capCNodeRadix(cap),
-                    cap_cnode_cap_get_capCNodePtr(cap)
-                );
-            fc_ret.cleanupInfo = cap_null_cap_new();
-            return fc_ret;
-        }
-        break;
-    }
+//     switch (cap_get_capType(cap)) {
+//     case cap_cnode_cap: {
+//         if (final) {
+//             fc_ret.remainder =
+//                 Zombie_new(
+//                     1ul << cap_cnode_cap_get_capCNodeRadix(cap),
+//                     cap_cnode_cap_get_capCNodeRadix(cap),
+//                     cap_cnode_cap_get_capCNodePtr(cap)
+//                 );
+//             fc_ret.cleanupInfo = cap_null_cap_new();
+//             return fc_ret;
+//         }
+//         break;
+//     }
 
-    case cap_thread_cap: {
-        if (final) {
-            tcb_t *tcb;
-            cte_t *cte_ptr;
+//     case cap_thread_cap: {
+//         if (final) {
+//             tcb_t *tcb;
+//             cte_t *cte_ptr;
 
-            tcb = TCB_PTR(cap_thread_cap_get_capTCBPtr(cap));
-            SMP_COND_STATEMENT(remoteTCBStall(tcb);)
-            cte_ptr = TCB_PTR_CTE_PTR(tcb, tcbCTable);
-            unbindNotification(tcb);
-#ifdef CONFIG_KERNEL_MCS
-            sched_context_t *sc = SC_PTR(tcb->tcbSchedContext);
-            if (sc) {
-                schedContext_unbindTCB(sc, tcb);
-                if (sc->scYieldFrom) {
-                    schedContext_completeYieldTo(sc->scYieldFrom);
-                }
-            }
-#endif
-            suspend(tcb);
-#ifdef CONFIG_DEBUG_BUILD
-            tcbDebugRemove(tcb);
-#endif
-            Arch_prepareThreadDelete(tcb);
-            fc_ret.remainder =
-                Zombie_new(
-                    tcbArchCNodeEntries,
-                    ZombieType_ZombieTCB,
-                    CTE_REF(cte_ptr)
-                );
-            fc_ret.cleanupInfo = cap_null_cap_new();
-            return fc_ret;
-        }
-        break;
-    }
+//             tcb = TCB_PTR(cap_thread_cap_get_capTCBPtr(cap));
+//             SMP_COND_STATEMENT(remoteTCBStall(tcb);)
+//             cte_ptr = TCB_PTR_CTE_PTR(tcb, tcbCTable);
+//             unbindNotification(tcb);
+// #ifdef CONFIG_KERNEL_MCS
+//             sched_context_t *sc = SC_PTR(tcb->tcbSchedContext);
+//             if (sc) {
+//                 schedContext_unbindTCB(sc, tcb);
+//                 if (sc->scYieldFrom) {
+//                     schedContext_completeYieldTo(sc->scYieldFrom);
+//                 }
+//             }
+// #endif
+//             suspend(tcb);
+// #ifdef CONFIG_DEBUG_BUILD
+//             tcbDebugRemove(tcb);
+// #endif
+//             Arch_prepareThreadDelete(tcb);
+//             fc_ret.remainder =
+//                 Zombie_new(
+//                     tcbArchCNodeEntries,
+//                     ZombieType_ZombieTCB,
+//                     CTE_REF(cte_ptr)
+//                 );
+//             fc_ret.cleanupInfo = cap_null_cap_new();
+//             return fc_ret;
+//         }
+//         break;
+//     }
 
-#ifdef CONFIG_KERNEL_MCS
-    case cap_sched_context_cap:
-        if (final) {
-            sched_context_t *sc = SC_PTR(cap_sched_context_cap_get_capSCPtr(cap));
-            schedContext_unbindAllTCBs(sc);
-            schedContext_unbindNtfn(sc);
-            if (sc->scReply) {
-                assert(call_stack_get_isHead(sc->scReply->replyNext));
-                sc->scReply->replyNext = call_stack_new(0, false);
-                sc->scReply = NULL;
-            }
-            if (sc->scYieldFrom) {
-                schedContext_completeYieldTo(sc->scYieldFrom);
-            }
-            /* mark the sc as no longer valid */
-            sc->scRefillMax = 0;
-            fc_ret.remainder = cap_null_cap_new();
-            fc_ret.cleanupInfo = cap_null_cap_new();
-            return fc_ret;
-        }
-        break;
-#endif
+// #ifdef CONFIG_KERNEL_MCS
+//     case cap_sched_context_cap:
+//         if (final) {
+//             sched_context_t *sc = SC_PTR(cap_sched_context_cap_get_capSCPtr(cap));
+//             schedContext_unbindAllTCBs(sc);
+//             schedContext_unbindNtfn(sc);
+//             if (sc->scReply) {
+//                 assert(call_stack_get_isHead(sc->scReply->replyNext));
+//                 sc->scReply->replyNext = call_stack_new(0, false);
+//                 sc->scReply = NULL;
+//             }
+//             if (sc->scYieldFrom) {
+//                 schedContext_completeYieldTo(sc->scYieldFrom);
+//             }
+//             /* mark the sc as no longer valid */
+//             sc->scRefillMax = 0;
+//             fc_ret.remainder = cap_null_cap_new();
+//             fc_ret.cleanupInfo = cap_null_cap_new();
+//             return fc_ret;
+//         }
+//         break;
+// #endif
 
-    case cap_zombie_cap:
-        fc_ret.remainder = cap;
-        fc_ret.cleanupInfo = cap_null_cap_new();
-        return fc_ret;
+//     case cap_zombie_cap:
+//         fc_ret.remainder = cap;
+//         fc_ret.cleanupInfo = cap_null_cap_new();
+//         return fc_ret;
 
-    case cap_irq_handler_cap:
-        if (final) {
-            irq_t irq = IDX_TO_IRQT(cap_irq_handler_cap_get_capIRQ(cap));
+//     case cap_irq_handler_cap:
+//         if (final) {
+//             irq_t irq = IDX_TO_IRQT(cap_irq_handler_cap_get_capIRQ(cap));
 
-            deletingIRQHandler(irq);
+//             deletingIRQHandler(irq);
 
-            fc_ret.remainder = cap_null_cap_new();
-            fc_ret.cleanupInfo = cap;
-            return fc_ret;
-        }
-        break;
-    }
+//             fc_ret.remainder = cap_null_cap_new();
+//             fc_ret.cleanupInfo = cap;
+//             return fc_ret;
+//         }
+//         break;
+//     }
 
     fc_ret.remainder = cap_null_cap_new();
     fc_ret.cleanupInfo = cap_null_cap_new();

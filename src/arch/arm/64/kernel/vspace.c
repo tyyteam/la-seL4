@@ -242,7 +242,7 @@ BOOT_CODE void map_kernel_window(void)
 
 #ifdef CONFIG_ARM_HYPERVISOR_SUPPORT
     /* verify that the kernel window as at the second entry of the PGD */
-    assert(GET_PGD_INDEX(PPTR_BASE) == 1);
+    assert(GET_PGD_INDEX(PPTR_BASE) == 1);-
 #else
     /* verify that the kernel window as at the last entry of the PGD */
     assert(GET_PGD_INDEX(PPTR_BASE) == BIT(PGD_INDEX_BITS) - 1);
