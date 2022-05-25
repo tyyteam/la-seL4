@@ -8,9 +8,11 @@
  * SPDX-License-Identifier: GPL-2.0-only
  */
 
+
 #include <config.h>
 #include <machine/assembler.h>
 #include <arch/machine/hardware.h>
+#include <arch/machine.h>
 #include <arch/api/syscall.h>
 #include <arch/machine/registerset.h>
 #include <util.h>
@@ -57,16 +59,17 @@ trap_entry:
     st.d $t7, $t0, 18*REGBYTES
     st.d $t8, $t0, 19*REGBYTES
     st.d $r21, $t0,20*REGBYTES
-    st.d $fp, $t0, 21*REGBYTES
-    st.d $s0, $t0, 22*REGBYTES
-    st.d $s1, $t0, 23*REGBYTES
-    st.d $s2, $t0, 24*REGBYTES
-    st.d $s3, $t0, 25*REGBYTES
-    st.d $s4, $t0, 26*REGBYTES
-    st.d $s5, $t0, 27*REGBYTES
-    st.d $s6, $t0, 28*REGBYTES
-    st.d $s7, $t0, 29*REGBYTES
-    st.d $s8, $t0, 30*REGBYTES
+    
+    st.d $s0, $t0, 21*REGBYTES
+    st.d $s1, $t0, 22*REGBYTES
+    st.d $s2, $t0, 23*REGBYTES
+    st.d $s3, $t0, 24*REGBYTES
+    st.d $s4, $t0, 25*REGBYTES
+    st.d $s5, $t0, 26*REGBYTES
+    st.d $s6, $t0, 27*REGBYTES
+    st.d $s7, $t0, 28*REGBYTES
+    st.d $s8, $t0, 29*REGBYTES
+    st.d $fp, $t0, 30*REGBYTES
     /* save t0 value */
 #ifdef ENABLE_SMP_SUPPORT
     //TODO
@@ -76,7 +79,7 @@ trap_entry:
     st.d $t8, $t0, 11*REGBYTES
 
     csrrd $ra, LOONGARCH_CSR_ERA   // save csr_era,i.e., exception PC
-    st.d $ra, 31*REGBYTES
+    st.d $ra, $t0, 31*REGBYTES
 
     csrrd $t8, LOONGARCH_CSR_BADV  // save csr_badvaddr
     st.d $t8, $t0, 32*REGBYTES
@@ -104,7 +107,7 @@ trap_entry:
     la $sp, kernel_stack_alloc
 	addi.w $t0, $zero, 1
 	slli.w $t0, $t0, CONFIG_KERNEL_STACK_BITS
-	add.d sp, sp, t0
+	add.d $sp, $sp, $t0
 #endif
     
     /* Get the ecode of estat at [21:16]*/

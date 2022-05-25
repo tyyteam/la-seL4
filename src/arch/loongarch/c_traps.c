@@ -65,17 +65,17 @@ void VISIBLE NORETURN restore_user_context(void)
         "ld.d  $t7, $t0, 18*%[REGSIZE]  \n"
         "ld.d  $t8, $t0, 19*%[REGSIZE]  \n"
         "ld.d  $r21, $t0, 20*%[REGSIZE] \n"
-        "ld.d  $fp, $t0, 21*%[REGSIZE]  \n"
-        "ld.d  $s0, $t0, 22*%[REGSIZE]  \n"
-        "ld.d  $s1, $t0, 23*%[REGSIZE]  \n"
-        "ld.d  $s2, $t0, 24*%[REGSIZE]  \n"
-        "ld.d  $s3, $t0, 25*%[REGSIZE]  \n"
-        "ld.d  $s4, $t0, 26*%[REGSIZE]  \n"
-        "ld.d  $s5, $t0, 27*%[REGSIZE]  \n"
-        "ld.d  $s6, $t0, 28*%[REGSIZE]  \n"
-        "ld.d  $s7, $t0, 29*%[REGSIZE]  \n"
-        "ld.d  $s8, $t0, 30*%[REGSIZE]  \n"
-        
+        "ld.d  $s0, $t0, 21*%[REGSIZE]  \n"
+        "ld.d  $s1, $t0, 22*%[REGSIZE]  \n"
+        "ld.d  $s2, $t0, 23*%[REGSIZE]  \n"
+        "ld.d  $s3, $t0, 24*%[REGSIZE]  \n"
+        "ld.d  $s4, $t0, 25*%[REGSIZE]  \n"
+        "ld.d  $s5, $t0, 26*%[REGSIZE]  \n"
+        "ld.d  $s6, $t0, 27*%[REGSIZE]  \n"
+        "ld.d  $s7, $t0, 28*%[REGSIZE]  \n"
+        "ld.d  $s8, $t0, 29*%[REGSIZE]  \n"
+        "ld.d  $fp, $t0, 30*%[REGSIZE]  \n"
+
         /* Get next restored tp */
         "ld.d  $t1, $t0, 1*%[REGSIZE]   \n"
         /* get restored tp */
@@ -83,30 +83,30 @@ void VISIBLE NORETURN restore_user_context(void)
 
 #ifndef ENABLE_SMP_SUPPORT
         /* Write back LOONGARCH_CSR_KS0 with cur_thread_reg to get it back on the next trap entry */
-        "csrwr $t0, LOONGARCH_CSR_KS0   \n"
+        "csrwr $t0, 0x30   \n"
 #endif
         //load [38*%[REGSIZE]+$t0] to LOONGARCH_CSR_ERA instead of 31*%[REGSIZE]
 
         "ld.d  $t1, $t0, 32*%[REGSIZE]  \n"
-        "csrwr $t1, LOONGARCH_CSR_BADV  \n"
+        "csrwr $t1, 0x7  \n"
 
         "ld.d  $t1, $t0, 33*%[REGSIZE]  \n"
-        "csrwr $t1, LOONGARCH_CSR_CRMD  \n"
+        "csrwr $t1, 0x0  \n"
 
         "ld.d  $t1, $t0, 34*%[REGSIZE]  \n"
-        "csrwr $t1, LOONGARCH_CSR_PRMD  \n"        
+        "csrwr $t1, 0x1  \n"        
 
         "ld.d  $t1, $t0, 35*%[REGSIZE]  \n"
-        "csrwr $t1, LOONGARCH_CSR_EUEN  \n"    
+        "csrwr $t1, 0x2  \n"    
 
         "ld.d  $t1, $t0, 36*%[REGSIZE]  \n"
-        "csrwr $t1, LOONGARCH_CSR_ECFG  \n"               
+        "csrwr $t1, 0x4  \n"               
 
         "ld.d  $t1, $t0, 37*%[REGSIZE]  \n"
-        "csrwr $t1, LOONGARCH_CSR_ESTAT \n"
+        "csrwr $t1, 0x5 \n"
 
         "ld.d  $t1, $t0, 38*%[REGSIZE]  \n"
-        "csrwr $t1, LOONGARCH_CSR_ERA   \n"
+        "csrwr $t1, 0x6   \n"
 
         "ld.d  $t1, $t0, 12*%[REGSIZE]  \n"
         "ld.d  $t0, $t0, 11*%[REGSIZE]  \n"

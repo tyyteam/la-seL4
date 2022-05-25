@@ -11,6 +11,7 @@
 #include <util.h>
 #include <arch/machine/hardware.h>
 
+
 #define CONFIG_64BIT
 
 #ifndef __ASSEMBLER__
@@ -199,8 +200,6 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 #define LOONGARCH_CSR_PRMD		0x1	/* Prev-exception mode info */
 #define  CSR_PRMD_PWE_SHIFT		3
 #define  CSR_PRMD_PWE			(UL_CONST(0x1) << CSR_PRMD_PWE_SHIFT)
-#define  CSR_PRMD_PIE_SHIFT		2
-#define  CSR_PRMD_PIE			(UL_CONST(0x1) << CSR_PRMD_PIE_SHIFT)
 #define  CSR_PRMD_PPLV_SHIFT		0
 #define  CSR_PRMD_PPLV_WIDTH		2
 #define  CSR_PRMD_PPLV			(UL_CONST(0x3) << CSR_PRMD_PPLV_SHIFT)

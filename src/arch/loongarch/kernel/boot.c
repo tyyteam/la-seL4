@@ -111,7 +111,7 @@ BOOT_CODE static void init_irqs(cap_t root_cnode_cap)
 }
 
 /* ASM symbol for the CPU initialisation trap. */
-extern char trap_entry[1];
+extern void trap_entry(void);
 
 /* This and only this function initialises the CPU. It does NOT initialise any kernel state. */
 
@@ -141,7 +141,7 @@ BOOT_CODE static void init_cpu(void)
      * tlbrefill entry is set at elfloader, where we page table may cause tlb missing
      * machine error entry is not set yet.
      */
-    csr_writeq(trap_entry, LOONGARCH_CSR_EENTRY);
+    csr_writeq((unsigned long)trap_entry, LOONGARCH_CSR_EENTRY);
 
     /*local irqs*/
     initLocalIRQController();

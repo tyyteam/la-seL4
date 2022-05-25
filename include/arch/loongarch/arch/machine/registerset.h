@@ -22,7 +22,7 @@ enum _register {
 
     ra=0,LR=0,
     tp=1,TP=1,TLS_BASE=1,
-    sp=2,SP=2
+    sp=2,SP=2,
 
     a0=3, capRegister = 3, badgeRegister = 3,
     a1=4, msgInfoRegister=4,
@@ -51,17 +51,16 @@ enum _register {
 
     r21=20,
 
-    fp=21,
-
-    s0=22,
-    s1=23,
-    s2=24,
-    s3=25,
-    s4=26,
-    s5=27,
-    s6=28,
-    s7=29,
-    s8=30,
+    s0=21,
+    s1=22,
+    s2=23,
+    s3=24,
+    s4=25,
+    s5=26,
+    s6=27,
+    s7=28,
+    s8=29,
+    s9=30,
 
     /* End of GP registers, the following are additional kernel-saved state. */
 
