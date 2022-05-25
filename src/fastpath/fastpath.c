@@ -124,7 +124,7 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
 #endif
 
 #ifdef CONFIG_ARCH_LOONGARCH
-    stored_hw_asid = cap_page_table_cap_get_capPTMappedASID(newVTable);
+    stored_hw_asid.words[0] = cap_page_table_cap_get_capPTMappedASID(newVTable);
 #endif
 
     /* let gcc optimise this out for 1 domain */
@@ -397,7 +397,7 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
 #endif
 
 #ifdef CONFIG_ARCH_LOONGARCH
-    stored_hw_asid = cap_page_table_cap_get_capPTMappedASID(newVTable);
+    stored_hw_asid.words[0] = cap_page_table_cap_get_capPTMappedASID(newVTable);
 #endif
 
     /* Ensure the original caller can be scheduled directly. */

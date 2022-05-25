@@ -1259,12 +1259,13 @@ __BUILD_CSR_OP(tlbidx)
 #define PS_64M		0x0000001a
 #define PS_256M		0x0000001c
 #define PS_1G		0x0000001e
+#define PS_64G      0x00000024
 
 #define PS_MASK		0x3f000000
 #define PS_SHIFT	24
 
 /* Default page size for a given kernel configuration */
-#define PS_DEFAULT_SIZE PS_16K
+#define PS_DEFAULT_SIZE PS_32M
 
 /* Default huge tlb size for a given kernel configuration */
 // #ifdef CONFIG_PAGE_SIZE_4KB

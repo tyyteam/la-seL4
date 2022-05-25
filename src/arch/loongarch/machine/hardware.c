@@ -306,7 +306,7 @@ BOOT_CODE void configure_exception_vector(void)
 
 	csr_writeq(eentry, LOONGARCH_CSR_EENTRY);
 	csr_writeq(eentry, LOONGARCH_CSR_MERRENTRY);
-	csr_writeq(tlbrentry, LOONGARCH_CSR_TLBRENTRY);
+	// csr_writeq(tlbrentry, LOONGARCH_CSR_TLBRENTRY);
 }
 
 /* Install CPU exception handler */
