@@ -28,7 +28,7 @@ void VISIBLE NORETURN restore_user_context(void)
 
 #ifdef ENABLE_SMP_SUPPORT
     word_t sp;
-    asm volatile("csrr %0, sscratch" : "=r"(sp));
+    asm volatile("csrrd %0, LOONGARCH_CSR_KS0" : "=r"(sp));//using LOONGARCH_CSR_KS0
     sp -= sizeof(word_t);
     *((word_t *)sp) = cur_thread_reg;
 #endif
@@ -40,64 +40,76 @@ void VISIBLE NORETURN restore_user_context(void)
 #endif
 
     asm volatile(
-        "move $t0, %[cur_thread]       \n"
-        "ld.d  $ra, $t0, 0*%[REGSIZE]  \n"
-        "ld.d  $sp, $t0, 1*%[REGSIZE]  \n"
-        /* loongarch doesn't have gp register*/
-        //"ld.d  gp, $t0, 2*%[REGSIZE]  \n"
+        "move $t0, %[cur_thread]        \n"
+        "ld.d  $ra, $t0, 0*%[REGSIZE]   \n"
         /* skip tp */
-        /* skip x5/$t0 */
+        "ld.d  $sp, $t0, 2*%[REGSIZE]   \n"
+        "ld.d  $a0, $t0, 3*%[REGSIZE]   \n"
+        "ld.d  $a1, $t0, 4*%[REGSIZE]   \n"
+        "ld.d  $a2, $t0, 5*%[REGSIZE]   \n"
+        "ld.d  $a3, $t0, 6*%[REGSIZE]   \n"
+        "ld.d  $a4, $t0, 7*%[REGSIZE]   \n"
+        "ld.d  $a5, $t0, 8*%[REGSIZE]   \n"
+        "ld.d  $a6, $t0, 9*%[REGSIZE]   \n"
+        "ld.d  $a7, $t0, 10*%[REGSIZE]  \n"
+        /* skip $r12/$t0 */
         /* no-op store conditional to clear monitor state */
         /* this may succeed in implementations with very large reservations, but the saved ra is dead */
-        "st.d  $zero, $t0, 0\n"
-        "ld.d  $t2, $t0, 6*%[REGSIZE]  \n"
-
-        "ld.d  $fp, $t0, 7*%[REGSIZE]  \n"
-
-        "ld.d  $s0, $t0, 8*%[REGSIZE]  \n"
-        "ld.d  $a0, $t0, 9*%[REGSIZE] \n"
-        "ld.d  $a1, $t0, 10*%[REGSIZE] \n"
-        "ld.d  $a2, $t0, 11*%[REGSIZE] \n"
-        "ld.d  $a3, $t0, 12*%[REGSIZE] \n"
-        "ld.d  $a4, $t0, 13*%[REGSIZE] \n"
-        "ld.d  $a5, $t0, 14*%[REGSIZE] \n"
-        "ld.d  $a6, $t0, 15*%[REGSIZE] \n"
-        "ld.d  $a7, $t0, 16*%[REGSIZE] \n"
-        "ld.d  $s1, $t0, 17*%[REGSIZE] \n"
-        "ld.d  $s2, $t0, 18*%[REGSIZE] \n"
-        "ld.d  $s3, $t0, 19*%[REGSIZE] \n"
-        "ld.d  $s4, $t0, 20*%[REGSIZE] \n"
-        "ld.d  $s5, $t0, 21*%[REGSIZE] \n"
-        "ld.d  $s6, $t0, 22*%[REGSIZE] \n"
-        "ld.d  $s7, $t0, 23*%[REGSIZE] \n"
-        "ld.d  $s8, $t0, 24*%[REGSIZE] \n"
-
-        //"ld.d  s10, $t0, 25*%[REGSIZE]\n"
-        //"ld.d  s11, $t0, 26*%[REGSIZE]\n"
-        /* loongarch doesn't have s10 and s11, but has t7 and t8, so use t7 and t8 replace s10 and s11*/
-        "ld.d  $t7, $t0, 25*%[REGSIZE]\n"
-        "ld.d  $t8, $t0, 26*%[REGSIZE]\n"
+        "sc.w  $zero, $t0, 0    \n"
+        /* skip $r13/$t1 */
+        "ld.d  $t2, $t0, 13*%[REGSIZE]  \n"
+        "ld.d  $t3, $t0, 14*%[REGSIZE]  \n"
+        "ld.d  $t4, $t0, 15*%[REGSIZE]  \n"
+        "ld.d  $t5, $t0, 16*%[REGSIZE]  \n"
+        "ld.d  $t6, $t0, 17*%[REGSIZE]  \n"
+        "ld.d  $t7, $t0, 18*%[REGSIZE]  \n"
+        "ld.d  $t8, $t0, 19*%[REGSIZE]  \n"
+        "ld.d  $r21, $t0, 20*%[REGSIZE] \n"
+        "ld.d  $fp, $t0, 21*%[REGSIZE]  \n"
+        "ld.d  $s0, $t0, 22*%[REGSIZE]  \n"
+        "ld.d  $s1, $t0, 23*%[REGSIZE]  \n"
+        "ld.d  $s2, $t0, 24*%[REGSIZE]  \n"
+        "ld.d  $s3, $t0, 25*%[REGSIZE]  \n"
+        "ld.d  $s4, $t0, 26*%[REGSIZE]  \n"
+        "ld.d  $s5, $t0, 27*%[REGSIZE]  \n"
+        "ld.d  $s6, $t0, 28*%[REGSIZE]  \n"
+        "ld.d  $s7, $t0, 29*%[REGSIZE]  \n"
+        "ld.d  $s8, $t0, 30*%[REGSIZE]  \n"
         
-        "ld.d  $t3, $t0, 27*%[REGSIZE] \n"
-        "ld.d  $t4, $t0, 28*%[REGSIZE] \n"
-        "ld.d  $t5, $t0, 29*%[REGSIZE] \n"
-        "ld.d  $t6, $t0, 30*%[REGSIZE] \n"
         /* Get next restored tp */
-        "ld.d  $t1, $t0, 3*%[REGSIZE]  \n"
+        "ld.d  $t1, $t0, 1*%[REGSIZE]   \n"
         /* get restored tp */
-        "add.d $tp, $t1, $r0  \n"
-        /* get badv */  //it is sepc in riscv
-        "ld.d  $t1, $t0, 34*%[REGSIZE]\n"
-        "csrwr $t1, 0x7  \n"//BADV
-#ifndef ENABLE_SMP_SUPPORT
-        /* Write back sscratch with cur_thread_reg to get it back on the next trap entry */
-        "csrwr $t0, 0x30         \n"
-#endif
-        "ld.d  $t1, $t0, 32*%[REGSIZE] \n"
-        "csrwr $t1, 0x4 \n"//ECFG
+        "add.d $tp, $t1, $r0    \n"
 
-        "ld.d  $t1, $t0, 5*%[REGSIZE] \n"
-        "ld.d  $t0, $t0, 4*%[REGSIZE] \n"
+#ifndef ENABLE_SMP_SUPPORT
+        /* Write back LOONGARCH_CSR_KS0 with cur_thread_reg to get it back on the next trap entry */
+        "csrwr $t0, LOONGARCH_CSR_KS0   \n"
+#endif
+        //load [38*%[REGSIZE]+$t0] to LOONGARCH_CSR_ERA instead of 31*%[REGSIZE]
+
+        "ld.d  $t1, $t0, 32*%[REGSIZE]  \n"
+        "csrwr $t1, LOONGARCH_CSR_BADV  \n"
+
+        "ld.d  $t1, $t0, 33*%[REGSIZE]  \n"
+        "csrwr $t1, LOONGARCH_CSR_CRMD  \n"
+
+        "ld.d  $t1, $t0, 34*%[REGSIZE]  \n"
+        "csrwr $t1, LOONGARCH_CSR_PRMD  \n"        
+
+        "ld.d  $t1, $t0, 35*%[REGSIZE]  \n"
+        "csrwr $t1, LOONGARCH_CSR_EUEN  \n"    
+
+        "ld.d  $t1, $t0, 36*%[REGSIZE]  \n"
+        "csrwr $t1, LOONGARCH_CSR_ECFG  \n"               
+
+        "ld.d  $t1, $t0, 37*%[REGSIZE]  \n"
+        "csrwr $t1, LOONGARCH_CSR_ESTAT \n"
+
+        "ld.d  $t1, $t0, 38*%[REGSIZE]  \n"
+        "csrwr $t1, LOONGARCH_CSR_ERA   \n"
+
+        "ld.d  $t1, $t0, 12*%[REGSIZE]  \n"
+        "ld.d  $t0, $t0, 11*%[REGSIZE]  \n"
         "ertn"
         : /* no output */
         : [REGSIZE] "i"(sizeof(word_t)),
@@ -107,105 +119,6 @@ void VISIBLE NORETURN restore_user_context(void)
 
     UNREACHABLE();
 }
-
-void VISIBLE NORETURN do_vint(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN cache_parity_error(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN do_ade(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN do_ale(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN do_bp(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN do_fpe(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN do_fpu(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN do_lsx(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN do_lasx(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN do_lbt(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN do_ri(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN do_watch(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN do_reserved(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN handle_syscall(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN do_page_fault(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-void VISIBLE NORETURN swapper_pg_dir(void){
-    //TODO
-    printf("not supported yet, will be supported soon.");
-    UNREACHABLE();
-}
-
-
-
 
 void VISIBLE NORETURN c_handle_interrupt(void)
 {
@@ -326,3 +239,101 @@ void VISIBLE NORETURN c_handle_syscall(word_t cptr, word_t msgInfo, syscall_t sy
 
     UNREACHABLE();
 }
+
+// Code below will be modified or cleared later.
+
+// void VISIBLE NORETURN do_vint(void){
+//     //TODO interrupts related
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN cache_parity_error(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN do_ade(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN do_ale(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN do_bp(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN do_fpe(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN do_fpu(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN do_lsx(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN do_lasx(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN do_lbt(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN do_ri(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN do_watch(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN do_reserved(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN handle_syscall(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN do_page_fault(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }
+
+// void VISIBLE NORETURN swapper_pg_dir(void){
+//     //TODO
+//     printf("not supported yet, will be supported soon.");
+//     UNREACHABLE();
+// }

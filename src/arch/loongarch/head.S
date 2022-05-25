@@ -53,6 +53,7 @@ _start:                   # kernel entry point
 	addi.w t0, zero, 1
 	slli.w t0, t0, CONFIG_KERNEL_STACK_BITS
 	add.d sp, sp, t0
+	csrwr zero, 0x30 /* zero LOONGARCH_CSR_KS0 for the init task */
 
 	bl		init_kernel
 

@@ -444,21 +444,6 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 #define LOONGARCH_CSR_KS7		0x37
 #define LOONGARCH_CSR_KS8		0x38
 
-/* Exception allocated KS0, KS1 and KS2 statically */
-#define EXCEPTION_KS0			LOONGARCH_CSR_KS0
-#define EXCEPTION_KS1			LOONGARCH_CSR_KS1
-#define EXCEPTION_KS2			LOONGARCH_CSR_KS2
-#define EXC_KSCRATCH_MASK		(1 << 0 | 1 << 1 | 1 << 2)
-
-/* Percpu-data base allocated KS3 statically */
-#define PERCPU_BASE_KS			LOONGARCH_CSR_KS3
-#define PERCPU_KSCRATCH_MASK		(1 << 3)
-
-/* KVM allocated KS4 and KS5 statically */
-#define KVM_VCPU_KS			LOONGARCH_CSR_KS4
-#define KVM_TEMP_KS			LOONGARCH_CSR_KS5
-#define KVM_KSCRATCH_MASK		(1 << 4 | 1 << 5)
-
 /* Timer registers */
 #define LOONGARCH_CSR_TMID		0x40	/* Timer ID */
 
@@ -1365,18 +1350,8 @@ void trap_init(void);
 
 /* irq related macro definitions, variables and functions during bootstrapping*/
 #define VECSIZE 0x200
-#define CSR_ECFG_VS_OF_VECSIZE_0X200 7
 
-unsigned long eentry;
-unsigned long tlbrentry;
-long exception_handlers[VECSIZE * 128 / sizeof(long)] ALIGN(SZ_64K);
-
-void setup_vint_size(unsigned int);
-void configure_exception_vector(void);
-void set_handler(unsigned long, void *, unsigned long);
-void init_trap(void);
-
-static inline void local_irq_disable(void)
+static inline void irq_disable(void)
 {
 	/*clear CSR_CRMD_IE*/
 	uint32_t flags = 0;
@@ -1387,7 +1362,7 @@ static inline void local_irq_disable(void)
 		: "memory");
 }
 
-static inline void local_irq_enable(void)
+static inline void irq_enable(void)
 {
 	/*set CSR_CRMD_IE*/
 	uint32_t flags = CSR_CRMD_IE;

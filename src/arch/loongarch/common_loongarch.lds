@@ -40,10 +40,11 @@ SECTIONS
     .text . : AT(ADDR(.text) - KERNEL_OFFSET)
     {
         . = ALIGN(16K);
-
-
         /* Standard kernel */
         *(.text)
+        . = ALIGN(16K);
+        _k_tlbrefill_entry = .;
+        *(k_tlbrefill_entry)
     }
 
     /* Start of data section */

@@ -130,20 +130,22 @@ BOOT_CODE static void init_cpu(void)
     // activate_kernel_vspace();
     // setup_pw();
 
-    /* irq related*/
-    setup_vint_size(VECSIZE);
+    /* init tlb */
+    init_tlb();
+    
+    /* traps related*/
+    /* set vs of LOONGARCH_CSR_ECFG*/
+    csr_xchgl(0<<CSR_ECFG_VS_SHIFT, CSR_ECFG_VS, LOONGARCH_CSR_ECFG);
+    
+    /* set the entry for normal exceptions(including interrupts).
+     * tlbrefill entry is set at elfloader, where we page table may cause tlb missing
+     * machine error entry is not set yet.
+     */
+    csr_writeq(trap_entry, LOONGARCH_CSR_EENTRY);
 
-    configure_exception_vector();
-
-    for (int i = 0; i < 64; i++)
-        set_handler(i * VECSIZE, handle_reserved, VECSIZE);
-        
-    /*tlb related exceptions*/
-    // init_tlb();
-    /*other exceptions*/
-    init_trap();    
     /*local irqs*/
     initLocalIRQController();
+
 #ifndef CONFIG_KERNEL_MCS
     //TODO
 #endif
@@ -233,8 +235,8 @@ static BOOT_CODE bool_t try_init_kernel(
     
     // map_kernel_window(); //TODO will be finished 
 
-    /* disable local irq and do necessary setups, then enable them.*/
-    local_irq_disable();
+    /* disable irq and do necessary setups, then enable them.*/
+    irq_disable();
 
     /* initialise the CPU */
     init_cpu();
@@ -311,8 +313,8 @@ static BOOT_CODE bool_t try_init_kernel(
     /* initialise the IRQ states and provide the IRQ control cap */
     init_irqs(root_cnode_cap);
 
-    /*enable local irq*/
-    local_irq_enable();
+    /*enable irq*/
+    irq_enable();
 
     /* create the bootinfo frame */
     populate_bi_frame(0, CONFIG_MAX_NUM_NODES, ipcbuf_vptr, extra_bi_size);

@@ -12,18 +12,19 @@
 #include <mode/hardware.h>
 
 /* Privileged CSR definitions */
-#define SSTATUS_SPIE  0x00000020
-#define SSTATUS_SPP   0x00000100
-#define SSTATUS_FS    0x00006000
+#define CSR_PRMD_PIE   0x00000004
+// #define SSTATUS_SPIE  0x00000020
+// #define SSTATUS_SPP   0x00000100
+// #define SSTATUS_FS    0x00006000
 
-#define SSTATUS_FS_CLEAN    0x00004000
-#define SSTATUS_FS_INITIAL  0x00002000
-#define SSTATUS_FS_DIRTY    0x00006000
+// #define SSTATUS_FS_CLEAN    0x00004000
+// #define SSTATUS_FS_INITIAL  0x00002000
+// #define SSTATUS_FS_DIRTY    0x00006000
 
-#define SATP_MODE_OFF  0
-#define SATP_MODE_SV32 1
-#define SATP_MODE_SV39 8
-#define SATP_MODE_SV48 9
+// #define SATP_MODE_OFF  0
+// #define SATP_MODE_SV32 1
+// #define SATP_MODE_SV39 8
+// #define SATP_MODE_SV48 9
 
 #ifndef __ASSEMBLER__
 
