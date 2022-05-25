@@ -24,6 +24,5 @@ BOOT_CODE void init_tlb(void)
     if (read_csr_pagesize() != PS_DEFAULT_SIZE)
         printf("MMU doesn't support PAGE_SIZE\n");
 
-    // setup_tlb_handler();
-    local_flush_tlb_all();
+    // local_flush_tlb_all();
 }

@@ -46,11 +46,9 @@ typedef word_t vm_rights_t;
 
 typedef pte_t vspace_root_t;
 
-typedef word_t pde_t;
-
-#define PDE_PTR(r) ((pde_t *)(r))
-#define PDE_REF(p) ((pde_t)(p))
-
+// typedef word_t pde_t;
+// typedef word_t pte_t;
+typedef pte_t pde_t;
 
 #define PTE_PTR(r) ((pte_t *)(r))
 #define PTE_REF(p) ((pte_t)(p))
