@@ -28,3 +28,6 @@ manual/generated
 
 # Emacs backups
 *~
+
+# backup
+*.backup
