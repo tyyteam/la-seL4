@@ -32,7 +32,7 @@ enum _register {
     a5=8,
     a6=9,
 #ifdef CONFIG_KERNEL_MCS
-    replyRegister = 16,
+    replyRegister = 9,
 #endif
     a7=10,
 
