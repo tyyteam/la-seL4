@@ -130,7 +130,6 @@ static inline bool_t isPTEPageTable(pte_t *pte)
  *
  * Maps all pages with full RWX and supervisor perms by default.
  */
-/*CY 根据自动生成的pte_next函数，待改 */
 static pte_t pte_next(word_t phys_addr, bool_t is_leaf, enum PTE_TYPE pte_type)
 {
     pte_t pte;
@@ -157,31 +156,21 @@ static pte_t pte_next(word_t phys_addr, bool_t is_leaf, enum PTE_TYPE pte_type)
 
 BOOT_CODE void map_kernel_frame(paddr_t paddr, pptr_t vaddr, vm_rights_t vm_rights)
 {
-//#if __loongarch_xlen == 32
-//paddr = ROUND_DOWN(paddr, RISCV_GET_LVL_PGSIZE_BITS(0));
-//assert((paddr % RISCV_GET_LVL_PGSIZE(0)) == 0);
-//kernel_root_pageTable[RISCV_GET_PT_INDEX(vaddr, 0)] = pte_next(paddr, true);
-
-//#else
-if (vaddr >= KDEV_BASE) {
-/* Map devices in 2nd-level page table */
-	// paddr = ROUND_DOWN(paddr, RISCV_GET_LVL_PGSIZE_BITS(1));
-	// assert((paddr % RISCV_GET_LVL_PGSIZE(1)) == 0);
-	// kernel_image_level2_dev_pt[RISCV_GET_PT_INDEX(vaddr, 1)] = pte_next(paddr, true);
-} 
-else {
-	// paddr = ROUND_DOWN(paddr, RISCV_GET_LVL_PGSIZE_BITS(0));
-	// assert((paddr % RISCV_GET_LVL_PGSIZE(0)) == 0);
-	// kernel_root_pageTable[RISCV_GET_PT_INDEX(vaddr, 0)] = pte_next(paddr, true);
-}
-
-//#endif
+    if (vaddr >= KDEV_BASE) {
+    /* Map devices in 2nd-level page table */
+        paddr = ROUND_DOWN(paddr, LA_GET_LVL_PGSIZE_BITS(2));
+        assert((paddr % LA_GET_LVL_PGSIZE(2)) == 0);
+        kernel_devices_pt[LA_GET_PT_INDEX(vaddr, 2)] = pte_next(paddr, true, PTE_L2);
+    } 
+    else {
+        paddr = ROUND_DOWN(paddr, LA_GET_LVL_PGSIZE_BITS(1));
+        assert((paddr % LA_GET_LVL_PGSIZE(1)) == 0);
+        kernel_l1pt[LA_GET_PT_INDEX(vaddr, 1)] = pte_next(paddr, true, PTE_L1);
+    }
 }
 
 BOOT_CODE VISIBLE void map_kernel_window(void)
 {
-    /*CY TODO !!! */
-
     /* mapping of KERNEL_ELF_BASE (virtual address) to kernel's
      * KERNEL_ELF_PHYS_BASE  */
     assert(CONFIG_PT_LEVELS > 1 && CONFIG_PT_LEVELS <= 4);
@@ -192,7 +181,7 @@ BOOT_CODE VISIBLE void map_kernel_window(void)
     /* first we map in memory from PADDR_BASE */
     word_t paddr = PADDR_BASE;
 
-    word_t index = 0;
+    word_t index = LA_GET_PT_INDEX(pptr, 1);
     while (pptr < PPTR_TOP) {
         assert(IS_ALIGNED(pptr, LA_GET_LVL_PGSIZE_BITS(1)));
         assert(IS_ALIGNED(paddr, LA_GET_LVL_PGSIZE_BITS(1)));
@@ -208,7 +197,7 @@ BOOT_CODE VISIBLE void map_kernel_window(void)
     pptr = PPTR_BASE;
     paddr = PADDR_BASE;
 
-    index = 0;
+    index = LA_GET_PT_INDEX(pptr, 1);
     while (pptr < PPTR_TOP) {
         assert(IS_ALIGNED(pptr, LA_GET_LVL_PGSIZE_BITS(1)));
         assert(IS_ALIGNED(paddr, LA_GET_LVL_PGSIZE_BITS(1)));
@@ -228,31 +217,26 @@ BOOT_CODE VISIBLE void map_kernel_window(void)
     assert(pptr == PPTR_TOP);
 
     /* now we should be mapping the 1GiB kernel base */
-    // pptr = ROUND_DOWN(KERNEL_ELF_BASE, LA_GET_LVL_PGSIZE_BITS(1));
-    // paddr = ROUND_DOWN(KERNEL_ELF_PADDR_BASE, LA_GET_LVL_PGSIZE_BITS(1));
+    pptr = ROUND_DOWN(KERNEL_ELF_BASE, 30);
+    paddr = ROUND_DOWN(KERNEL_ELF_PADDR_BASE, 30);
 
-    // word_t index = 0;
-    /* The kernel image is mapped twice, locating the two indexes in the
-    * root page table, pointing them to the same second level page table.
-    */
-    // kernel_l1pt[LA_GET_PT_INDEX(KERNEL_ELF_PADDR_BASE + PPTR_BASE_OFFSET, 1)] =
-    //     pte_next(kpptr_to_paddr(kernel_l2pt), false, PTE_NONE);
-    // kernel_l1pt[LA_GET_PT_INDEX(pptr, 1)] =
-    //     pte_next(kpptr_to_paddr(kernel_l2pt), false, PTE_NONE);
-    // while (pptr < (ROUND_DOWN(KERNEL_ELF_BASE, LA_GET_LVL_PGSIZE_BITS(1)) + LA_GET_LVL_PGSIZE(1))) {
-    //     kernel_l2pt[index] = pte_next(paddr, true, PTE_L2);
-    //     index++;
-    //     pptr += LA_GET_LVL_PGSIZE(2);
-    //     paddr += LA_GET_LVL_PGSIZE(2);
-    // }
+    /* The kernel image is mapped twice */
+    kernel_l1pt[LA_GET_PT_INDEX(pptr, 1)] =
+        pte_next(kpptr_to_paddr(kernel_image_pt), false, PTE_NONE);
+    
+    index = LA_GET_PT_INDEX(pptr, 2);
+    while (pptr < PPTR_TOP + BIT(30)) {
+        kernel_image_pt[index] = pte_next(paddr, true, PTE_L2);
+        index++;
+        pptr += LA_GET_LVL_PGSIZE(2);
+        paddr += LA_GET_LVL_PGSIZE(2);
+    }
 
     /* Map kernel device page table */
-    // kernel_root_pageTable[LA_GET_PT_INDEX(KDEV_BASE, 1)] =
-    //     pte_next(kpptr_to_paddr(kernel_image_level2_dev_pt), false);
+    kernel_l1pt[LA_GET_PT_INDEX(KDEV_BASE, 1)] =
+        pte_next(kpptr_to_paddr(kernel_devices_pt), false, PTE_NONE);
 
-    /* There should be 1GiB free where we put device mapping */
-    // assert(pptr == KDEV_BASE);
-    // map_kernel_devices();  /*CY 这个还没管 */
+    map_kernel_devices();
 }
 
 BOOT_CODE void map_it_pt_cap(cap_t vspace_cap, cap_t pt_cap)
@@ -482,6 +466,7 @@ lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
         ret.ptBitsLeft -= PT_INDEX_BITS;
         pt = (pte_t *)(save_ptSlot->words[0]);
         save_ptSlot = pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
+        level--;
     }
 
     if (isPTEPageTable((pte_t *)save_ptSlot)) {

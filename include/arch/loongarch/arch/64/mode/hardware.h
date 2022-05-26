@@ -1,4 +1,8 @@
 /*
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+ *
+ * Derived from:
  * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
  *
  * SPDX-License-Identifier: GPL-2.0-only
@@ -11,7 +15,6 @@
 
 #if CONFIG_PT_LEVELS == 3
 
-/*CY seL4_UserTop哪里来的？ */
 /* last accessible virtual address in user space */
 #define USER_TOP seL4_UserTop
 
@@ -28,20 +31,19 @@
 
 /* The physical memory address to use for mapping the kernel ELF */
 /* This represents the physical address that the kernel image will be linked to. This needs to
- * be on a 1gb boundary as we currently require being able to creating a mapping to this address
+ * be on a 1gb boundary as we curr9999999999ently require being able to creating a mapping to this address
  * as the largest frame size */
 
 #define KERNEL_ELF_PADDR_BASE (physBase + UL_CONST(0x0))
 
 /* The base address in virtual memory to use for the kernel ELF mapping */
 
-#define KERNEL_ELF_BASE (PPTR_BASE_OFFSET + KERNEL_ELF_PADDR_BASE)
+#define KERNEL_ELF_BASE (PPTR_TOP + (KERNEL_ELF_PADDR_BASE & MASK(30)))
 /* The base address in virtual memory to use for the kernel device
  * mapping region. These are mapped in the kernel page table. */
-#define KDEV_BASE UL_CONST(0xFFFF80001FE00000)
+#define KDEV_BASE UL_CONST(0xFFFF81101FE00000)
 
 /* Place the kernel log buffer at the end of the kernel device page table */
-/*CY 但是没考虑这个，暂定这个数 */
 #define KS_LOG_PPTR UL_CONST(0xFFFF80000F000000)
 
 #else
