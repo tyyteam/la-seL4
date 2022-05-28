@@ -1349,7 +1349,6 @@ void trap_init(void);
 
 
 /* irq related macro definitions, variables and functions during bootstrapping*/
-#define VECSIZE 0x200
 
 static inline void irq_disable(void)
 {
