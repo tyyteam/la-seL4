@@ -45,6 +45,9 @@ SECTIONS
         . = ALIGN(16K);
         _k_tlbrefill_entry = .;
         *(k_tlbrefill_entry)
+        . = ALIGN(16K);
+        _k_eentry = .;
+        *(k_eentry)
     }
 
     /* Start of data section */
