@@ -125,7 +125,7 @@ handle_syscall:
     /* Set the return address to era + 4 in the case of a system call */
     addi.d $ra, $ra, 4
     /* Save NextIP*/
-    st.d $ra, $sp, 38*REGBYTES
+    st.d $ra, $t0, 38*REGBYTES
 
 #ifdef CONFIG_FASTPATH
 //TODO
@@ -142,12 +142,12 @@ handle_syscall:
 
 exception:
     /* Save NextIP*/
-    st.d $ra, $sp, 38*REGBYTES
+    st.d $ra, $t0, 38*REGBYTES
     b c_handle_interrupt
 
     
 
 interrupt:
     /* Save NextIP*/
-    st.d $ra, $sp, 38*REGBYTES
+    st.d $ra, $t0, 38*REGBYTES
     b c_handle_interrupt
