@@ -336,7 +336,7 @@ BOOT_CODE cap_t create_it_address_space(cap_t root_cnode_cap, v_region_t it_v_re
     seL4_SlotPos slot_pos_before = ndks_boot.slot_pos_cur;
     write_slot(SLOT_PTR(pptr_of_cap(root_cnode_cap), seL4_CapInitThreadVSpace), lvl1pt_cap);
 
-    /* create all n level PT caps necessary to cover userland image in 4KiB pages */
+    /* create all n level PT caps necessary to cover userland image in 16KiB pages */
     for (int i = 0; i < CONFIG_PT_LEVELS - 1; i++) {
 
         for (pt_vptr = ROUND_DOWN(it_v_reg.start, LA_GET_LVL_PGSIZE_BITS(i));
@@ -368,7 +368,7 @@ BOOT_CODE void write_it_asid_pool(cap_t it_ap_cap, cap_t it_lvl1pt_cap)
 {
     asid_pool_t *ap = ASID_POOL_PTR(pptr_of_cap(it_ap_cap));
     ap->array[IT_ASID] = PTE_PTR(pptr_of_cap(it_lvl1pt_cap));
-    riscvKSASIDTable[IT_ASID >> asidLowBits] = ap;
+    loongarchKSASIDTable[IT_ASID >> asidLowBits] = ap;
 }
 
 /* ==================== BOOT CODE FINISHES HERE ==================== */
@@ -508,8 +508,8 @@ void deleteASIDPool(asid_t asid_base, asid_pool_t *pool)
     /* Haskell error: "ASID pool's base must be aligned" */
     assert(IS_ALIGNED(asid_base, asidLowBits));
 
-    if (riscvKSASIDTable[asid_base >> asidLowBits] == pool) {
-        riscvKSASIDTable[asid_base >> asidLowBits] = NULL;
+    if (loongarchKSASIDTable[asid_base >> asidLowBits] == pool) {
+        loongarchKSASIDTable[asid_base >> asidLowBits] = NULL;
         setVMRoot(NODE_STATE(ksCurThread));
     }
 }

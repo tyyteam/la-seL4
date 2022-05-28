@@ -27,8 +27,7 @@ NODE_STATE_BEGIN(archNodeState)
 NODE_STATE_DECLARE(word_t, ipiReschedulePending);
 NODE_STATE_END(archNodeState);
 
-/*CY 待修改 */
-extern asid_pool_t *riscvKSASIDTable[BIT(asidHighBits)];
+extern asid_pool_t *loongarchKSASIDTable[BIT(asidHighBits)];
 
 /* Kernel Page Tables */
 extern pte_t kernel_l1pt[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));

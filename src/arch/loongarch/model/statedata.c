@@ -18,9 +18,8 @@
 #include <linker.h>
 #include <plat/machine/hardware.h>
 
-/*CY 待修改 */
 /* The top level asid mapping table */
-asid_pool_t *riscvKSASIDTable[BIT(asidHighBits)];
+asid_pool_t *loongarchKSASIDTable[BIT(asidHighBits)];
 
 /* Kernel Page Tables */
 pte_t kernel_l1pt[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
@@ -30,6 +29,6 @@ pte_t kernel_l2pt[BIT(PT_INDEX_BITS)][BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_Pag
 pte_t kernel_image_pt[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
 pte_t kernel_devices_pt[BIT(PT_INDEX_BITS)] ALIGN_BSS(BIT(seL4_PageTableBits));
 
-/*rv 暂时不知道作用，不用
+/*
 SMP_STATE_DEFINE(core_map_t, coreMap);
 */
