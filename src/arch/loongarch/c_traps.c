@@ -87,26 +87,26 @@ void VISIBLE NORETURN restore_user_context(void)
 #endif
         //load [38*%[REGSIZE]+$t0] to LOONGARCH_CSR_ERA instead of 31*%[REGSIZE]
 
-        "ld.d  $t1, $t0, 32*%[REGSIZE]  \n"
+        "ld.d  $t1, $t0, 32*%[REGSIZE]  \n" //load LOONGARCH_CSR_BADV
         "csrwr $t1, 0x7  \n"
 
-        "ld.d  $t1, $t0, 33*%[REGSIZE]  \n"
+        "ld.d  $t1, $t0, 33*%[REGSIZE]  \n" //load LOONGARCH_CSR_CRMD
         "csrwr $t1, 0x0  \n"
 
-        "ld.d  $t1, $t0, 34*%[REGSIZE]  \n"
+        "ld.d  $t1, $t0, 34*%[REGSIZE]  \n" //load LOONGARCH_CSR_PRMD
         "csrwr $t1, 0x1  \n"        
 
-        "ld.d  $t1, $t0, 35*%[REGSIZE]  \n"
+        "ld.d  $t1, $t0, 35*%[REGSIZE]  \n" //load LOONGARCH_CSR_EUEN
         "csrwr $t1, 0x2  \n"    
 
-        "ld.d  $t1, $t0, 36*%[REGSIZE]  \n"
+        "ld.d  $t1, $t0, 36*%[REGSIZE]  \n" //load LOONGARCH_CSR_ECFG
         "csrwr $t1, 0x4  \n"               
 
-        "ld.d  $t1, $t0, 37*%[REGSIZE]  \n"
-        "csrwr $t1, 0x5 \n"
+        "ld.d  $t1, $t0, 37*%[REGSIZE]  \n" //load LOONGARCH_CSR_ESTAT
+        "csrwr $t1, 0x5 \n"                 
 
-        "ld.d  $t1, $t0, 38*%[REGSIZE]  \n"
-        "csrwr $t1, 0x6   \n"
+        "ld.d  $t1, $t0, 38*%[REGSIZE]  \n" //load nextIP to LOONGARCH_CSR_ERA
+        "csrwr $t1, 0x6   \n"               
 
         "ld.d  $t1, $t0, 12*%[REGSIZE]  \n"
         "ld.d  $t0, $t0, 11*%[REGSIZE]  \n"
