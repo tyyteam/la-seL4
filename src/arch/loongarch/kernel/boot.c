@@ -1,4 +1,8 @@
 /*
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+ * 
+ * Derived from:
  * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
  * Copyright 2015, 2016 Hesham Almatary <heshamelmatary@gmail.com>
  * Copyright 2021, HENSOLDT Cyber
@@ -18,8 +22,8 @@
 #include <arch/kernel/vspace.h>
 #include <arch/machine/tlb.h>
 #include <arch/benchmark.h>
-#include <linker.h> /*CY 平台无关，include/下 */
-#include <plat/machine/hardware.h> /*CY ？？？在include/下 */
+#include <linker.h> 
+#include <plat/machine/hardware.h> 
 #include <machine.h> /*CY 平台无关，include/下。这里会include machine/registerset.h（通用的一些寄存器操作 get/set） 然后再include arch/machine/registerset.h（平台相关的寄存器宏定义）*/
 
 

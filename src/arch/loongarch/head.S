@@ -1,6 +1,7 @@
 /*
- * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei and Yang Chen)
- *
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+ * 
  * SPDX-License-Identifier: GPL-2.0-only
  */
 
