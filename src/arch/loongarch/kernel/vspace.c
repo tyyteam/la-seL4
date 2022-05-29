@@ -213,6 +213,18 @@ BOOT_CODE VISIBLE void map_kernel_window(void)
         }
         index++;
     }
+
+    /* 64GB mapping */
+    // word_t index = LA_GET_PT_INDEX(pptr, 1);
+    // while (pptr < PPTR_TOP) {
+    //     assert(IS_ALIGNED(pptr, LA_GET_LVL_PGSIZE_BITS(1)));
+    //     assert(IS_ALIGNED(paddr, LA_GET_LVL_PGSIZE_BITS(1)));
+
+    //     kernel_l1pt[LA_GET_PT_INDEX(pptr, 1)] = pte_next(paddr, true, PTE_L1);
+
+    //     pptr += LA_GET_LVL_PGSIZE(1);
+    //     paddr += LA_GET_LVL_PGSIZE(1);
+    // }
     
     assert(pptr == PPTR_TOP);
 
@@ -254,9 +266,7 @@ BOOT_CODE void map_it_pt_cap(cap_t vspace_cap, cap_t pt_cap)
 
     targetSlot = pt_ret.ptSlot;
 
-    *targetSlot = pte_new(
-                      (addrFromPPtr(pt) >> seL4_PageBits)
-                  );
+    *targetSlot = pte_next(addrFromPPtr(pt), false, PTE_NONE);
     // sfence();//TODO 虚拟内存屏障指令
 }
 
@@ -337,7 +347,7 @@ BOOT_CODE cap_t create_it_address_space(cap_t root_cnode_cap, v_region_t it_v_re
     write_slot(SLOT_PTR(pptr_of_cap(root_cnode_cap), seL4_CapInitThreadVSpace), lvl1pt_cap);
 
     /* create all n level PT caps necessary to cover userland image in 16KiB pages */
-    for (int i = 0; i < CONFIG_PT_LEVELS - 1; i++) {
+    for (int i = 1; i < CONFIG_PT_LEVELS; i++) {
 
         for (pt_vptr = ROUND_DOWN(it_v_reg.start, LA_GET_LVL_PGSIZE_BITS(i));
              pt_vptr < it_v_reg.end;
@@ -407,7 +417,7 @@ void copyGlobalMappings(pte_t *newLvl1pt)
     unsigned long i;
     pte_t *global_kernel_vspace = kernel_l1pt;
 
-    for (i = LA_GET_PT_INDEX(PPTR_BASE, 0); i < BIT(PT_INDEX_BITS); i++) {
+    for (i = LA_GET_PT_INDEX(PPTR_BASE, 1); i < BIT(PT_INDEX_BITS); i++) {
         newLvl1pt[i] = global_kernel_vspace[i];
     }
 }
@@ -462,11 +472,11 @@ lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
     ret.ptBitsLeft = PT_INDEX_BITS * level + seL4_PageBits;
     save_ptSlot = (pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS)));
 
-    while (likely(0 < level)) {
+    while (!isPTEPageTable((pte_t *)save_ptSlot) && likely(0 < level)) {
+        level--;
         ret.ptBitsLeft -= PT_INDEX_BITS;
         pt = (pte_t *)(save_ptSlot->words[0]);
         save_ptSlot = pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
-        level--;
     }
 
     if (isPTEPageTable((pte_t *)save_ptSlot)) {

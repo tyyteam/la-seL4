@@ -36,14 +36,13 @@ block frame_cap {
 
 -- N-level page table
 block page_table_cap {
-    field       capPTMappedASID     16
-    field_high  capPTBasePtr        39
-    padding                         9
+    field capPTMappedASID            16
+    field_high capPTBasePtr          48
 
-    field       capType             5
-    padding                         19
-    field       capPTIsMapped       1
-    field_high  capPTMappedAddress  39
+    field capType                    5
+    padding                          10
+    field capPTIsMapped              1
+    field_high capPTMappedAddress    48
 }
 
 -- Cap to the table of 2^6 ASID pools
