@@ -20,6 +20,7 @@
   * cmake框架分析图：[cmake框架分析图](./docs/cmake框架分析图.md)。
   * seL4源码结构图：[seL4源码结构图](./docs/seL4源码结构图.md)。
   * 开发过程积累的技术文档：[oscompProblemSolutions](https://github.com/tyyteam/seL4-oscompProblemSolutions)。
+  * 许可证：[GPL](./LICENSE.md)。
 
 # 项目进展和计划
 
