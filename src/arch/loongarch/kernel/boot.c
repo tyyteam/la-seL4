@@ -1,4 +1,8 @@
 /*
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+ * 
+ * Derived from:
  * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
  * Copyright 2015, 2016 Hesham Almatary <heshamelmatary@gmail.com>
  * Copyright 2021, HENSOLDT Cyber
@@ -18,8 +22,8 @@
 #include <arch/kernel/vspace.h>
 #include <arch/machine/tlb.h>
 #include <arch/benchmark.h>
-#include <linker.h> /*CY 平台无关，include/下 */
-#include <plat/machine/hardware.h> /*CY ？？？在include/下 */
+#include <linker.h> 
+#include <plat/machine/hardware.h> 
 #include <machine.h> /*CY 平台无关，include/下。这里会include machine/registerset.h（通用的一些寄存器操作 get/set） 然后再include arch/machine/registerset.h（平台相关的寄存器宏定义）*/
 
 
@@ -111,7 +115,7 @@ BOOT_CODE static void init_irqs(cap_t root_cnode_cap)
 }
 
 /* ASM symbol for the CPU initialisation trap. */
-extern char trap_entry[1];
+extern void trap_entry(void);
 
 /* This and only this function initialises the CPU. It does NOT initialise any kernel state. */
 
@@ -127,23 +131,25 @@ BOOT_CODE static void init_fpu(void)
 BOOT_CODE static void init_cpu(void)
 {
 
-    // activate_kernel_vspace();
+    activate_kernel_vspace();
     // setup_pw();
 
-    /* irq related*/
-    setup_vint_size(VECSIZE);
+    /* init tlb */
+    init_tlb();
+    
+    /* traps related*/
+    /* set vs of LOONGARCH_CSR_ECFG*/
+    csr_xchgl(0<<CSR_ECFG_VS_SHIFT, CSR_ECFG_VS, LOONGARCH_CSR_ECFG);
+    
+    /* set the entry for normal exceptions(including interrupts).
+     * tlbrefill entry is set at elfloader, where we page table may cause tlb missing
+     * machine error entry is not set yet.
+     */
+    csr_writeq((unsigned long)trap_entry, LOONGARCH_CSR_EENTRY);
 
-    configure_exception_vector();
-
-    for (int i = 0; i < 64; i++)
-        set_handler(i * VECSIZE, handle_reserved, VECSIZE);
-        
-    /*tlb related exceptions*/
-    // init_tlb();
-    /*other exceptions*/
-    init_trap();    
     /*local irqs*/
     initLocalIRQController();
+
 #ifndef CONFIG_KERNEL_MCS
     //TODO
 #endif
@@ -231,10 +237,10 @@ static BOOT_CODE bool_t try_init_kernel(
     bi_frame_vptr = ipcbuf_vptr + BIT(PAGE_BITS);
     extra_bi_frame_vptr = bi_frame_vptr + BIT(BI_FRAME_SIZE_BITS);
     
-    // map_kernel_window(); //TODO will be finished 
+    map_kernel_window(); //TODO will be finished 
 
-    /* disable local irq and do necessary setups, then enable them.*/
-    local_irq_disable();
+    /* disable irq and do necessary setups, then enable them.*/
+    irq_disable();
 
     /* initialise the CPU */
     init_cpu();
@@ -311,8 +317,8 @@ static BOOT_CODE bool_t try_init_kernel(
     /* initialise the IRQ states and provide the IRQ control cap */
     init_irqs(root_cnode_cap);
 
-    /*enable local irq*/
-    local_irq_enable();
+    /*enable irq*/
+    irq_enable();
 
     /* create the bootinfo frame */
     populate_bi_frame(0, CONFIG_MAX_NUM_NODES, ipcbuf_vptr, extra_bi_size);

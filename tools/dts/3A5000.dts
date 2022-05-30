@@ -1,6 +1,9 @@
 /*
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+ * 
+ * Derived from:
  * Copyright Linux Kernel Team
- * Copyright tyy Team
  * SPDX-License-Identifier: GPL-2.0-only
  *
  * This file is derived from an intermediate build stage of the

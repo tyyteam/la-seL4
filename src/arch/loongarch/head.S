@@ -1,6 +1,7 @@
 /*
- * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei and Yang Chen)
- *
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+ * 
  * SPDX-License-Identifier: GPL-2.0-only
  */
 
@@ -19,21 +20,6 @@
 
 
 _start:                   # kernel entry point
-
-	/* Config direct window and set PG */
-	li.d		t0, CSR_DMW1_INIT	# CA, PLV0, 0x9000 xxxx xxxx xxxx
-	csrwr		t0, LOONGARCH_CSR_DMWIN1
-
-	/* Enable PG */
-	li.w		t0, 0xb0		# PLV=0, IE=0, PG=1
-	csrwr		t0, LOONGARCH_CSR_CRMD
-	li.w		t0, 0x04		# PLV=0, PIE=1, PWE=0
-	csrwr		t0, LOONGARCH_CSR_PRMD
-	li.w		t0, 0x00		# FPE=0, SXE=0, ASXE=0, BTE=0
-	csrwr		t0, LOONGARCH_CSR_EUEN
-
-	/* We might not get launched at the address the kernel is linked to,
-	 * so we jump there.  */
 	la.abs		t0, 0f
 	jirl		zero, t0, 0
 0:
@@ -53,6 +39,7 @@ _start:                   # kernel entry point
 	addi.w t0, zero, 1
 	slli.w t0, t0, CONFIG_KERNEL_STACK_BITS
 	add.d sp, sp, t0
+	csrwr zero, LOONGARCH_CSR_KS0 /* zero LOONGARCH_CSR_KS0 for the init task */
 
 	bl		init_kernel
 

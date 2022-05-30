@@ -1,4 +1,8 @@
 /*
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+ * 
+ * Derived from:
  * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
  * Copyright 2015, 2016 Hesham Almatary <heshamelmatary@gmail.com>
  * Copyright 2021, HENSOLDT Cyber
@@ -40,10 +44,14 @@ SECTIONS
     .text . : AT(ADDR(.text) - KERNEL_OFFSET)
     {
         . = ALIGN(16K);
-
-
         /* Standard kernel */
         *(.text)
+        . = ALIGN(16K);
+        _k_tlbrefill_entry = .;
+        *(k_tlbrefill_entry)
+        . = ALIGN(16K);
+        _k_eentry = .;
+        *(k_eentry)
     }
 
     /* Start of data section */
@@ -74,9 +82,9 @@ SECTIONS
         *(COMMON) /* fallback in case '-fno-common' is not used */
         *(.sbss)
 
-        /* 4k breakpoint stack */
+        /* 16k breakpoint stack */
         _breakpoint_stack_bottom = .;
-        . = . + 4K;
+        . = . + 16K;
         _breakpoint_stack_top = .;
 
         /* large data such as the globals frame and global PD */

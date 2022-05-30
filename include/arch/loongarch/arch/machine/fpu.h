@@ -13,7 +13,7 @@
 
 static inline void set_fs_off(void)
 {
-    asm volatile("csrc sstatus, %0" :: "rK"(SSTATUS_FS));
+    // asm volatile("csrc sstatus, %0" :: "rK"(SSTATUS_FS));
 }
 
 #ifdef CONFIG_HAVE_FPU
@@ -35,22 +35,22 @@ extern bool_t isFPUEnabledCached[CONFIG_MAX_NUM_NODES];
 
 static inline void set_fs_clean(void)
 {
-    asm volatile("csrs sstatus, %0" :: "rK"(SSTATUS_FS_CLEAN));
+    // asm volatile("csrs sstatus, %0" :: "rK"(SSTATUS_FS_CLEAN));
 }
 
 static inline void set_fs_initial(void)
 {
-    asm volatile("csrs sstatus, %0" :: "rK"(SSTATUS_FS_INITIAL));
+    // asm volatile("csrs sstatus, %0" :: "rK"(SSTATUS_FS_INITIAL));
 }
 
 static inline void set_fs_dirty(void)
 {
-    asm volatile("csrs sstatus, %0" :: "rK"(SSTATUS_FS_DIRTY));
+    // asm volatile("csrs sstatus, %0" :: "rK"(SSTATUS_FS_DIRTY));
 }
 
 static inline word_t read_sstatus_fs(void)
 {
-    return (read_sstatus() & SSTATUS_FS);
+    // return (read_sstatus() & SSTATUS_FS);
 }
 
 /* We unconditionally enable FPU accesses in kernel
@@ -165,12 +165,12 @@ static inline bool_t isFpuEnable(void)
 
 static inline void set_tcb_fs_state(tcb_t *tcb, bool_t enabled)
 {
-    word_t sstatus = getRegister(tcb, SSTATUS);
-    sstatus &= ~SSTATUS_FS;
-    if (enabled) {
-        sstatus |= SSTATUS_FS_CLEAN;
-    }
-    setRegister(tcb, SSTATUS, sstatus);
+    // word_t sstatus = getRegister(tcb, SSTATUS);
+    // sstatus &= ~SSTATUS_FS;
+    // if (enabled) {
+    //     sstatus |= SSTATUS_FS_CLEAN;
+    // }
+    // setRegister(tcb, SSTATUS, sstatus);
 }
 
 #endif /* end of CONFIG_HAVE_FPU */

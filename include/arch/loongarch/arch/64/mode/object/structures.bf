@@ -1,4 +1,8 @@
 --
+-- Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+-- qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+--
+-- Derived from:
 -- Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
 -- Copyright 2015, 2016 Hesham Almatary <heshamelmatary@gmail.com>
 --
@@ -9,8 +13,8 @@
 
 ---- Default base size: uint64_t
 #if (CONFIG_PT_LEVELS == 3)
-base 64(39,1)
-#define BF_CANONICAL_RANGE 39
+base 64(48,1)
+#define BF_CANONICAL_RANGE 48
 #else
 #error "Only PT_LEVELS == 3 is currently supported on RISCV64"
 #endif
@@ -36,14 +40,13 @@ block frame_cap {
 
 -- N-level page table
 block page_table_cap {
-    field       capPTMappedASID     16
-    field_high  capPTBasePtr        39
-    padding                         9
+    field capPTMappedASID            16
+    field_high capPTBasePtr          48
 
-    field       capType             5
-    padding                         19
-    field       capPTIsMapped       1
-    field_high  capPTMappedAddress  39
+    field capType                    5
+    padding                          10
+    field capPTIsMapped              1
+    field_high capPTMappedAddress    48
 }
 
 -- Cap to the table of 2^6 ASID pools
@@ -112,36 +115,10 @@ block vm_attributes {
 }
 
 
----- RISCV-specific object types
+---- Loongarch-specific object types
 
--- RISC-V PTE format (priv-1.10) requires MSBs after PPN to be reserved 0s
--- RISC-V supports up to 56 bytes physical addressing.
--- Notice that the ppn field in the next two blocks is not field_high.
--- This means that ppn values are shifted manually in the code before the generated
--- bitfield accessors are used.
--- This is because Sv32 supports up to 34 bits of physical addressing and we
--- cannot return 34-bit values on RISCV-32.  This still affects us here in RISCV64
--- because the vspace source code is the same for both architectures and doing
--- the bit shifting manually only for 32-bit and not 64-bit is counter-intuitive.
 block pte {
-    padding                10
-    field ppn              44
-    field sw               2
-    field dirty            1
-    field accessed         1
-    field global           1
-    field user             1
-    field execute          1
-    field write            1
-    field read             1
-    field valid            1
-}
-
--- RISC-V SATP (priv-1.10) Supervisor Address Translation and Protection
-block satp {
-    field mode          4
-    field asid          16
-    field ppn           44
+    field word          64
 }
 
 #include <sel4/arch/shared_types.bf>

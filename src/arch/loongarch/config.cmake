@@ -1,5 +1,6 @@
 #
-# Copyright 2022 tyy team
+# Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+# qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
@@ -73,7 +74,7 @@ add_sources(
         object/objecttype.c
         object/tcb.c
         smp/ipi.c
-    ASMFILES head.S genex.S tlbex.S 
+    ASMFILES head.S traps.S
 )
 
 add_bf_source_old("KernelArchLoongarch" "structures.bf" "include/arch/loongarch" "arch/object")

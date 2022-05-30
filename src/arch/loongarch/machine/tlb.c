@@ -15,25 +15,6 @@ void local_flush_tlb_all(void)
 	invtlb_all(INVTLB_CURRENT_ALL, 0, 0);
 }
 
-void setup_tlb_handler(void)
-{
-	static int run_once = 0;
-
-	/* The tlb handlers are generated only once */
-	if (!run_once) {
-		memcpy((void *)tlbrentry, handle_tlb_refill, 0x80);
-		local_flush_icache_range(tlbrentry, tlbrentry + 0x80);
-		set_handler(EXCCODE_TLBI * VECSIZE, handle_tlb_load, VECSIZE);
-		set_handler(EXCCODE_TLBL * VECSIZE, handle_tlb_load, VECSIZE);
-		set_handler(EXCCODE_TLBS * VECSIZE, handle_tlb_store, VECSIZE);
-		set_handler(EXCCODE_TLBM * VECSIZE, handle_tlb_modify, VECSIZE);
-		set_handler(EXCCODE_TLBNR * VECSIZE, handle_tlb_protect, VECSIZE);
-		set_handler(EXCCODE_TLBNX * VECSIZE, handle_tlb_protect, VECSIZE);
-		set_handler(EXCCODE_TLBPE * VECSIZE, handle_tlb_protect, VECSIZE);
-		run_once++;
-	}
-}
-
 BOOT_CODE void init_tlb(void)
 {
     write_csr_pagesize(PS_DEFAULT_SIZE);
@@ -43,6 +24,5 @@ BOOT_CODE void init_tlb(void)
     if (read_csr_pagesize() != PS_DEFAULT_SIZE)
         printf("MMU doesn't support PAGE_SIZE\n");
 
-    setup_tlb_handler();
-    local_flush_tlb_all();
+    // local_flush_tlb_all();
 }

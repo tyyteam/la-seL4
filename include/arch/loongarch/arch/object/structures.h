@@ -1,4 +1,8 @@
 /*
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+ * 
+ * Derived from:
  * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
  * Copyright 2015, 2016 Hesham Almatary <heshamelmatary@gmail.com>
  *
@@ -46,11 +50,9 @@ typedef word_t vm_rights_t;
 
 typedef pte_t vspace_root_t;
 
-typedef word_t pde_t;
-
-#define PDE_PTR(r) ((pde_t *)(r))
-#define PDE_REF(p) ((pde_t)(p))
-
+// typedef word_t pde_t;
+// typedef word_t pte_t;
+typedef pte_t pde_t;
 
 #define PTE_PTR(r) ((pte_t *)(r))
 #define PTE_REF(p) ((pte_t)(p))

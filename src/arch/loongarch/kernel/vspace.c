@@ -1,4 +1,8 @@
 /*
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+ * 
+ * Derived from:
  * Copyright 2020, DornerWorks
  * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
  * Copyright 2015, 2016 Hesham Almatary <heshamelmatary@gmail.com>
@@ -28,8 +32,10 @@
 #include <util.h>
 
 enum PTE_TYPE {
-    PTE_BASIC,
-    PTE_LARGE
+    PTE_NONE,
+    PTE_L1,
+    PTE_L2,
+    PTE_L3
 };
 
 struct resolve_ret {
@@ -54,95 +60,199 @@ typedef struct resolve_ret resolve_ret_t;
 //     return vm_rights != VMKernelOnly;
 // }
 
+// static inline uint64_t PURE
+// pte_ptr_get_huge(pte_t *pte_ptr) {
+//     uint64_t ret;
+//     ret = (pte_ptr->words[0] & 0x3ffffffffffc00ull) >> 10;
+//     /* Possibly sign extend */
+//     if (__builtin_expect(!!(0 && (ret & (1ull << (38)))), 0)) {
+//         ret |= 0x0;
+//     }
+//     return ret;
+// }
+
+// static inline uint64_t PURE
+// pte_ptr_get_ppn(pte_t *pte_ptr) {
+//     uint64_t ret;
+//     ret = (pte_ptr->words[0] & 0x3ffffffffffc00ull) >> 10;
+//     /* Possibly sign extend */
+//     if (__builtin_expect(!!(0 && (ret & (1ull << (38)))), 0)) {
+//         ret |= 0x0;
+//     }
+//     return ret;
+// }
+
+// static inline uint64_t PURE
+// pte_ptr_get_execute(pte_t *pte_ptr) {
+//     uint64_t ret;
+//     ret = (0 || (pte_ptr->words[0] >> 62) & 0x1ull) ? 0x1ull : 0x0ull;
+//     return ret;
+// }
+
+// static inline uint64_t PURE
+// pte_ptr_get_write(pte_t *pte_ptr) {
+//     uint64_t ret;
+//     ret = (pte_ptr->words[0] & 0x4ull) >> 2;
+//     /* Possibly sign extend */
+//     if (__builtin_expect(!!(0 && (ret & (1ull << (38)))), 0)) {
+//         ret |= 0x0;
+//     }
+//     return ret;
+// }
+
+// static inline uint64_t PURE
+// pte_ptr_get_read(pte_t *pte_ptr) {
+//     uint64_t ret;
+//     ret = (pte_ptr->words[0] & 0x2ull) >> 1;
+//     /* Possibly sign extend */
+//     if (__builtin_expect(!!(0 && (ret & (1ull << (38)))), 0)) {
+//         ret |= 0x0;
+//     }
+//     return ret;
+// }
+
+static inline uint64_t PURE
+pte_ptr_get_valid(pte_t *pte_ptr) {
+    uint64_t ret;
+    ret = (pte_ptr->words[0] & 0x1ull) >> 0;
+    return ret;
+}
+
 static inline bool_t isPTEPageTable(pte_t *pte)
 {
-    return pte_ptr_get_valid(pte) &&
-           !(pte_ptr_get_read(pte) || pte_ptr_get_write(pte) || pte_ptr_get_execute(pte));
+    return pte_ptr_get_valid(pte);
 }
+
+// static inline bool_t isPTEPageTable(pte_t *pte)
+// {
+//     return pte_ptr_get_valid(pte) &&
+//            !(pte_ptr_get_read(pte) || pte_ptr_get_write(pte) || pte_ptr_get_execute(pte));
+// }
 
 /** Helper function meant only to be used for mapping the kernel
  * window.
  *
  * Maps all pages with full RWX and supervisor perms by default.
  */
-/*CY 根据自动生成的pte_next函数，待改 */
 static pte_t pte_next(word_t phys_addr, bool_t is_leaf, enum PTE_TYPE pte_type)
 {
+    pte_t pte;
 
-    word_t ppn = (word_t)(phys_addr >> 12);
-    if (pte_type) {
-        ppn >>= 12;
+    if (!is_leaf) {
+        pte.words[0] = PTE_CREATE_NEXT(phys_addr);
+    }
+    else {
+        if (pte_type == PTE_L3) {
+            pte.words[0] = PTE_CREATE_L3_LEAF(phys_addr);
+        }
+        else if (pte_type == PTE_L2) {
+            pte.words[0] = PTE_CREATE_L2_LEAF(phys_addr);
+        }
+        else {
+            pte.words[0] = PTE_CREATE_L1_LEAF(phys_addr);
+        }
     }
 
-    uint8_t read = is_leaf ? 1 : 0;
-    uint8_t write = read;
-    uint8_t exec = read;
-
-    return pte_new(ppn,
-                   0,     /* sw */
-                   1,     /* dirty */
-                   1,     /* accessed */
-                   1,     /* global */
-                   0,     /* user */
-                   exec,  /* execute */
-                   write, /* write */
-                   read,  /* read */
-                   1      /* valid */
-                  );
+    return pte;
 }
 
 /* ==================== BOOT CODE STARTS HERE ==================== */
 
 BOOT_CODE void map_kernel_frame(paddr_t paddr, pptr_t vaddr, vm_rights_t vm_rights)
 {
-//#if __loongarch_xlen == 32
-//paddr = ROUND_DOWN(paddr, RISCV_GET_LVL_PGSIZE_BITS(0));
-//assert((paddr % RISCV_GET_LVL_PGSIZE(0)) == 0);
-//kernel_root_pageTable[RISCV_GET_PT_INDEX(vaddr, 0)] = pte_next(paddr, true);
-
-//#else
-if (vaddr >= KDEV_BASE) {
-/* Map devices in 2nd-level page table */
-	// paddr = ROUND_DOWN(paddr, RISCV_GET_LVL_PGSIZE_BITS(1));
-	// assert((paddr % RISCV_GET_LVL_PGSIZE(1)) == 0);
-	// kernel_image_level2_dev_pt[RISCV_GET_PT_INDEX(vaddr, 1)] = pte_next(paddr, true);
-} 
-else {
-	// paddr = ROUND_DOWN(paddr, RISCV_GET_LVL_PGSIZE_BITS(0));
-	// assert((paddr % RISCV_GET_LVL_PGSIZE(0)) == 0);
-	// kernel_root_pageTable[RISCV_GET_PT_INDEX(vaddr, 0)] = pte_next(paddr, true);
-}
-
-//#endif
+    if (vaddr >= KDEV_BASE) {
+    /* Map devices in 2nd-level page table */
+        paddr = ROUND_DOWN(paddr, LA_GET_LVL_PGSIZE_BITS(2));
+        assert((paddr % LA_GET_LVL_PGSIZE(2)) == 0);
+        kernel_devices_pt[LA_GET_PT_INDEX(vaddr, 2)] = pte_next(paddr, true, PTE_L2);
+    } 
+    else {
+        paddr = ROUND_DOWN(paddr, LA_GET_LVL_PGSIZE_BITS(1));
+        assert((paddr % LA_GET_LVL_PGSIZE(1)) == 0);
+        kernel_l1pt[LA_GET_PT_INDEX(vaddr, 1)] = pte_next(paddr, true, PTE_L1);
+    }
 }
 
 BOOT_CODE VISIBLE void map_kernel_window(void)
 {
-    /*CY TODO !!! */
-
     /* mapping of KERNEL_ELF_BASE (virtual address) to kernel's
      * KERNEL_ELF_PHYS_BASE  */
     assert(CONFIG_PT_LEVELS > 1 && CONFIG_PT_LEVELS <= 4);
 
-    /* now we should be mapping the 1GiB kernel base */
-    /*CY 让pptr指向PPTR_TOP，下面映射Kernel ELF的页表*/
-    word_t pptr = ROUND_DOWN(KERNEL_ELF_BASE, 30);
-    word_t paddr = ROUND_DOWN(KERNEL_ELF_PADDR_BASE, 30);
-    while (pptr < KDEV_BASE) {
-        kernel_level0_pd[LA_GET_PT_INDEX(pptr, 0)] = kpptr_to_paddr(&kernel_level1_pd[LA_GET_PT_INDEX(pptr, 1)]);
-        for (int i = 0; pptr - PPTR_BASE < LA_GET_LVL_PGSIZE(1) * i; ++i) {
-            kernel_level1_pd[LA_GET_PT_INDEX(pptr, 1) * (LA_GET_PT_INDEX(pptr, 0) + 1)] = kpptr_to_paddr(&kernel_pt[LA_GET_PT_INDEX(pptr, 2) * (LA_GET_PT_INDEX(pptr, 1) + 1) * (LA_GET_PT_INDEX(pptr, 0) + 1)]);
-            for (int j = 0; pptr - PPTR_BASE < LA_GET_LVL_PGSIZE(2) * j; ++j) {
-                kernel_pt[LA_GET_PT_INDEX(pptr, 2)] = pte_next(paddr, true, PTE_BASIC);
-                pptr += LA_GET_LVL_PGSIZE(2);
-                paddr += LA_GET_LVL_PGSIZE(2);
-            }
-        }
+    /* kernel window starts at PPTR_BASE */
+    word_t pptr = PPTR_BASE;
+
+    /* first we map in memory from PADDR_BASE */
+    word_t paddr = PADDR_BASE;
+
+    word_t index = LA_GET_PT_INDEX(pptr, 1);
+    while (pptr < PPTR_TOP) {
+        assert(IS_ALIGNED(pptr, LA_GET_LVL_PGSIZE_BITS(1)));
+        assert(IS_ALIGNED(paddr, LA_GET_LVL_PGSIZE_BITS(1)));
+
+        kernel_l1pt[LA_GET_PT_INDEX(pptr, 1)] = pte_next(kpptr_to_paddr(kernel_l2pt[index++]), false, PTE_NONE);
+
+        pptr += LA_GET_LVL_PGSIZE(1);
+        paddr += LA_GET_LVL_PGSIZE(1);
     }
 
-    /* There should be 1GiB free where we put device mapping */
-    assert(pptr == KDEV_BASE);
-    map_kernel_devices();  /*CY 这个还没管 */
+    assert(pptr == PPTR_TOP);
+
+    pptr = PPTR_BASE;
+    paddr = PADDR_BASE;
+
+    index = LA_GET_PT_INDEX(pptr, 1);
+    while (pptr < PPTR_TOP) {
+        assert(IS_ALIGNED(pptr, LA_GET_LVL_PGSIZE_BITS(1)));
+        assert(IS_ALIGNED(paddr, LA_GET_LVL_PGSIZE_BITS(1)));
+        word_t pptr_end = pptr + LA_GET_LVL_PGSIZE(1);
+        while (pptr < pptr_end) {
+            assert(IS_ALIGNED(pptr, LA_GET_LVL_PGSIZE_BITS(2)));
+            assert(IS_ALIGNED(paddr, LA_GET_LVL_PGSIZE_BITS(2)));
+
+            kernel_l2pt[index][LA_GET_PT_INDEX(pptr, 2)] = pte_next(paddr, true, PTE_L2);
+
+            pptr += LA_GET_LVL_PGSIZE(2);
+            paddr += LA_GET_LVL_PGSIZE(2);
+        }
+        index++;
+    }
+
+    /* 64GB mapping */
+    // word_t index = LA_GET_PT_INDEX(pptr, 1);
+    // while (pptr < PPTR_TOP) {
+    //     assert(IS_ALIGNED(pptr, LA_GET_LVL_PGSIZE_BITS(1)));
+    //     assert(IS_ALIGNED(paddr, LA_GET_LVL_PGSIZE_BITS(1)));
+
+    //     kernel_l1pt[LA_GET_PT_INDEX(pptr, 1)] = pte_next(paddr, true, PTE_L1);
+
+    //     pptr += LA_GET_LVL_PGSIZE(1);
+    //     paddr += LA_GET_LVL_PGSIZE(1);
+    // }
+    
+    assert(pptr == PPTR_TOP);
+
+    /* now we should be mapping the 1GiB kernel base */
+    pptr = ROUND_DOWN(KERNEL_ELF_BASE, 30);
+    paddr = ROUND_DOWN(KERNEL_ELF_PADDR_BASE, 30);
+
+    /* The kernel image is mapped twice */
+    kernel_l1pt[LA_GET_PT_INDEX(pptr, 1)] =
+        pte_next(kpptr_to_paddr(kernel_image_pt), false, PTE_NONE);
+    
+    index = LA_GET_PT_INDEX(pptr, 2);
+    while (pptr < PPTR_TOP + BIT(30)) {
+        kernel_image_pt[index] = pte_next(paddr, true, PTE_L2);
+        index++;
+        pptr += LA_GET_LVL_PGSIZE(2);
+        paddr += LA_GET_LVL_PGSIZE(2);
+    }
+
+    /* Map kernel device page table */
+    kernel_l1pt[LA_GET_PT_INDEX(KDEV_BASE, 1)] =
+        pte_next(kpptr_to_paddr(kernel_devices_pt), false, PTE_NONE);
+
+    map_kernel_devices();
 }
 
 BOOT_CODE void map_it_pt_cap(cap_t vspace_cap, cap_t pt_cap)
@@ -150,7 +260,7 @@ BOOT_CODE void map_it_pt_cap(cap_t vspace_cap, cap_t pt_cap)
     lookupPTSlot_ret_t pt_ret;
     pte_t *targetSlot;
     vptr_t vptr = cap_page_table_cap_get_capPTMappedAddress(pt_cap);
-    pde_t *lvl1pt = PDE_PTR(pptr_of_cap(vspace_cap));
+    pte_t *lvl1pt = PTE_PTR(pptr_of_cap(vspace_cap));
 
     /* pt to be mapped */
     pte_t *pt   = PTE_PTR(pptr_of_cap(pt_cap));
@@ -160,24 +270,13 @@ BOOT_CODE void map_it_pt_cap(cap_t vspace_cap, cap_t pt_cap)
 
     targetSlot = pt_ret.ptSlot;
 
-    *targetSlot = pte_new(
-                      (addrFromPPtr(pt) >> seL4_PageBits),
-                      0, /* sw */
-                      1, /* dirty */
-                      1, /* accessed */
-                      0,  /* global */
-                      0,  /* user */
-                      0,  /* execute */
-                      0,  /* write */
-                      0,  /* read */
-                      1 /* valid */
-                  );
+    *targetSlot = pte_next(addrFromPPtr(pt), false, PTE_NONE);
     // sfence();//TODO 虚拟内存屏障指令
 }
 
 BOOT_CODE void map_it_frame_cap(cap_t vspace_cap, cap_t frame_cap)
 {
-    pde_t *lvl1pt   = PDE_PTR(pptr_of_cap(vspace_cap));
+    pte_t *lvl1pt   = PTE_PTR(pptr_of_cap(vspace_cap));
     pte_t *frame_pptr   = PTE_PTR(pptr_of_cap(frame_cap));
     vptr_t frame_vptr = cap_frame_cap_get_capFMappedAddress(frame_cap);
 
@@ -188,16 +287,7 @@ BOOT_CODE void map_it_frame_cap(cap_t vspace_cap, cap_t frame_cap)
     pte_t *targetSlot = lu_ret.ptSlot;
 
     *targetSlot = pte_new(
-                      (pptr_to_paddr(frame_pptr) >> seL4_PageBits),
-                      0, /* sw */
-                      1, /* dirty */
-                      1, /* accessed */
-                      0,  /* global */
-                      1,  /* user */
-                      1,  /* execute */
-                      1,  /* write */
-                      1,  /* read */
-                      1   /* valid */
+                      (pptr_to_paddr(frame_pptr) >> seL4_PageBits)
                   );
     // sfence();
 }
@@ -247,7 +337,7 @@ BOOT_CODE cap_t create_it_address_space(cap_t root_cnode_cap, v_region_t it_v_re
     cap_t      lvl1pt_cap;
     vptr_t     pt_vptr;
 
-    copyGlobalMappings(PDE_PTR(rootserver.vspace));
+    copyGlobalMappings(PTE_PTR(rootserver.vspace));
 
     lvl1pt_cap =
         cap_page_table_cap_new(
@@ -260,8 +350,8 @@ BOOT_CODE cap_t create_it_address_space(cap_t root_cnode_cap, v_region_t it_v_re
     seL4_SlotPos slot_pos_before = ndks_boot.slot_pos_cur;
     write_slot(SLOT_PTR(pptr_of_cap(root_cnode_cap), seL4_CapInitThreadVSpace), lvl1pt_cap);
 
-    /* create all n level PT caps necessary to cover userland image in 4KiB pages */
-    for (int i = 0; i < CONFIG_PT_LEVELS - 1; i++) {
+    /* create all n level PT caps necessary to cover userland image in 16KiB pages */
+    for (int i = 1; i < CONFIG_PT_LEVELS; i++) {
 
         for (pt_vptr = ROUND_DOWN(it_v_reg.start, LA_GET_LVL_PGSIZE_BITS(i));
              pt_vptr < it_v_reg.end;
@@ -285,14 +375,14 @@ BOOT_CODE cap_t create_it_address_space(cap_t root_cnode_cap, v_region_t it_v_re
 
 BOOT_CODE void activate_kernel_vspace(void)
 {
-    setVSpaceRoot(kpptr_to_paddr(&kernel_level0_pd), 0);
+    setVSpaceRoot(kpptr_to_paddr(&kernel_l1pt), 0);
 }
 
 BOOT_CODE void write_it_asid_pool(cap_t it_ap_cap, cap_t it_lvl1pt_cap)
 {
     asid_pool_t *ap = ASID_POOL_PTR(pptr_of_cap(it_ap_cap));
     ap->array[IT_ASID] = PTE_PTR(pptr_of_cap(it_lvl1pt_cap));
-    riscvKSASIDTable[IT_ASID >> asidLowBits] = ap;
+    loongarchKSASIDTable[IT_ASID >> asidLowBits] = ap;
 }
 
 /* ==================== BOOT CODE FINISHES HERE ==================== */
@@ -326,12 +416,12 @@ BOOT_CODE void write_it_asid_pool(cap_t it_ap_cap, cap_t it_lvl1pt_cap)
 //     return ret;
 // }
 
-void copyGlobalMappings(word_t *newLvl1pt)
+void copyGlobalMappings(pte_t *newLvl1pt)
 {
     unsigned long i;
-    word_t *global_kernel_vspace = kernel_level0_pd;
+    pte_t *global_kernel_vspace = kernel_l1pt;
 
-    for (i = LA_GET_PT_INDEX(PPTR_BASE, 0); i < BIT(PT_INDEX_BITS); i++) {
+    for (i = LA_GET_PT_INDEX(PPTR_BASE, 1); i < BIT(PT_INDEX_BITS); i++) {
         newLvl1pt[i] = global_kernel_vspace[i];
     }
 }
@@ -365,18 +455,18 @@ word_t *PURE lookupIPCBuffer(bool_t isReceiver, tcb_t *thread)
     }
 }
 
-static inline pte_t *getPPtrFromHWPTE(pte_t *pte)
-{
-    return PTE_PTR(ptrFromPAddr(pte_ptr_get_ppn(pte) << seL4_PageTableBits));
-}
+// static inline pte_t *getPPtrFromHWPTE(pte_t *pte)
+// {
+//     return PTE_PTR(ptrFromPAddr(pte_ptr_get_ppn(pte) << seL4_PageTableBits));
+// }
 
-lookupPTSlot_ret_t lookupPTSlot(pde_t *lvl1pt, vptr_t vptr)
+lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
 {
     lookupPTSlot_ret_t ret;
 
     word_t level = CONFIG_PT_LEVELS - 1;
-    pde_t *pt = lvl1pt;
-    pde_t *save_ptSlot = lvl1pt;
+    pte_t *pt = lvl1pt;
+    pte_t *save_ptSlot = lvl1pt;
 
     /* this is how many bits we potentially have left to decode. Initially we have the
      * full address space to decode, and every time we walk this will be reduced. The
@@ -386,9 +476,10 @@ lookupPTSlot_ret_t lookupPTSlot(pde_t *lvl1pt, vptr_t vptr)
     ret.ptBitsLeft = PT_INDEX_BITS * level + seL4_PageBits;
     save_ptSlot = (pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS)));
 
-    while (likely(0 < level)) {
+    while (!isPTEPageTable((pte_t *)save_ptSlot) && likely(0 < level)) {
+        level--;
         ret.ptBitsLeft -= PT_INDEX_BITS;
-        pt = (pde_t *)(*save_ptSlot);
+        pt = (pte_t *)(save_ptSlot->words[0]);
         save_ptSlot = pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
     }
 
@@ -431,8 +522,8 @@ void deleteASIDPool(asid_t asid_base, asid_pool_t *pool)
     /* Haskell error: "ASID pool's base must be aligned" */
     assert(IS_ALIGNED(asid_base, asidLowBits));
 
-    if (riscvKSASIDTable[asid_base >> asidLowBits] == pool) {
-        riscvKSASIDTable[asid_base >> asidLowBits] = NULL;
+    if (loongarchKSASIDTable[asid_base >> asidLowBits] == pool) {
+        loongarchKSASIDTable[asid_base >> asidLowBits] = NULL;
         setVMRoot(NODE_STATE(ksCurThread));
     }
 }

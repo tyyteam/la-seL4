@@ -1,5 +1,6 @@
 /*
- * tyyteam
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
  *
  * SPDX-License-Identifier: GPL-2.0-only
  */
@@ -22,16 +23,12 @@
 #define UART_REG_LSR_DR BIT(0)
 
 #define UART_REG(x) ((volatile uint8_t *)((UART_PPTR) + (x)))
-// #define uart_read_reg(reg) (*(UART_REG(reg)))
-// #define uart_write_reg(reg, v) (*(UART_REG(reg)) = (v))
 
 #ifdef CONFIG_PRINTING
 void uart_drv_putchar(unsigned char c)
 {
     while(!(*UART_REG(UART_REG_LSR) & UART_REG_LSR_TFE));
     *UART_REG(UART_REG_DAT) = (c & 0xff);
-    // while( (uart_read_reg(UART_REG_LSR) & UART_REG_LSR_TFE) == 0 );
-    // uart_write_reg(UART_REG_DAT,c);
 }
 #endif /* CONFIG_PRINTING */
 
@@ -40,9 +37,6 @@ unsigned char uart_drv_getchar(void)
 {
     while(!(*UART_REG(UART_REG_LSR) & UART_REG_LSR_DR));
     return *UART_REG(UART_REG_DAT);
-    // while((uart_read_reg(UART_REG_LSR) & UART_REG_LSR_DR)==0);
-    // return uart_read_reg(UART_REG_DAT);
-    // return 'c';
 }
 #endif /* CONFIG_DEBUG_BUILD */
 

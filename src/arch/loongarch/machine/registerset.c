@@ -1,4 +1,8 @@
 /*
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+ * 
+ * Derived from:
  * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
  * Copyright 2015, 2016 Hesham Almatary <heshamelmatary@gmail.com>
  *
@@ -17,8 +21,8 @@ compile_assert(
 );
 
 const register_t frameRegisters[] = {
-    FaultIP, ra, sp, gp,
-    s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11,
+    FaultIP, ra, sp,
+    s0,s1,s2,s3,s4,s5,s6,s7,s8,s9
 };
 compile_assert(
     consistent_frame_registers,

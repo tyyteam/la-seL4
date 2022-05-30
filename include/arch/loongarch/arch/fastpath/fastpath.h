@@ -1,4 +1,8 @@
 /*
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+ * 
+ * Derived from:
  * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
  * Copyright 2015, 2016 Hesham Almatary <heshamelmatary@gmail.com>
  *
@@ -36,9 +40,9 @@ NORETURN;
 #define endpoint_ptr_get_epQueue_tail_fp(ep_ptr) TCB_PTR(endpoint_ptr_get_epQueue_tail(ep_ptr))
 #define cap_vtable_cap_get_vspace_root_fp(vtable_cap) PTE_PTR(cap_page_table_cap_get_capPTBasePtr(vtable_cap))
 
-static inline void FORCE_INLINE switchToThread_fp(tcb_t *thread, pte_t *vroot, pde_t stored_hw_asid)
+static inline void FORCE_INLINE switchToThread_fp(tcb_t *thread, pte_t *vroot, pte_t stored_hw_asid)
 {
-    asid_t asid = (asid_t)(stored_hw_asid);
+    asid_t asid = (asid_t)(stored_hw_asid.words[0]);
 
     setVSpaceRoot(addrFromPPtr(vroot), asid);
 
@@ -100,7 +104,7 @@ static inline void NORETURN FORCE_INLINE fastpath_restore(word_t badge, word_t m
 
 #ifdef ENABLE_SMP_SUPPORT
     word_t sp;
-    asm volatile("csrr %0, sscratch" : "=r"(sp));
+    asm volatile("csrrd %0, 0x30" : "=r"(sp));
     sp -= sizeof(word_t);
     *((word_t *)sp) = TCB_REF(cur_thread);
 #endif
@@ -154,7 +158,7 @@ static inline void NORETURN FORCE_INLINE fastpath_restore(word_t badge, word_t m
         "ld.d  $t1, $t0, 34*%[REGSIZE]\n"
         "csrwr  $t1, 0x7  \n"
 #ifndef ENABLE_SMP_SUPPORT
-        /* Write back sscratch with cur_thread_reg to get it back on the next trap entry */
+        /* Write back LOONGARCH_CSR_KS0 with cur_thread_reg to get it back on the next trap entry */
         "csrwr $t0, 0x30\n"
 #endif
         "ld.d  $t1, $t0, 32*%[REGSIZE] \n"

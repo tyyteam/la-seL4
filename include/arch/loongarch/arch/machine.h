@@ -11,6 +11,7 @@
 #include <util.h>
 #include <arch/machine/hardware.h>
 
+
 #define CONFIG_64BIT
 
 #ifndef __ASSEMBLER__
@@ -199,8 +200,6 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 #define LOONGARCH_CSR_PRMD		0x1	/* Prev-exception mode info */
 #define  CSR_PRMD_PWE_SHIFT		3
 #define  CSR_PRMD_PWE			(UL_CONST(0x1) << CSR_PRMD_PWE_SHIFT)
-#define  CSR_PRMD_PIE_SHIFT		2
-#define  CSR_PRMD_PIE			(UL_CONST(0x1) << CSR_PRMD_PIE_SHIFT)
 #define  CSR_PRMD_PPLV_SHIFT		0
 #define  CSR_PRMD_PPLV_WIDTH		2
 #define  CSR_PRMD_PPLV			(UL_CONST(0x3) << CSR_PRMD_PPLV_SHIFT)
@@ -443,21 +442,6 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 #define LOONGARCH_CSR_KS6		0x36
 #define LOONGARCH_CSR_KS7		0x37
 #define LOONGARCH_CSR_KS8		0x38
-
-/* Exception allocated KS0, KS1 and KS2 statically */
-#define EXCEPTION_KS0			LOONGARCH_CSR_KS0
-#define EXCEPTION_KS1			LOONGARCH_CSR_KS1
-#define EXCEPTION_KS2			LOONGARCH_CSR_KS2
-#define EXC_KSCRATCH_MASK		(1 << 0 | 1 << 1 | 1 << 2)
-
-/* Percpu-data base allocated KS3 statically */
-#define PERCPU_BASE_KS			LOONGARCH_CSR_KS3
-#define PERCPU_KSCRATCH_MASK		(1 << 3)
-
-/* KVM allocated KS4 and KS5 statically */
-#define KVM_VCPU_KS			LOONGARCH_CSR_KS4
-#define KVM_TEMP_KS			LOONGARCH_CSR_KS5
-#define KVM_KSCRATCH_MASK		(1 << 4 | 1 << 5)
 
 /* Timer registers */
 #define LOONGARCH_CSR_TMID		0x40	/* Timer ID */
@@ -1259,12 +1243,13 @@ __BUILD_CSR_OP(tlbidx)
 #define PS_64M		0x0000001a
 #define PS_256M		0x0000001c
 #define PS_1G		0x0000001e
+#define PS_64G      0x00000024
 
 #define PS_MASK		0x3f000000
 #define PS_SHIFT	24
 
 /* Default page size for a given kernel configuration */
-#define PS_DEFAULT_SIZE PS_16K
+#define PS_DEFAULT_SIZE PS_32M
 
 /* Default huge tlb size for a given kernel configuration */
 // #ifdef CONFIG_PAGE_SIZE_4KB
@@ -1364,19 +1349,8 @@ void trap_init(void);
 
 
 /* irq related macro definitions, variables and functions during bootstrapping*/
-#define VECSIZE 0x200
-#define CSR_ECFG_VS_OF_VECSIZE_0X200 7
 
-unsigned long eentry;
-unsigned long tlbrentry;
-long exception_handlers[VECSIZE * 128 / sizeof(long)] ALIGN(SZ_64K);
-
-void setup_vint_size(unsigned int);
-void configure_exception_vector(void);
-void set_handler(unsigned long, void *, unsigned long);
-void init_trap(void);
-
-static inline void local_irq_disable(void)
+static inline void irq_disable(void)
 {
 	/*clear CSR_CRMD_IE*/
 	uint32_t flags = 0;
@@ -1387,7 +1361,7 @@ static inline void local_irq_disable(void)
 		: "memory");
 }
 
-static inline void local_irq_enable(void)
+static inline void irq_enable(void)
 {
 	/*set CSR_CRMD_IE*/
 	uint32_t flags = CSR_CRMD_IE;
