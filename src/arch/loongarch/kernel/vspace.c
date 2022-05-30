@@ -120,7 +120,12 @@ pte_ptr_get_valid(pte_t *pte_ptr) {
 
 static inline bool_t isPTEPageTable(pte_t *pte)
 {
-    return pte_ptr_get_valid(pte);
+    if (pte_ptr_get_valid(pte)) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
 }
 
 // static inline bool_t isPTEPageTable(pte_t *pte)
@@ -337,7 +342,7 @@ BOOT_CODE cap_t create_it_address_space(cap_t root_cnode_cap, v_region_t it_v_re
     cap_t      lvl1pt_cap;
     vptr_t     pt_vptr;
 
-    copyGlobalMappings(PTE_PTR(rootserver.vspace));
+    copyGlobalMappings_t(PTE_PTR(rootserver.vspace));
 
     lvl1pt_cap =
         cap_page_table_cap_new(
@@ -426,6 +431,16 @@ void copyGlobalMappings(pte_t *newLvl1pt)
     }
 }
 
+void copyGlobalMappings_t(pte_t *newLvl1pt)
+{
+    unsigned long i;
+
+    for (i = LA_GET_PT_INDEX(PPTR_BASE, 1); i < BIT(PT_INDEX_BITS); i++) {
+        pte_t *pte = PTE_PTR(PTE_CREATE_NEXT(1ull));
+        newLvl1pt[i] = *pte;
+    }
+}
+
 word_t *PURE lookupIPCBuffer(bool_t isReceiver, tcb_t *thread)
 {
     word_t w_bufferPtr;
@@ -476,14 +491,14 @@ lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
     ret.ptBitsLeft = PT_INDEX_BITS * level + seL4_PageBits;
     save_ptSlot = (pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS)));
 
-    while (!isPTEPageTable((pte_t *)save_ptSlot) && likely(0 < level)) {
+    while (isPTEPageTable((pte_t *)save_ptSlot) && likely(0 < level)) {
         level--;
         ret.ptBitsLeft -= PT_INDEX_BITS;
         pt = (pte_t *)(save_ptSlot->words[0]);
         save_ptSlot = pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
     }
 
-    if (isPTEPageTable((pte_t *)save_ptSlot)) {
+    if (!isPTEPageTable((pte_t *)save_ptSlot)) {
         ret.ptSlot = (pte_t *)save_ptSlot;
     }
 
