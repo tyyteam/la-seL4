@@ -19,7 +19,8 @@
   * **项目构建、编译和调试方法**：[项目构建编译与调试方法](./docs/技术文档-项目构建、编译和调试方法.md)。
   * cmake框架分析图：[cmake框架分析图](./docs/cmake框架分析图.md)。
   * seL4源码结构图：[seL4源码结构图](./docs/seL4源码结构图.md)。
-  * seL4-comments，我们在该仓库的seL4源码里写了大量注释：[seL4-comments](https://github.com/tyyteam/seL4-comments)。
+  * seL4-comments，本团队在该仓库的seL4内核源码里写了大量注释：[seL4-comments](https://github.com/tyyteam/seL4-comments)。
+  * seL4_tools-comments，本团队在该仓库的seL4-elfloader源码里写了大量注释：[seL4_tools-comments](https://github.com/tyyteam/seL4_tools-comments)
   * 开发过程积累的技术文档：[oscompProblemSolutions](https://github.com/tyyteam/seL4-oscompProblemSolutions)。
   * 许可证：[GPL](./LICENSE.md)。
 
