@@ -251,6 +251,7 @@ KernelCommonFlags(
     # generated automatically when gcc wraps the linking step and invokes ld.
     -nostdlib -fno-pic -fno-pie
 )
+
 if(KernelFWholeProgram)
     # KernelFWholeProgram is still an experimental feature and disabled by
     # default. Clarify if the linker step via GCC actually cares about this
@@ -317,7 +318,6 @@ include_directories(
     "include/plat/${KernelPlatform}"
     "include/plat/${KernelPlatform}/plat/${KernelWordSize}"
 )
-
 
 if(KernelArchARM)
     include_directories(

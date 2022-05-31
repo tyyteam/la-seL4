@@ -35,7 +35,7 @@ macro(declare_seL4_arch sel4_arch)
         "ia32;KernelSel4ArchIA32;ARCH_IA32"
         "loongarch64;KernelSel4ArchLoongarch64;ARCH_LOONGARCH64"
     )
-
+    
     if(KernelSel4ArchArmHyp)
         # arm-hyp is basically aarch32. This should be cleaned up and aligned
         # with other architectures, where hypervisor support is an additional

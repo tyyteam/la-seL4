@@ -1,5 +1,6 @@
 #
-# Copyright 2022, tyy team
+# Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+# qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
 # SPDX-License-Identifier: GPL-2.0-only
 #
 
@@ -12,7 +13,10 @@ if(KernelPlatform3A5000)
     else()
         fallback_declare_seL4_arch_default(loongarch64)
     endif()
-    
+    # MCS is not supported on 3A5000 temporarly. MCS requires a timer driver that
+    # implements the tickless programming requirements, but tyyteam doesn't check it yet.
+    # so we just set it OFF
+    set(KernelPlatformSupportsMCS OFF)
     config_set(KernelLoongarchPlatform Loongarch_PLAT "3A5000")
     config_set(KernelPlatformFirstHartID FIRST_HART_ID 0)
     if(KernelSel4ArchLoongarch64)

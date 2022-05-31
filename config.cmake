@@ -89,7 +89,6 @@ set(KernelSetTLSBaseSelf OFF)
 include(src/arch/${KernelArch}/config.cmake)
 include(include/${KernelWordSize}/mode/config.cmake)
 include(src/config.cmake)
-
 if(DEFINED KernelDTSList AND (NOT "${KernelDTSList}" STREQUAL ""))
     set(KernelDTSIntermediate "${CMAKE_CURRENT_BINARY_DIR}/kernel.dts")
     set(
@@ -173,7 +172,6 @@ if(DEFINED KernelDTSList AND (NOT "${KernelDTSList}" STREQUAL ""))
         )
         set(KernelDTBSize "${KernelDTBSize}" CACHE INTERNAL "Size of DTB blob, in bytes")
     endif()
-
     set(deps ${KernelDTBPath} ${config_file} ${config_schema} ${HARDWARE_GEN_PATH})
     check_outfile_stale(regen ${device_dest} deps ${CMAKE_CURRENT_BINARY_DIR}/gen_header.cmd)
     if(regen)
@@ -263,6 +261,7 @@ config_string(
     DEFAULT 230
     UNQUOTE
 )
+
 config_option(KernelFastpath FASTPATH "Enable IPC fastpath" DEFAULT ON)
 
 config_string(
@@ -287,7 +286,6 @@ config_string(
     DEFAULT 256
     UNQUOTE
 )
-
 config_string(
     KernelMaxNumNodes MAX_NUM_NODES "Max number of CPU cores to boot"
     DEFAULT 1
@@ -346,6 +344,7 @@ config_option(
     DEFAULT OFF
     DEPENDS "NOT KernelVerificationBuild;NOT KernelHardwareDebugAPIUnsupported"
 )
+
 config_option(
     KernelPrinting PRINTING
     "Allow the kernel to print out messages to the serial console during bootup and execution."
@@ -381,6 +380,7 @@ config_choice(
     "tracepoints;KernelBenchmarksTracepoints;BENCHMARK_TRACEPOINTS;NOT KernelVerificationBuild"
     "track_utilisation;KernelBenchmarksTrackUtilisation;BENCHMARK_TRACK_UTILISATION;NOT KernelVerificationBuild"
 )
+
 if(NOT (KernelBenchmarks STREQUAL "none"))
     config_set(KernelEnableBenchmarks ENABLE_BENCHMARKS ON)
 else()
@@ -413,6 +413,7 @@ config_option(
     DEPENDS "KernelPrinting"
     DEFAULT_DISABLED OFF
 )
+
 config_option(
     KernelColourPrinting COLOUR_PRINTING
     "In debug mode, seL4 prints diagnostic messages to its serial output describing, \
@@ -423,6 +424,7 @@ config_option(
     DEPENDS "KernelPrinting"
     DEFAULT_DISABLED OFF
 )
+
 config_string(
     KernelUserStackTraceLength USER_STACK_TRACE_LENGTH
     "On a double fault the kernel can try and print out the users stack to aid \
