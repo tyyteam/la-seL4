@@ -32,7 +32,7 @@ if(KernelWordSize EQUAL 64)
 endif()
 
 if(KernelPTLevels EQUAL 3)
-    math(EXPR KernelPaddrUserTop "1 << 47")
+    math(EXPR KernelPaddrUserTop "0xfcffffffff")
 elseif(KernelPTLevels EQUAL 4)
     message(FATAL_ERROR "PTLevels 4 not used")
     # math(EXPR KernelPaddrUserTop "1 << 56")
