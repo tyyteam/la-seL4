@@ -25,7 +25,6 @@ config_option(
     DEFAULT OFF
     DEPENDS "KernelArchLoongarch"
 )
-
 if(KernelWordSize EQUAL 64)
     set(KernelClz64 ON CACHE BOOL "")
     set(KernelCtz64 ON CACHE BOOL "")
@@ -48,7 +47,7 @@ if(KernelLoongarchExtF)
     set(KernelHaveFPU ON)
 endif()
 
-# This is not supported on RISC-V
+# This is not supported on RISC-V(tyyteam doesn't check it, and just set it ON)
 set(KernelHardwareDebugAPIUnsupported ON CACHE INTERNAL "")
 
 add_sources(
