@@ -237,7 +237,7 @@ static BOOT_CODE bool_t try_init_kernel(
     bi_frame_vptr = ipcbuf_vptr + BIT(PAGE_BITS);
     extra_bi_frame_vptr = bi_frame_vptr + BIT(BI_FRAME_SIZE_BITS);
     
-    map_kernel_window(); //TODO will be finished 
+    map_kernel_window();
 
     /* disable irq and do necessary setups, then enable them.*/
     irq_disable();

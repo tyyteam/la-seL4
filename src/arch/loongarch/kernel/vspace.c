@@ -329,7 +329,7 @@ static BOOT_CODE cap_t create_it_pt_cap(cap_t vspace_cap, pptr_t pptr, vptr_t vp
 BOOT_CODE word_t arch_get_n_paging(v_region_t it_v_reg)
 {
     word_t n = 0;
-    for (int i = 0; i < CONFIG_PT_LEVELS - 1; i++) {
+    for (int i = 1; i < CONFIG_PT_LEVELS; i++) {
         n += get_n_paging(it_v_reg, LA_GET_LVL_PGSIZE_BITS(i));
     }
     return n;
