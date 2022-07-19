@@ -511,8 +511,8 @@ BOOT_CODE tcb_t *create_initial_thread(cap_t root_cnode_cap, cap_t it_pd_cap, vp
     setRegister(tcb, capRegister, bi_frame_vptr);
     setNextPC(tcb, ui_v_entry);
     printf("ui_v_entry: %lu\n", ui_v_entry);
-    printf("tcbContext Registers[NextIP]: %lu",tcb->tcbArch.tcbContext.registers[NextIP]);
-    printf("tcbContext Register[era/")
+    printf("tcbContext Registers[NextIP]: %lu\n",tcb->tcbArch.tcbContext.registers[NextIP]);
+    printf("tcbContext Register[FaultIP]: %lu\n",tcb->tcbArch.tcbContext.registers[FaultIP]);
 
     /* initialise TCB */
 #ifdef CONFIG_KERNEL_MCS
