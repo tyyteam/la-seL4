@@ -87,7 +87,9 @@ void VISIBLE NORETURN restore_user_context(void)
 
 #ifndef ENABLE_SMP_SUPPORT
         /* Write back LOONGARCH_CSR_KS0 with cur_thread_reg to get it back on the next trap entry */
+        "move $t1, $t0        \n"
         "csrwr $t0, 0x30   \n"
+        "move $t0, $t1        \n"
 #endif
         //load [38*%[REGSIZE]+$t0] to LOONGARCH_CSR_ERA instead of 31*%[REGSIZE]
 #ifdef DEBUG
