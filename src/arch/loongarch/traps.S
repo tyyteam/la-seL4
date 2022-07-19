@@ -84,7 +84,7 @@ trap_entry:
     csrrd $t8, LOONGARCH_CSR_BADV  // save csr_badvaddr
     st.d $t8, $t0, 32*REGBYTES
 
-    csrrd $t8, LOONGARCH_CSR_CRMD  // save csr_crmd
+    csrrd $t8, LOONGARCH_CSR_CRMD  // save csr_crmd //删掉
     st.d $t8, $t0, 33*REGBYTES
 
     csrrd $t8, LOONGARCH_CSR_PRMD  // save csr_prmd
@@ -143,7 +143,7 @@ handle_syscall:
 exception:
     /* Save NextIP*/
     st.d $ra, $t0, 38*REGBYTES
-    b c_handle_interrupt
+    b c_handle_exception
 
     
 

@@ -14,7 +14,7 @@
 
 #define REGBYTES (CONFIG_WORD_SIZE / 8)
 
-.section k_eentry
+.section .text
 
 .global trap_entry
 .extern c_handle_syscall

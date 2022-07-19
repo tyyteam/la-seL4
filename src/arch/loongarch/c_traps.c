@@ -90,12 +90,14 @@ void VISIBLE NORETURN restore_user_context(void)
         "csrwr $t0, 0x30   \n"
 #endif
         //load [38*%[REGSIZE]+$t0] to LOONGARCH_CSR_ERA instead of 31*%[REGSIZE]
-
+#ifdef DEBUG
+        "restore_csr:\n"
+#endif
         "ld.d  $t1, $t0, 32*%[REGSIZE]  \n" //load LOONGARCH_CSR_BADV
         "csrwr $t1, 0x7  \n"
 
-        "ld.d  $t1, $t0, 33*%[REGSIZE]  \n" //load LOONGARCH_CSR_CRMD
-        "csrwr $t1, 0x0  \n"
+        // "ld.d  $t1, $t0, 33*%[REGSIZE]  \n" //load LOONGARCH_CSR_CRMD
+        // "csrwr $t1, 0x0  \n"
 
         "ld.d  $t1, $t0, 34*%[REGSIZE]  \n" //load LOONGARCH_CSR_PRMD
         "csrwr $t1, 0x1  \n"        
@@ -114,6 +116,9 @@ void VISIBLE NORETURN restore_user_context(void)
 
         "ld.d  $t1, $t0, 12*%[REGSIZE]  \n"
         "ld.d  $t0, $t0, 11*%[REGSIZE]  \n"
+#ifdef DEBUG
+        "return:\n"
+#endif
         "ertn"
         : /* no output */
         : [REGSIZE] "i"(sizeof(word_t)),
@@ -133,6 +138,39 @@ void VISIBLE NORETURN c_handle_interrupt(void)
     handleInterruptEntry();
 
     restore_user_context();
+    UNREACHABLE();
+}
+void VISIBLE NORETURN c_handle_exception(void)
+{
+    NODE_LOCK_SYS;
+
+    c_entry_hook();
+
+    word_t excause = read_csr_excode();
+    printf("%lu\n",excause);
+//     switch (scause) {
+//     case RISCVInstructionAccessFault:
+//     case RISCVLoadAccessFault:
+//     case RISCVStoreAccessFault:
+//     case RISCVLoadPageFault:
+//     case RISCVStorePageFault:
+//     case RISCVInstructionPageFault:
+//         handleVMFaultEvent(scause);
+//         break;
+//     default:
+// #ifdef CONFIG_HAVE_FPU
+//         if (!isFpuEnable()) {
+//             /* we assume the illegal instruction is caused by FPU first */
+//             handleFPUFault();
+//             setNextPC(NODE_STATE(ksCurThread), getRestartPC(NODE_STATE(ksCurThread)));
+//             break;
+//         }
+// #endif
+//         handleUserLevelFault(scause, 0);
+//         break;
+//     }
+
+    // restore_user_context();
     UNREACHABLE();
 }
 
