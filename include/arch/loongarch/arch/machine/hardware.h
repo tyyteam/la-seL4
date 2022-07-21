@@ -79,25 +79,24 @@
 #define LA_GET_LVL_PGSIZE(n)      BIT(LA_GET_LVL_PGSIZE_BITS((n)))
 /*CY 待修改 */
 /*
- * These values are defined in RISC-V priv-1.10 manual, they represent the
- * exception codes saved in scause register (by the hardware) on traps.
+ * These values are defined in LoongArch Reference Manual Volume 1: Basic Architecture version 1.00,
+ * they represent the exception codes saved in CSR.ESTAT register (by the hardware) on traps. For some
+ * Ecode, you need to check EsubCode for details.
  */
 enum vm_fault_type {
-    RISCVInstructionMisaligned = 0,
-    RISCVInstructionAccessFault = 1,
-    RISCVInstructionIllegal = 2,
-    RISCVBreakpoint = 3,
-    /* reserved */
-    RISCVLoadAccessFault = 5,
-    RISCVAddressMisaligned = 6,
-    RISCVStoreAccessFault = 7,
-    RISCVEnvCall = 8,
-    /* 9-11 reserved */
-    RISCVInstructionPageFault = 12,
-    RISCVLoadPageFault = 13,
-    /* 14 - reserved */
-    RISCVStorePageFault = 15
-                          /* >= 16 reserved */
+    LALoadPageInvalid=1, //PIL
+    LAStorePageInvalid=2,//PIS
+    LAFetchPageInvalid=3,//PIF
+    LAPageModException=4,//PME
+    LAPageNoReadable=5,     //PNR
+    LAPageNoExecutable=6,   //PNX
+    LAPagePrivilegeIllegal=7,   //PPI
+    LAAddrError=8,//ADEF or ADEM         /*Check EsubCode for details*/
+    LAAddrAlignFault=9,//ALE
+    LABoundCheck=10    //BCE
+
+    //other exceptions are not related to vm_fault, which will be recorded in badv
+    /* >=25 reserved*/
 };
 typedef word_t vm_fault_type_t;
 

@@ -1122,6 +1122,23 @@ static inline void write_csr_tlbrefill_pagesize(unsigned int size)
 	__dcsrxchg(size << CSR_TLBREHI_PS_SHIFT, CSR_TLBREHI_PS, LOONGARCH_CSR_TLBREHI);
 }
 
+static inline unsigned int r_csr_ticlr(void)
+{
+  unsigned int x;
+  asm volatile("csrrd %0, 0x44" : "=r" (x) );
+  return x;
+}
+
+static inline void w_csr_ticlr(unsigned int x)
+{
+  asm volatile("csrwr %0, 0x44" : : "r" (x) );
+}
+
+static inline void w_csr_tcfg(unsigned long x)
+{
+  asm volatile("csrwr %0, 0x41" : : "r" (x) );
+}
+
 #define read_csr_asid()			__csrrd(LOONGARCH_CSR_ASID)
 #define write_csr_asid(val)		__csrwr(val, LOONGARCH_CSR_ASID)
 #define read_csr_entryhi()		__dcsrrd(LOONGARCH_CSR_TLBEHI)
@@ -1170,6 +1187,9 @@ static inline void write_csr_tlbrefill_pagesize(unsigned int size)
 #define write_csr_perfcntr2(val)	__dcsrwr(val, LOONGARCH_CSR_PERFCNTR2)
 #define write_csr_perfctrl3(val)	__dcsrwr(val, LOONGARCH_CSR_PERFCTRL3)
 #define write_csr_perfcntr3(val)	__dcsrwr(val, LOONGARCH_CSR_PERFCNTR3)
+
+#define read_csr_badv() 			__dcsrrd(LOONGARCH_CSR_BADV)
+
 
 /*
  * Manipulate bits in a register.

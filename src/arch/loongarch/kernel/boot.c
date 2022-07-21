@@ -151,7 +151,7 @@ BOOT_CODE static void init_cpu(void)
     initLocalIRQController();
 
 #ifndef CONFIG_KERNEL_MCS
-    //TODO
+    initTimer();
 #endif
 
     /* disable FPU*/

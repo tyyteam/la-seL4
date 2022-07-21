@@ -78,7 +78,7 @@ static inline void plic_complete_claim(irq_t irq);
  * @param[in]  disable  True to mask/disable, False to unmask/enable.
  * @param[in]  irq      interrupt to mask/unmask.
  */
-static inline void plic_mask_irq(bool_t disable, irq_t irq);
+static inline void extio_mask_irq(bool_t disable, irq_t irq);
 
 
 #ifdef HAVE_SET_TRIGGER

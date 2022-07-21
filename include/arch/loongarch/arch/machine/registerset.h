@@ -66,7 +66,7 @@ enum _register {
 
     csr_era=31,FaultIP=31,
     csr_badvaddr=32,
-    csr_crmd=33,
+    // csr_crmd=33,
     csr_prmd=34,
     csr_euen=35,
     csr_ecfg=36,

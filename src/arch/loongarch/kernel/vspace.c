@@ -507,29 +507,38 @@ lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
 
 exception_t handleVMFault(tcb_t *thread, vm_fault_type_t vm_faultType)
 {
-    // uint64_t addr;
+    uint64_t addr;
+    addr = read_csr_badv();
 
-    // addr = read_stval();
+    switch (vm_faultType)
+    {
+        case LALoadPageInvalid:     //PIL
+        case LAPageNoReadable:      //PNR
+            current_fault = seL4_Fault_VMFault_new(addr, LALoadPageInvalid, false);
+            return EXCEPTION_FAULT;
 
-    // switch (vm_faultType) {
-    // case RISCVLoadPageFault:
-    // case RISCVLoadAccessFault:
-    //     current_fault = seL4_Fault_VMFault_new(addr, RISCVLoadAccessFault, false);
-    //     return EXCEPTION_FAULT;
-    // case RISCVStorePageFault:
-    // case RISCVStoreAccessFault:
-    //     current_fault = seL4_Fault_VMFault_new(addr, RISCVStoreAccessFault, false);
-    //     return EXCEPTION_FAULT;
-    // case RISCVInstructionPageFault:
-    // case RISCVInstructionAccessFault:
-    //     current_fault = seL4_Fault_VMFault_new(addr, RISCVInstructionAccessFault, true);
-    //     return EXCEPTION_FAULT;
+        case LAStorePageInvalid:    //PIS
+        case LAPageModException:    //PME
+            current_fault = seL4_Fault_VMFault_new(addr, LAStorePageInvalid, false);
+            return EXCEPTION_FAULT;
 
-    // default:
-    //     fail("Invalid VM fault type");
-    // }
-    /*CY 自己加的 */
-    return EXCEPTION_FAULT;
+        case LAFetchPageInvalid:    //PIF
+        case LAPageNoExecutable:    //PNX
+            current_fault = seL4_Fault_VMFault_new(addr, LAFetchPageInvalid, true);
+            return EXCEPTION_FAULT;
+
+        case LAAddrError:           //ADEF or ADEM
+
+        case LAAddrAlignFault:      //ALE
+
+        case LABoundCheck:          //BCE
+
+        case LAPagePrivilegeIllegal://PPI
+            fail("not handled exceptions!\n");
+
+        default:
+            fail("Invalid VM fault type");
+    }
 }
 
 void deleteASIDPool(asid_t asid_base, asid_pool_t *pool)

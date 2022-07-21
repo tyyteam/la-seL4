@@ -16,11 +16,6 @@
 
 static inline uint64_t loongarch_read_time(void)
 {
-    /*
-    word_t n;
-    asm volatile("rdtime %0" : "=r"(n));
-    return n;
-    */
     int rID = 0;
 	uint64_t val = 0;
 

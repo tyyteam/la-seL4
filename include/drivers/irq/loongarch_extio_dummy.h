@@ -15,6 +15,7 @@
 #define HAVE_SET_TRIGGER 1
 
 #include <arch/machine/extio.h>
+#include <arch/machine.h>
 
 static inline irq_t extio_get_claim(void)
 {
@@ -28,10 +29,13 @@ static inline void plic_complete_claim(irq_t irq)
            (int)irq);
 }
 
-static inline void plic_mask_irq(bool_t disable, irq_t irq)
-{
-    printf("no PLIC present, can't %s interrupt %d\n",
-           disable ? "mask" : "unmask", (int)irq);
+static inline void extio_mask_irq(bool_t disable, irq_t irq)
+{    
+    if(disable){
+        clear_csr_ecfg(BIT(irq));
+    }else{
+        set_csr_ecfg(BIT(irq));
+    }
 }
 
 static inline void plic_irq_set_trigger(irq_t irq, bool_t edge_triggered)

@@ -84,10 +84,7 @@ trap_entry:
     csrrd $t8, LOONGARCH_CSR_BADV  // save csr_badvaddr
     st.d $t8, $t0, 32*REGBYTES
 
-    csrrd $t8, LOONGARCH_CSR_CRMD  // save csr_crmd //删掉
-    st.d $t8, $t0, 33*REGBYTES
-
-    csrrd $t8, LOONGARCH_CSR_PRMD  // save csr_prmd
+    csrrd $t8, LOONGARCH_CSR_PRMD  // save csr_prmd, we don`t need to save csr_crmd
     st.d $t8, $t0, 34*REGBYTES
 
     csrrd $t8, LOONGARCH_CSR_EUEN  // save csr_euen
@@ -128,11 +125,11 @@ handle_syscall:
     st.d $ra, $t0, 38*REGBYTES
 
 #ifdef CONFIG_FASTPATH
-//TODO
+//TODO call c_handle_fastpath_call
 #ifdef CONFIG_KERNEL_MCS
 //TODO
 #endif
-//TODO
+//TODO call c_handle_fastpath_reply_recv
 #endif
     /* move syscall number to 3rd argument */
     move $a2, $a7

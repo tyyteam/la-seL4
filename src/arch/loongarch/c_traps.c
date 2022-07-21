@@ -87,40 +87,33 @@ void VISIBLE NORETURN restore_user_context(void)
 
 #ifndef ENABLE_SMP_SUPPORT
         /* Write back LOONGARCH_CSR_KS0 with cur_thread_reg to get it back on the next trap entry */
-        "move $t1, $t0        \n"
-        "csrwr $t0, 0x30   \n"
-        "move $t0, $t1        \n"
+        "move $t1, $t0          \n"
+        "csrwr $t0, 0x30        \n"
+        "move $t0, $t1          \n"
 #endif
         //load [38*%[REGSIZE]+$t0] to LOONGARCH_CSR_ERA instead of 31*%[REGSIZE]
-#ifdef DEBUG
-        "restore_csr:\n"
-#endif
+
         "ld.d  $t1, $t0, 32*%[REGSIZE]  \n" //load LOONGARCH_CSR_BADV
         "csrwr $t1, 0x7  \n"
-
-        // "ld.d  $t1, $t0, 33*%[REGSIZE]  \n" //load LOONGARCH_CSR_CRMD
-        // "csrwr $t1, 0x0  \n"
 
         "ld.d  $t1, $t0, 34*%[REGSIZE]  \n" //load LOONGARCH_CSR_PRMD
         "csrwr $t1, 0x1  \n"        
 
         "ld.d  $t1, $t0, 35*%[REGSIZE]  \n" //load LOONGARCH_CSR_EUEN
-        "csrwr $t1, 0x2  \n"    
+        "csrwr $t1, 0x2  \n"
 
         "ld.d  $t1, $t0, 36*%[REGSIZE]  \n" //load LOONGARCH_CSR_ECFG
-        "csrwr $t1, 0x4  \n"               
+        "csrwr $t1, 0x4  \n"
 
         "ld.d  $t1, $t0, 37*%[REGSIZE]  \n" //load LOONGARCH_CSR_ESTAT
-        "csrwr $t1, 0x5 \n"                 
+        "csrwr $t1, 0x5 \n"
 
         "ld.d  $t1, $t0, 38*%[REGSIZE]  \n" //load nextIP to LOONGARCH_CSR_ERA
-        "csrwr $t1, 0x6   \n"               
+        "csrwr $t1, 0x6   \n"
 
         "ld.d  $t1, $t0, 12*%[REGSIZE]  \n"
         "ld.d  $t0, $t0, 11*%[REGSIZE]  \n"
-#ifdef DEBUG
-        "return:\n"
-#endif
+
         "ertn"
         : /* no output */
         : [REGSIZE] "i"(sizeof(word_t)),
@@ -133,7 +126,7 @@ void VISIBLE NORETURN restore_user_context(void)
 
 void VISIBLE NORETURN c_handle_interrupt(void)
 {
-    NODE_LOCK_IRQ_IF(getActiveIRQ() != irq_remote_call_ipi);
+    NODE_LOCK_IRQ_IF(getActiveIRQ() != INTERRUPT_IPI);
 
     c_entry_hook();
 
@@ -148,66 +141,38 @@ void VISIBLE NORETURN c_handle_exception(void)
 
     c_entry_hook();
 
-    word_t excause = read_csr_excode();
-    printf("%lu\n",excause);
-//     switch (scause) {
-//     case RISCVInstructionAccessFault:
-//     case RISCVLoadAccessFault:
-//     case RISCVStoreAccessFault:
-//     case RISCVLoadPageFault:
-//     case RISCVStorePageFault:
-//     case RISCVInstructionPageFault:
-//         handleVMFaultEvent(scause);
-//         break;
-//     default:
-// #ifdef CONFIG_HAVE_FPU
-//         if (!isFpuEnable()) {
-//             /* we assume the illegal instruction is caused by FPU first */
-//             handleFPUFault();
-//             setNextPC(NODE_STATE(ksCurThread), getRestartPC(NODE_STATE(ksCurThread)));
-//             break;
-//         }
-// #endif
-//         handleUserLevelFault(scause, 0);
-//         break;
-//     }
+    word_t excode = read_csr_excode();
+    switch (excode)
+    {
+        case LAAddrError:               //ADEF or ADEM
+        case LAAddrAlignFault:          //ALE
+        case LABoundCheck:              //BCE
+        case LALoadPageInvalid:         //PIL
+        case LAStorePageInvalid:        //PIS
+        case LAFetchPageInvalid:        //PIF
+        case LAPageModException:        //PME
+        case LAPageNoReadable:          //PNR
+        case LAPageNoExecutable:        //PNX
+        case LAPagePrivilegeIllegal:    //PPI
+            handleVMFaultEvent(excode); //LoongArch records the bad vaddr in CSR.BADV
+            break;
 
-    // restore_user_context();
+        default:
+#ifdef CONFIG_HAVE_FPU
+        if (!isFpuEnable()) {
+            /* we assume the illegal instruction is caused by FPU first */
+            handleFPUFault();
+            setNextPC(NODE_STATE(ksCurThread), getRestartPC(NODE_STATE(ksCurThread)));
+            break;
+        }
+#endif
+            handleUserLevelFault(excode, 0);
+            break;
+    }
+
+    restore_user_context();
     UNREACHABLE();
 }
-
-// void VISIBLE NORETURN c_handle_exception(void)
-// {
-//     NODE_LOCK_SYS;
-
-//     c_entry_hook();
-
-//     word_t scause = read_scause();
-//     switch (scause) {
-//     case RISCVInstructionAccessFault:
-//     case RISCVLoadAccessFault:
-//     case RISCVStoreAccessFault:
-//     case RISCVLoadPageFault:
-//     case RISCVStorePageFault:
-//     case RISCVInstructionPageFault:
-//         handleVMFaultEvent(scause);
-//         break;
-//     default:
-// #ifdef CONFIG_HAVE_FPU
-//         if (!isFpuEnable()) {
-//             /* we assume the illegal instruction is caused by FPU first */
-//             handleFPUFault();
-//             setNextPC(NODE_STATE(ksCurThread), getRestartPC(NODE_STATE(ksCurThread)));
-//             break;
-//         }
-// #endif
-//         handleUserLevelFault(scause, 0);
-//         break;
-//     }
-
-//     restore_user_context();
-//     UNREACHABLE();
-// }
 
 void VISIBLE NORETURN slowpath(syscall_t syscall)
 {
@@ -283,101 +248,3 @@ void VISIBLE NORETURN c_handle_syscall(word_t cptr, word_t msgInfo, syscall_t sy
 
     UNREACHABLE();
 }
-
-// Code below will be modified or cleared later.
-
-// void VISIBLE NORETURN do_vint(void){
-//     //TODO interrupts related
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN cache_parity_error(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN do_ade(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN do_ale(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN do_bp(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN do_fpe(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN do_fpu(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN do_lsx(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN do_lasx(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN do_lbt(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN do_ri(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN do_watch(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN do_reserved(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN handle_syscall(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN do_page_fault(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }
-
-// void VISIBLE NORETURN swapper_pg_dir(void){
-//     //TODO
-//     printf("not supported yet, will be supported soon.");
-//     UNREACHABLE();
-// }

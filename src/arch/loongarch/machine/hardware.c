@@ -80,10 +80,10 @@ static irq_t active_irq[CONFIG_MAX_NUM_NODES];
  * Gets the active irq. Returns the same irq if called again before ackInterrupt.
  *
  * This function is called by the kernel to get the interrupt that is currently
- * active. It not interrupt is currently active, it will try to find one and
+ * active. If no interrupt is currently active, it will try to find one and
  * put it in the active state. If no interrupt is found, irqInvalid is returned.
  * It can't be assumed that if isIRQPending() returned true, there will always
- * be an active interrupt then this is called. It may hold in mayn cases, but
+ * be an active interrupt when this is called. It may hold in many cases, but
  * there are corner cases with level-triggered interrupts or on multicore
  * systems.
  * This function can be called multiple times during one kernel entry. It must
@@ -103,31 +103,43 @@ static inline irq_t getActiveIRQ(void)
     }
 
     /* No interrupt currently active, find a new one from the sources. The
-     * priorities are: external -> software -> timer.
+     * priorities are: IPI > timer > PMI > HWI7~0 > SWI1~0.
      */
-    word_t word_estat = (unsigned long)read_csr_estat();
-    //word_t sip = read_sip();
-    if (word_estat & (BIT(CSR_ESTAT_IS_HWI0)|BIT(CSR_ESTAT_IS_HWI1)|BIT(CSR_ESTAT_IS_HWI2)|
-                        BIT(CSR_ESTAT_IS_HWI3)|BIT(CSR_ESTAT_IS_HWI4)|BIT(CSR_ESTAT_IS_HWI5)|
-                        BIT(CSR_ESTAT_IS_HWI6)|BIT(CSR_ESTAT_IS_HWI7))){
-        /* Even if we say an external interrupt is pending, the extend io interrupt controller
-         *  may not return any pending interrupt here in some corner cases. 
-         * A level triggered interrupt might have been deasserted again or another hard
-         * has claimed it in a multicore system.
-         */
-        irq = extio_get_claim();
+    word_t estat = (unsigned long)read_csr_estat();
+    
 #ifdef ENABLE_SMP_SUPPORT
-    } else if(word_estat & BIT(CSR_ESTAT_IS_IPI)) {
+    if(estat & BIT(CSR_ESTAT_IS_IPI)){
         //TODO
+    }else if(estat & BIT(CSR_ESTAT_IS_TIMER)){
+#else
+    if(estat & BIT(CSR_ESTAT_IS_TIMER)){
 #endif
-    } else if (word_estat & BIT(CSR_ESTAT_IS_TIMER)) {
         irq = KERNEL_TIMER_IRQ;
-    } else {
-        /* Seems none of the known sources has a pending interrupt. This can
-         * happen if e.g. if another hart context has claimed the interrupt
-         * already.
-         */
-        irq = irqInvalid;
+    }else if(estat & BIT(CSR_ESTAT_IS_PMC)){
+        irq = KERNEL_PMC_IRQ;
+    }else if(estat & BIT(CSR_ESTAT_IS_HWI7)){
+        irq = HW_IRQ7;
+    }else if (estat & BIT(CSR_ESTAT_IS_HWI6)){
+        irq = HW_IRQ6;
+    }else if(estat & BIT(CSR_ESTAT_IS_HWI5)){
+        irq = HW_IRQ5;
+    }else if(estat & BIT(CSR_ESTAT_IS_HWI4)){
+        irq = HW_IRQ4;
+    }else if(estat & BIT(CSR_ESTAT_IS_HWI3)){
+        irq = HW_IRQ3;
+    }else if(estat & BIT(CSR_ESTAT_IS_HWI2)){
+        irq = HW_IRQ2;
+    }else if(estat & BIT(CSR_ESTAT_IS_HWI1)){
+        irq = HW_IRQ1;
+    }else if(estat & BIT(CSR_ESTAT_IS_HWI0)){
+        irq = HW_IRQ0;
+    }else if(estat & BIT(CSR_ESTAT_IS_SWI1)){
+        irq = KERNEL_SW_IRQ1;
+    }else if(estat & BIT(CSR_ESTAT_IS_SWI0)){
+        irq = KERNEL_SW_IRQ0;
+    }else{
+        // Seems none of the known sources has a pending interrupt.  
+        irq=irqInvalid;
     }
 
     /* There is no guarantee that there is a new interrupt. */
@@ -191,12 +203,18 @@ static inline bool_t isIRQPending(void)
 static inline void maskInterrupt(bool_t disable, irq_t irq)
 {
     assert(IS_IRQ_VALID(irq));
-    if (irq >= 0 && irq <= maxIRQ){
+    if (irq == KERNEL_TIMER_IRQ){
         if(disable){
             clear_csr_ecfg(BIT(irq));
         }else{
             set_csr_ecfg(BIT(irq));
         }
+#ifdef ENABLE_SMP_SUPPORT
+    }else if(irq==INTERRUPT_IPI){
+        return;
+#endif
+    }else {
+        extio_mask_irq(disable,irq);
     }
 }
 
@@ -221,7 +239,7 @@ static inline void ackInterrupt(irq_t irq)
         return;
     }
 #ifdef ENABLE_SMP_SUPPORT
-    if (irq == irq_reschedule_ipi || irq == irq_remote_call_ipi) {
+    if (irq == INTERRUPT_IPI) {
         ipi_clear_irq(irq);
     }
 #endif
@@ -230,13 +248,10 @@ static inline void ackInterrupt(irq_t irq)
 #ifndef CONFIG_KERNEL_MCS
 void resetTimer(void)
 {
-    //uint64_t target;
-    // repeatedly try and set the timer in a loop as otherwise there is a race and we
-    // may set a timeout in the past, resulting in it never getting triggered
-    // do {
-    //     target = loongarch_read_time() + RESET_CYCLES;
-    //     sbi_set_timer(target);
-    // } while (loongarch_read_time() > target);
+    printf("LoongArch timer interrupt\n");
+
+    /* ack */
+    w_csr_ticlr(r_csr_ticlr() | CSR_TINTCLR_TI);
 }
 
 /**
@@ -244,7 +259,8 @@ void resetTimer(void)
  */
 BOOT_CODE void initTimer(void)
 {
-    //sbi_set_timer(loongarch_read_time() + RESET_CYCLES);
+    unsigned long tcfg = 0x10000000UL | CSR_TCFG_EN | CSR_TCFG_PERIOD;
+    w_csr_tcfg(tcfg);
 }
 #endif /* !CONFIG_KERNEL_MCS */
 
@@ -282,5 +298,5 @@ BOOT_CODE void initIRQController(void)
 static inline void handleSpuriousIRQ(void)
 {
     /* Do nothing */
-    printf("Superior IRQ!! csr_estat %u\n", read_csr_estat());
+    printf("Superior IRQ!! csr_estat: %u\n", read_csr_estat());
 }
