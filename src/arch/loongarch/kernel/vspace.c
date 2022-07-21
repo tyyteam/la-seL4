@@ -114,13 +114,27 @@ typedef struct resolve_ret resolve_ret_t;
 static inline uint64_t PURE
 pte_ptr_get_valid(pte_t *pte_ptr) {
     uint64_t ret;
-    ret = (pte_ptr->words[0] & 0x1ull) >> 0;
+    ret = (pte_ptr->words[0] & 0x1ull);
+    return ret;
+}
+
+static inline uint64_t PURE
+pte_ptr_is_leaf(pte_t *pte_ptr) {
+    uint64_t ret;
+    ret = (pte_ptr->words[0] & 0x40ull);
+    return ret;
+}
+
+static inline uint64_t PURE
+pte_ptr_is_initial(pte_t *pte_ptr) {
+    uint64_t ret;
+    ret = pte_ptr->words[0];
     return ret;
 }
 
 static inline bool_t isPTEPageTable(pte_t *pte)
 {
-    if (pte_ptr_get_valid(pte)) {
+    if (pte_ptr_is_leaf(pte) || pte_ptr_is_initial(pte) == 0) {
         return 0;
     }
     else {
@@ -268,32 +282,37 @@ BOOT_CODE void map_it_pt_cap(cap_t vspace_cap, cap_t pt_cap)
     pte_t *lvl1pt = PTE_PTR(pptr_of_cap(vspace_cap));
 
     /* pt to be mapped */
-    pte_t *pt   = PTE_PTR(pptr_of_cap(pt_cap));
+    pte_t *pt = PTE_PTR(pptr_of_cap(pt_cap));
 
     /* Get PT slot to install the address in */
     pt_ret = lookupPTSlot(lvl1pt, vptr);
 
     targetSlot = pt_ret.ptSlot;
 
+    // if (!pt_ret.ptLevel) {
+    //     *targetSlot = pte_next(addrFromPPtr(pt), true, PTE_L3);
+    // } else {
+    //     *targetSlot = pte_next(addrFromPPtr(pt), false, PTE_NONE);
+    // }
     *targetSlot = pte_next(addrFromPPtr(pt), false, PTE_NONE);
+
     // sfence();//TODO 虚拟内存屏障指令
 }
 
 BOOT_CODE void map_it_frame_cap(cap_t vspace_cap, cap_t frame_cap)
 {
-    pte_t *lvl1pt   = PTE_PTR(pptr_of_cap(vspace_cap));
-    pte_t *frame_pptr   = PTE_PTR(pptr_of_cap(frame_cap));
+    pte_t *lvl1pt = PTE_PTR(pptr_of_cap(vspace_cap));
+    pte_t *frame_pptr = PTE_PTR(pptr_of_cap(frame_cap));
     vptr_t frame_vptr = cap_frame_cap_get_capFMappedAddress(frame_cap);
 
-    /* We deal with a frame as 4KiB */
+    /* We deal with a frame as 16KiB */
     lookupPTSlot_ret_t lu_ret = lookupPTSlot(lvl1pt, frame_vptr);
     assert(lu_ret.ptBitsLeft == seL4_PageBits);
 
     pte_t *targetSlot = lu_ret.ptSlot;
 
-    *targetSlot = pte_new(
-                      (pptr_to_paddr(frame_pptr) >> seL4_PageBits)
-                  );
+    *targetSlot = pte_next(addrFromPPtr(frame_pptr), true, PTE_L3);
+
     // sfence();
 }
 
@@ -342,7 +361,7 @@ BOOT_CODE cap_t create_it_address_space(cap_t root_cnode_cap, v_region_t it_v_re
     cap_t      lvl1pt_cap;
     vptr_t     pt_vptr;
 
-    copyGlobalMappings_t(PTE_PTR(rootserver.vspace));
+    // copyGlobalMappings_t(PTE_PTR(rootserver.vspace));
 
     lvl1pt_cap =
         cap_page_table_cap_new(
@@ -365,7 +384,7 @@ BOOT_CODE cap_t create_it_address_space(cap_t root_cnode_cap, v_region_t it_v_re
                              create_it_pt_cap(lvl1pt_cap, it_alloc_paging(), pt_vptr, IT_ASID))
                ) {
                 return cap_null_cap_new();
-            }
+            } 
         }
 
     }
@@ -392,34 +411,34 @@ BOOT_CODE void write_it_asid_pool(cap_t it_ap_cap, cap_t it_lvl1pt_cap)
 
 /* ==================== BOOT CODE FINISHES HERE ==================== */
 
-// static findVSpaceForASID_ret_t findVSpaceForASID(asid_t asid)
-// {
-//     findVSpaceForASID_ret_t ret;
-//     // asid_pool_t        *poolPtr;
-//     // pde_t     *vspace_root;
+static findVSpaceForASID_ret_t findVSpaceForASID(asid_t asid)
+{
+    findVSpaceForASID_ret_t ret;
+    asid_pool_t        *poolPtr;
+    pde_t     *vspace_root;
 
-//     // poolPtr = riscvKSASIDTable[asid >> asidLowBits];
-//     // if (!poolPtr) {
-//     //     current_lookup_fault = lookup_fault_invalid_root_new();
+    poolPtr = loongarchKSASIDTable[asid >> asidLowBits];
+    if (!poolPtr) {
+        current_lookup_fault = lookup_fault_invalid_root_new();
 
-//     //     ret.vspace_root = NULL;
-//     //     ret.status = EXCEPTION_LOOKUP_FAULT;
-//     //     return ret;
-//     // }
+        ret.vspace_root = NULL;
+        ret.status = EXCEPTION_LOOKUP_FAULT;
+        return ret;
+    }
 
-//     // vspace_root = poolPtr->array[asid & MASK(asidLowBits)];
-//     // if (!vspace_root) {
-//     //     current_lookup_fault = lookup_fault_invalid_root_new();
+    vspace_root = poolPtr->array[asid & MASK(asidLowBits)];
+    if (!vspace_root) {
+        current_lookup_fault = lookup_fault_invalid_root_new();
 
-//     //     ret.vspace_root = NULL;
-//     //     ret.status = EXCEPTION_LOOKUP_FAULT;
-//     //     return ret;
-//     // }
+        ret.vspace_root = NULL;
+        ret.status = EXCEPTION_LOOKUP_FAULT;
+        return ret;
+    }
 
-//     // ret.vspace_root = vspace_root;
-//     // ret.status = EXCEPTION_NONE;
-//     return ret;
-// }
+    ret.vspace_root = vspace_root;
+    ret.status = EXCEPTION_NONE;
+    return ret;
+}
 
 void copyGlobalMappings(pte_t *newLvl1pt)
 {
@@ -435,9 +454,8 @@ void copyGlobalMappings_t(pte_t *newLvl1pt)
 {
     unsigned long i;
 
-    for (i = LA_GET_PT_INDEX(PPTR_BASE, 1); i < BIT(PT_INDEX_BITS); i++) {
-        pte_t *pte = PTE_PTR(PTE_CREATE_NEXT(1ull));
-        newLvl1pt[i] = *pte;
+    for (i = LA_GET_PT_INDEX(0ull, 1); i < BIT(PT_INDEX_BITS); i++) {
+        newLvl1pt[i].words[0] = PTE_CREATE_NEXT(0x40ull);
     }
 }
 
@@ -482,6 +500,8 @@ lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
     word_t level = CONFIG_PT_LEVELS - 1;
     pte_t *pt = lvl1pt;
     pte_t *save_ptSlot = lvl1pt;
+    printf("pt: %p\n", pt);
+    printf("save_ptSlot: %p\n", save_ptSlot);
 
     /* this is how many bits we potentially have left to decode. Initially we have the
      * full address space to decode, and every time we walk this will be reduced. The
@@ -489,18 +509,25 @@ lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
      * or already exists, in ret.ptSlot. The following formulation is an invariant of
      * the loop: */
     ret.ptBitsLeft = PT_INDEX_BITS * level + seL4_PageBits;
-    save_ptSlot = (pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS)));
+    save_ptSlot = pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
+    printf("ret.ptBitsLeft: %lu\n", ret.ptBitsLeft);
+    printf("save_ptSlot: %p\n", save_ptSlot);
 
     while (isPTEPageTable((pte_t *)save_ptSlot) && likely(0 < level)) {
         level--;
         ret.ptBitsLeft -= PT_INDEX_BITS;
-        pt = (pte_t *)(save_ptSlot->words[0]);
+        pt = PTE_PTR(paddr_to_pptr(save_ptSlot->words[0]));
         save_ptSlot = pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
+        printf("ret.ptBitsLeft: %lu\n", ret.ptBitsLeft);
+        printf("pt: %p\n", pt);
+        printf("save_ptSlot: %p\n", save_ptSlot);
     }
 
-    if (!isPTEPageTable((pte_t *)save_ptSlot)) {
-        ret.ptSlot = (pte_t *)save_ptSlot;
-    }
+    ret.ptSlot = (pte_t *)save_ptSlot;
+    ret.ptLevel = level;
+    // if (!isPTEPageTable((pte_t *)save_ptSlot)) {
+    //     ret.ptSlot = (pte_t *)save_ptSlot;
+    // }
 
     return ret;
 }
@@ -679,28 +706,28 @@ void deleteASIDPool(asid_t asid_base, asid_pool_t *pool)
 
 void setVMRoot(tcb_t *tcb)
 {
-    // cap_t threadRoot;
-    // asid_t asid;
-    // pte_t *lvl1pt;
-    // findVSpaceForASID_ret_t  find_ret;
+    cap_t threadRoot;
+    asid_t asid;
+    pte_t *lvl1pt;
+    findVSpaceForASID_ret_t  find_ret;
 
-    // threadRoot = TCB_PTR_CTE_PTR(tcb, tcbVTable)->cap;
+    threadRoot = TCB_PTR_CTE_PTR(tcb, tcbVTable)->cap;
 
-    // if (cap_get_capType(threadRoot) != cap_page_table_cap) {
-    //     setVSpaceRoot(kpptr_to_paddr(&kernel_level0_pd), 0);
-    //     return;
-    // }
+    if (cap_get_capType(threadRoot) != cap_page_table_cap) {
+        setVSpaceRoot(kpptr_to_paddr(&kernel_l1pt), 0);
+        return;
+    }
 
-    // lvl1pt = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(threadRoot));
+    lvl1pt = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(threadRoot));
 
-    // asid = cap_page_table_cap_get_capPTMappedASID(threadRoot);
-    // find_ret = findVSpaceForASID(asid);
-    // if (unlikely(find_ret.status != EXCEPTION_NONE || find_ret.vspace_root != lvl1pt)) {
-    //     setVSpaceRoot(kpptr_to_paddr(&kernel_level0_pd), 0);
-    //     return;
-    // }
+    asid = cap_page_table_cap_get_capPTMappedASID(threadRoot);
+    find_ret = findVSpaceForASID(asid);
+    if (unlikely(find_ret.status != EXCEPTION_NONE || find_ret.vspace_root != lvl1pt)) {
+        setVSpaceRoot(kpptr_to_paddr(&kernel_l1pt), 0);
+        return;
+    }
 
-    // setVSpaceRoot(addrFromPPtr(lvl1pt), asid);
+    setUserVSpaceRoot(addrFromPPtr(lvl1pt), asid);
 }
 
 bool_t CONST isValidVTableRoot(cap_t cap)

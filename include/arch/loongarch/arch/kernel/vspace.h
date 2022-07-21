@@ -31,6 +31,7 @@ void write_it_asid_pool(cap_t it_ap_cap, cap_t it_lvl1pt_cap);
 struct lookupPTSlot_ret {
     pte_t *ptSlot;
     word_t ptBitsLeft;
+    word_t ptLevel;
 };
 
 typedef struct lookupPTSlot_ret lookupPTSlot_ret_t;
