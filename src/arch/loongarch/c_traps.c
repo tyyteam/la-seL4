@@ -142,6 +142,7 @@ void VISIBLE NORETURN c_handle_exception(void)
     c_entry_hook();
 
     word_t excode = read_csr_excode();
+    printf("excode: %lu\n", excode);
     switch (excode)
     {
         case LAAddrError:               //ADEF or ADEM
@@ -240,7 +241,7 @@ void VISIBLE NORETURN c_handle_syscall(word_t cptr, word_t msgInfo, syscall_t sy
     NODE_LOCK_SYS;
 
     c_entry_hook();
-#ifdef TRACK_KERNEL_ENTRIES
+#ifdef TRACK_KERNEL_ENTRIES //loongarch enabled this macro
     benchmark_debug_syscall_start(cptr, msgInfo, syscall);
     ksKernelEntry.is_fastpath = 0;
 #endif /* DEBUG */
