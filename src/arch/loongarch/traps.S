@@ -98,13 +98,8 @@ trap_entry:
 #else
     /* Load kernel's stack address */
     la $sp, kernel_stack_alloc
-<<<<<<< HEAD
 	addi.d $t8, $zero, 1
 	slli.d $t8, $t8, CONFIG_KERNEL_STACK_BITS
-=======
-	addi.w $t8, $zero, 1
-	slli.w $t8, $t8, CONFIG_KERNEL_STACK_BITS
->>>>>>> 205982af9db56198f62deab3d3b19938d9ff42e1
 	add.d $sp, $sp, $t8
 #endif
     
