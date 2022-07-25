@@ -142,7 +142,7 @@ void VISIBLE NORETURN c_handle_exception(void)
     c_entry_hook();
 
     word_t excode = read_csr_excode();
-    printf("excode: %lu\n", excode);
+    printf("excode:%lu\n",excode);
     switch (excode)
     {
         case LAAddrError:               //ADEF or ADEM

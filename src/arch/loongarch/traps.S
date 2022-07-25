@@ -30,12 +30,7 @@ trap_entry:
 #ifdef ENABLE_SMP_SUPPORT
     //TODO
 #else
-    # /* backup t1 into LOONGARCH_CSR_KS8*/
-    # csrwr $t1, LOONGARCH_CSR_KS8
-    # li.d $t1, 0xFFFFFFFFFFFFFFFF
-    # csrxchg $t0, $t1, LOONGARCH_CSR_KS0 //exchange the value of t0 and LOONGARCH_CSR_KS0
-    # csrrd $t1, LOONGARCH_CSR_KS8//restore t1
-    csrwr $t0, LOONGARCH_CSR_KS0
+    csrwr $t0, LOONGARCH_CSR_KS0 //exchange the value of t0 and LOONGARCH_CSR_KS0
 #endif
     st.d $ra, $t0, 0*REGBYTES
     st.d $tp, $t0, 1*REGBYTES
@@ -103,8 +98,13 @@ trap_entry:
 #else
     /* Load kernel's stack address */
     la $sp, kernel_stack_alloc
+<<<<<<< HEAD
 	addi.d $t8, $zero, 1
 	slli.d $t8, $t8, CONFIG_KERNEL_STACK_BITS
+=======
+	addi.w $t8, $zero, 1
+	slli.w $t8, $t8, CONFIG_KERNEL_STACK_BITS
+>>>>>>> 205982af9db56198f62deab3d3b19938d9ff42e1
 	add.d $sp, $sp, $t8
 #endif
     
