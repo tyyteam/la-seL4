@@ -55,7 +55,7 @@ bool_t CONST isValidVTableRoot(cap_t cap);
 exception_t checkValidIPCBuffer(vptr_t vptr, cap_t cap);
 vm_rights_t CONST maskVMRights(vm_rights_t vm_rights,
                                seL4_CapRights_t cap_rights_mask);
-exception_t decodeRISCVMMUInvocation(word_t label, word_t length, cptr_t cptr,
+exception_t decodeLOONGARCHMMUInvocation(word_t label, word_t length, cptr_t cptr,
                                      cte_t *cte, cap_t cap, word_t *buffer);
 exception_t performPageTableInvocationMap(cap_t cap, cte_t *ctSlot,
                                           pte_t lvl1pt, pte_t *ptSlot);

@@ -302,8 +302,7 @@ exception_t Arch_decodeInvocation(
     word_t *buffer
 )
 {
-    // return decodeRISCVMMUInvocation(label, length, cptr, slot, cap, buffer);
-    return EXCEPTION_NONE;
+    return decodeLOONGARCHMMUInvocation(label, length, cptr, slot, cap, buffer);
 }
 
 void Arch_prepareThreadDelete(tcb_t *thread)
