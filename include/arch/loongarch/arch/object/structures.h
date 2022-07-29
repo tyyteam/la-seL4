@@ -57,7 +57,7 @@ typedef pte_t pde_t;
 #define PTE_PTR(r) ((pte_t *)(r))
 #define PTE_REF(p) ((pte_t)(p))
 
-#define PT_SIZE_BITS 12
+#define PT_SIZE_BITS 14
 #define PT_PTR(r) ((pte_t *)(r))
 #define PT_REF(p) ((word_t)(p))
 
