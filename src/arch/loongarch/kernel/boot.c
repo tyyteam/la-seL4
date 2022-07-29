@@ -137,24 +137,23 @@ BOOT_CODE static void init_cpu(void)
     /* init tlb */
     init_tlb();
     
-    /* traps related*/
-    /* set vs of LOONGARCH_CSR_ECFG*/
+    /* set vs=0 of LOONGARCH_CSR_ECFG, all traps goes to the same trap_entry in traps.S*/
     csr_xchgl(0<<CSR_ECFG_VS_SHIFT, CSR_ECFG_VS, LOONGARCH_CSR_ECFG);
     
-    /* set the entry for normal exceptions(including interrupts).
-     * tlbrefill entry is set at elfloader, where we page table may cause tlb missing
+    /* set the entry for traps.
+     * tlbrefill entry is set in elfloader, we used page table in elfloader and may cause tlb missing.
      * machine error entry is not set yet.
      */
     csr_writeq((unsigned long)trap_entry, LOONGARCH_CSR_EENTRY);
 
-    /*local irqs*/
+    /* local irq initialization*/
     initLocalIRQController();
 
 #ifndef CONFIG_KERNEL_MCS
     initTimer();
 #endif
 
-    /* disable FPU*/
+    /* disable FPU access*/
     clear_csr_euen(BIT(CSR_EUEN_FPEN));
 
 #ifdef CONFIG_HAVE_FPU
@@ -163,7 +162,6 @@ BOOT_CODE static void init_cpu(void)
 }
 
 /* This and only this function initialises the platform. It does NOT initialise any kernel state. */
-
 BOOT_CODE static void init_plat(void)
 {
     initIRQController();
@@ -239,8 +237,8 @@ static BOOT_CODE bool_t try_init_kernel(
     
     map_kernel_window();
 
-    /* disable irq and do necessary setups, then enable them.*/
-    irq_disable();
+    /* disable traps and do necessary setups, then enable them*/
+    traps_off();
 
     /* initialise the CPU */
     init_cpu();
@@ -317,8 +315,8 @@ static BOOT_CODE bool_t try_init_kernel(
     /* initialise the IRQ states and provide the IRQ control cap */
     init_irqs(root_cnode_cap);
 
-    /*enable irq*/
-    irq_enable();
+    /*enable traps*/
+    traps_on();
 
     /* create the bootinfo frame */
     populate_bi_frame(0, CONFIG_MAX_NUM_NODES, ipcbuf_vptr, extra_bi_size);

@@ -983,9 +983,10 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 #define ECFG_PMC		10
 #define ECFG_TIMER		11
 #define ECFG_IPI		12
-//#define ECFGF(hwirq)		(UL_CONST(1) << hwirq)
+#define SWI_VEC			0x00000003
+#define HWI_VEC			0x000003fc
 
-#define ESTATF_IP		0x00001fff
+#define ESTAT_IS		0x00001fff
 
 #define LOONGARCH_IOCSR_FEATURES	0x8
 #define  IOCSRF_TEMP			BIT(0)
@@ -1059,6 +1060,20 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 #define LOONGARCH_IOCSR_EXTIOI_ISR_BASE		0x1800
 #define LOONGARCH_IOCSR_EXTIOI_ROUTE_BASE	0x1c00
 #define IOCSR_EXTIOI_VECTOR_NUM			256
+
+
+/* ============== LS7A registers =============== */
+#define LS7A_PCH_REG_BASE       0x9000000010000000UL
+  
+#define LS7A_INT_MASK_REG       LS7A_PCH_REG_BASE + 0x020
+#define LS7A_INT_EDGE_REG       LS7A_PCH_REG_BASE + 0x060
+#define LS7A_INT_CLEAR_REG      LS7A_PCH_REG_BASE + 0x080
+#define LS7A_INT_HTMSI_VEC_REG  LS7A_PCH_REG_BASE + 0x200
+#define LS7A_INT_STATUS_REG     LS7A_PCH_REG_BASE + 0x3a0
+#define LS7A_INT_POL_REG        LS7A_PCH_REG_BASE + 0x3e0
+
+
+
 
 #ifndef __ASSEMBLER__
 
@@ -1137,6 +1152,26 @@ static inline void w_csr_ticlr(unsigned int x)
 static inline void w_csr_tcfg(unsigned long x)
 {
   asm volatile("csrwr %0, 0x41" : : "r" (x) );
+}
+
+static inline unsigned int r_csr_crmd(void)
+{
+  unsigned int x;
+  asm volatile("csrrd %0, 0x0" : "=r" (x) );
+  return x;
+}
+
+static inline unsigned int r_csr_prmd(void)
+{
+  unsigned int x;
+  asm volatile("csrrd %0, 0x1" : "=r" (x) );
+  return x;
+}
+
+static inline int intr_get(void)
+{
+  unsigned int x = r_csr_crmd();
+  return (x & CSR_CRMD_IE) != 0;
 }
 
 #define read_csr_asid()			__csrrd(LOONGARCH_CSR_ASID)
@@ -1379,7 +1414,7 @@ void trap_init(void);
 
 /* irq related macro definitions, variables and functions during bootstrapping*/
 
-static inline void irq_disable(void)
+static inline void traps_off(void)
 {
 	/*clear CSR_CRMD_IE*/
 	uint32_t flags = 0;
@@ -1390,7 +1425,7 @@ static inline void irq_disable(void)
 		: "memory");
 }
 
-static inline void irq_enable(void)
+static inline void traps_on(void)
 {
 	/*set CSR_CRMD_IE*/
 	uint32_t flags = CSR_CRMD_IE;

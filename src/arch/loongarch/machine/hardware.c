@@ -266,22 +266,22 @@ BOOT_CODE void initTimer(void)
 
 BOOT_CODE void initLocalIRQController(void)
 {
-    printf("Init local IRQ\n");
+    printf("Initializing local IRQ and extend io interrupt controller...\n");
 
-    /* Init per-hart extend io interrupt */
-    extio_init_hart();
+    /* clear the interrupt stat */
+    clear_csr_estat(ESTAT_IS);
 
-    clear_csr_estat(ESTATF_IP);
     /* Enable SoftWare Interrupt, Performance Monitor Counter Overflow Interrupt,
      * Timer Interrupt. If SMP is enabled, then enable the ECFG_IPI. */
-    set_csr_ecfg(BIT(ECFG_SWI0)|BIT(ECFG_SWI1)|BIT(ECFG_HW0)|BIT(ECFG_HW1)|BIT(ECFG_HW2)|BIT(ECFG_HW3)\
-        |BIT(ECFG_HW4)|BIT(ECFG_HW5)|BIT(ECFG_HW6)|BIT(ECFG_HW7)|BIT(ECFG_PMC)|BIT(ECFG_TIMER)\
-        |SMP_TERNARY(BIT(ECFG_IPI), 0));
+    set_csr_ecfg(SWI_VEC|HWI_VEC|BIT(ECFG_PMC)|BIT(ECFG_TIMER)|SMP_TERNARY(BIT(ECFG_IPI), 0));
+
+    /* map extend io interrupt to HW1 of node 0, core 0.*/
+    extioi_init_hart();
 }
 
 BOOT_CODE void initIRQController(void)
 {
-    printf("Initializing extend io interrupt...\n");
+    printf("Initializing loongson 7a1000 interrupt controller...\n");
 
     /* Initialize active_irq[] properly to stick to the semantics and play safe.
      * Effectively this is not needed if irqInvalid is zero (which is currently
@@ -292,7 +292,7 @@ BOOT_CODE void initIRQController(void)
         active_irq[i] = irqInvalid;
     }
 
-    extio_init_controller();
+    ls7a_intc_init();
 }
 
 static inline void handleSpuriousIRQ(void)

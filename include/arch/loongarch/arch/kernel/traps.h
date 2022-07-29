@@ -19,7 +19,17 @@
 
 static inline void arch_c_entry_hook(void)
 {
-    /* Nothing architecture specific to be done. */
+    //check CSR_PRMD_PPLV 
+    if((r_csr_prmd() & CSR_PRMD_PPLV) != 0){
+        printf("kerneltrap: not from privilege 0\n");
+        UNREACHABLE();
+    }
+
+    //check CSR_CRMD_IE
+    if(intr_get() != 0){
+        printf("kerneltrap: interrupts enabled\n");
+        UNREACHABLE();
+    }
 }
 
 static inline void arch_c_exit_hook(void)
