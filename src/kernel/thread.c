@@ -40,18 +40,19 @@ void activateThread(void)
         assert(thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState) == ThreadState_Running);
     }
 #endif
-    int debugvalue=thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState);
-    printf("%d\n",debugvalue);
-    switch (debugvalue) {
+    // int debugvalue=thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState);
+    // printf("%d\n",debugvalue);
+    // switch (debugvalue) {
+    switch (thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState)) {
     case ThreadState_Running:
-        printf("ThreadState_Running: %d\n",ThreadState_Running);
+        // printf("ThreadState_Running: %d\n",ThreadState_Running);
 #ifdef CONFIG_VTX
     case ThreadState_RunningVM:
 #endif
         break;
 
     case ThreadState_Restart: {
-        printf("ThreadState_Restart: %d\n",ThreadState_Restart);
+        // printf("ThreadState_Restart: %d\n",ThreadState_Restart);
         word_t pc;
 
         pc = getRestartPC(NODE_STATE(ksCurThread));
