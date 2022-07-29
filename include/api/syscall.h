@@ -37,8 +37,6 @@ exception_t handleVMFaultEvent(vm_fault_type_t vm_faultType);
 
 static inline word_t PURE getSyscallArg(word_t i, word_t *ipc_buffer)
 {
-    printf("i: %lu\n",i);
-    printf("n_msgRegisters: %d\n",n_msgRegisters);
     if (i < n_msgRegisters) {
         return getRegister(NODE_STATE(ksCurThread), msgRegisters[i]);
     }

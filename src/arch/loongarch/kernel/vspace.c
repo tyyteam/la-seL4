@@ -767,28 +767,29 @@ vm_rights_t CONST maskVMRights(vm_rights_t vm_rights, seL4_CapRights_t cap_right
 
 /* The rest of the file implements the LOONGARCH object invocations */
 
-// static pte_t CONST makeUserPTE(paddr_t paddr/*, bool_t executable, vm_rights_t vm_rights*/)
-// {
-    // word_t write = LOONGARCHGetWriteFromVMRights(vm_rights);
-    // word_t read = LOONGARCHGetReadFromVMRights(vm_rights);
-    // if (unlikely(!read && !write && !executable)) {
-    //     return pte_pte_invalid_new();
-    // } else {
-    //     return pte_new(
-    //                paddr >> seL4_PageBits,
-    //                0, /* sw */
-    //                1, /* dirty */
-    //                1, /* accessed */
-    //                0, /* global */
-    //                1, /* user */
-    //                executable, /* execute */
-    //                RISCVGetWriteFromVMRights(vm_rights), /* write */
-    //                RISCVGetReadFromVMRights(vm_rights), /* read */
-    //                1 /* valid */
-    //            );
-    // }
-//     return pte_next(paddr, true, PTE_L3);
-// }
+static pte_t CONST makeUserPTE(paddr_t paddr/*, bool_t executable, vm_rights_t vm_rights*/)
+{
+    assert(0);
+    word_t write = LOONGARCHGetWriteFromVMRights(vm_rights);
+    word_t read = LOONGARCHGetReadFromVMRights(vm_rights);
+    if (unlikely(!read && !write && !executable)) {
+        return pte_pte_invalid_new();
+    } else {
+        return pte_new(
+                   paddr >> seL4_PageBits,
+                   0, /* sw */
+                   1, /* dirty */
+                   1, /* accessed */
+                   0, /* global */
+                   1, /* user */
+                   executable, /* execute */
+                   RISCVGetWriteFromVMRights(vm_rights), /* write */
+                   RISCVGetReadFromVMRights(vm_rights), /* read */
+                   1 /* valid */
+               );
+    }
+    return pte_next(paddr, true, PTE_L3);
+}
 
 static inline bool_t CONST checkVPAlignment(vm_page_size_t sz, word_t w)
 {
@@ -1007,13 +1008,8 @@ static exception_t decodeLOONGARCHFrameInvocation(word_t label, word_t length,
         cap = cap_frame_cap_set_capFMappedAddress(cap,  vaddr);
 
         bool_t executable = !vm_attributes_get_riscvExecuteNever(attr);
-        assert(0);
-        printf("executable: %lu\n",executable);
-        printf("frame_paddr: %lu\n",frame_paddr);
-        printf("vmRights: %lu\n",vmRights);
 
-        pte_t pte;
-        // pte_t pte = makeUserPTE(frame_paddr, executable, vmRights);
+        pte_t pte = makeUserPTE(frame_paddr, executable, vmRights);
         
         setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
         return performPageInvocationMapPTE(cap, cte, pte, lu_ret.ptSlot);
