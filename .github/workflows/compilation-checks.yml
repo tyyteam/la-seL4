@@ -27,7 +27,7 @@ jobs:
             compiler: llvm
     steps:
     - uses: actions/checkout@v2
-    - uses: seL4/ci-actions/standalone-kernel@master
+    - uses: tyyteam/la-seL4-ci-actions/standalone-kernel@master
       with:
         ARCH: ${{ matrix.arch }}
         COMPILER: ${{ matrix.compiler }}
