@@ -25,7 +25,7 @@ jobs:
           # llvm RISCV64 compilation is not currently supported
           - arch: RISCV64
             compiler: llvm
-          # llvm Loongarch64 compilation is not currently supported
+          # llvm loongarch64 compilation is not currently supported
           - arch: loongarch64
             compiler: llvm
 
