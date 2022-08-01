@@ -19,14 +19,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [ARM, ARM_HYP, AARCH64, RISCV64, X64, loongarch64]
+        arch: [ARM, ARM_HYP, AARCH64, RISCV64, X64, Loongarch64]
         compiler: [gcc, llvm]
         exclude:
           # llvm RISCV64 compilation is not currently supported
           - arch: RISCV64
             compiler: llvm
-          # llvm loongarch64 compilation is not currently supported
-          - arch: loongarch64
+          # llvm Loongarch64 compilation is not currently supported
+          - arch: Loongarch64
             compiler: llvm
             
     steps:
