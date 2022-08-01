@@ -47,13 +47,13 @@ typedef struct resolve_ret resolve_ret_t;
 
 static exception_t performPageGetAddress(void *vbase_ptr);
 
-// static word_t CONST RISCVGetWriteFromVMRights(vm_rights_t vm_rights)
+// static word_t CONST LOONGARCHGetWriteFromVMRights(vm_rights_t vm_rights)
 // {
 //     /* Write-only frame cap rights not currently supported. */
 //     return vm_rights == VMReadWrite;
 // }
 
-// static inline word_t CONST RISCVGetReadFromVMRights(vm_rights_t vm_rights)
+// static inline word_t CONST LOONGARCHGetReadFromVMRights(vm_rights_t vm_rights)
 // {
 //     /* Write-only frame cap rights not currently supported.
 //      * Kernel-only conveys no user rights. */
@@ -894,7 +894,7 @@ static exception_t decodeLOONGARCHPageTableInvocation(word_t label, word_t lengt
 
     paddr_t paddr = addrFromPPtr(
                         PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap)));
-    pte_t pte = pte_next(paddr,false,PTE_NONE); 
+    pte_t pte = pte_next(paddr, false, PTE_NONE);
 
     cap = cap_page_table_cap_set_capPTIsMapped(cap, 1);
     cap = cap_page_table_cap_set_capPTMappedASID(cap, asid);
@@ -1030,7 +1030,7 @@ static exception_t decodeLOONGARCHFrameInvocation(word_t label, word_t length,
     }
 
     default:
-        userError("RISCVPage: Illegal operation.");
+        userError("LOONGARCHPage: Illegal operation.");
         current_syscall_error.type = seL4_IllegalOperation;
 
         return EXCEPTION_SYSCALL_ERROR;
@@ -1070,7 +1070,7 @@ exception_t decodeLOONGARCHMMUInvocation(word_t label, word_t length, cptr_t cpt
         // void            *frame;
         exception_t      status;
 
-        // if (label != RISCVASIDControlMakePool) {
+        // if (label != LOONGARCHASIDControlMakePool) {
         //     current_syscall_error.type = seL4_IllegalOperation;
 
         //     return EXCEPTION_SYSCALL_ERROR;
@@ -1142,7 +1142,7 @@ exception_t decodeLOONGARCHMMUInvocation(word_t label, word_t length, cptr_t cpt
         // word_t i;
         // asid_t       asid;
 
-        // if (label != RISCVASIDPoolAssign) {
+        // if (label != LOONGARCHASIDPoolAssign) {
         //     current_syscall_error.type = seL4_IllegalOperation;
 
         //     return EXCEPTION_SYSCALL_ERROR;
@@ -1159,7 +1159,7 @@ exception_t decodeLOONGARCHMMUInvocation(word_t label, word_t length, cptr_t cpt
         if (unlikely(
                 cap_get_capType(vspaceCap) != cap_page_table_cap ||
                 cap_page_table_cap_get_capPTIsMapped(vspaceCap))) {
-            userError("RISCVASIDPool: Invalid vspace root.");
+            userError("LOONGARCHASIDPool: Invalid vspace root.");
             current_syscall_error.type = seL4_InvalidCapability;
             current_syscall_error.invalidCapNumber = 1;
 
@@ -1332,7 +1332,7 @@ void Arch_userStackTrace(tcb_t *tptr)
 
 //     frameSize = cap_frame_cap_get_capFSize(lu_ret.cap);
 
-//     if (frameSize != RISCV_Mega_Page) {
+//     if (frameSize != LOONGARCH_Mega_Page) {
 //         userError("Invalid frame size. The kernel expects large page log buffer");
 //         current_fault = seL4_Fault_CapFault_new(frame_cptr, false);
 
@@ -1351,7 +1351,7 @@ void Arch_userStackTrace(tcb_t *tptr)
 //     }
 //     assert(physical_address - ksUserLogBuffer == BIT(seL4_LargePageBits));
 // #else
-//     kernel_image_level2_dev_pt[RISCV_GET_PT_INDEX(KS_LOG_PPTR, 1)] = pte_next(ksUserLogBuffer, true);
+//     kernel_image_level2_dev_pt[LOONGARCH_GET_PT_INDEX(KS_LOG_PPTR, 1)] = pte_next(ksUserLogBuffer, true);
 // #endif
 
 //     sfence();
