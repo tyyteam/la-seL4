@@ -19,16 +19,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [ARM, ARM_HYP, AARCH64, RISCV64, X64, Loongarch64]
+        arch: [ARM, ARM_HYP, AARCH64, RISCV64, X64, loongarch64]
         compiler: [gcc, llvm]
         exclude:
           # llvm RISCV64 compilation is not currently supported
           - arch: RISCV64
             compiler: llvm
           # llvm Loongarch64 compilation is not currently supported
-          - arch: Loongarch64
+          - arch: loongarch64
             compiler: llvm
-            
+
     steps:
     - uses: actions/checkout@v2
     - uses: tyyteam/la-seL4-ci-actions/standalone-kernel@master
