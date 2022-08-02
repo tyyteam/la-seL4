@@ -99,6 +99,11 @@ if("${CROSS_COMPILER_PREFIX}" STREQUAL "")
                 "riscv64-unknown-elf-"
                 "riscv64-elf-"
             )
+        elseif(Loongarch64)
+            FindPrefixedGCC(
+                CROSS_COMPILER_PREFIX
+                "loongarch64-unknown-linux-gnu-"
+            )
         endif()
     endif()
     if(AARCH32HF)
