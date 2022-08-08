@@ -30,7 +30,7 @@ trap_entry:
 #ifdef ENABLE_SMP_SUPPORT
     //TODO
 #else
-    csrwr $t0, LOONGARCH_CSR_KS0 //exchange the value of t0 and LOONGARCH_CSR_KS0
+    csrwr $t0, LOONGARCH_CSR_KS3 //exchange the value of t0 and LOONGARCH_CSR_KS0
 #endif
     st.d $ra, $t0, 0*REGBYTES
     st.d $tp, $t0, 1*REGBYTES
@@ -70,7 +70,7 @@ trap_entry:
 #ifdef ENABLE_SMP_SUPPORT
     //TODO
 #else
-    csrrd $t8, LOONGARCH_CSR_KS0
+    csrrd $t8, LOONGARCH_CSR_KS3
 #endif
     st.d $t8, $t0, 11*REGBYTES
 
@@ -136,6 +136,11 @@ handle_syscall:
 exception:
     /* Save NextIP*/
     st.d $ra, $t0, 38*REGBYTES
+
+	# csrwr	$t0, EXCEPTION_KS0
+	# csrwr	$t1, EXCEPTION_KS1
+	# csrwr	$ra, EXCEPTION_KS2
+    
     b c_handle_exception
 
     
