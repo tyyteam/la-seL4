@@ -443,6 +443,12 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 #define LOONGARCH_CSR_KS7		0x37
 #define LOONGARCH_CSR_KS8		0x38
 
+/* Exception allocated KS0, KS1 and KS2 statically */
+#define EXCEPTION_KS0			LOONGARCH_CSR_KS0
+#define EXCEPTION_KS1			LOONGARCH_CSR_KS1
+#define EXCEPTION_KS2			LOONGARCH_CSR_KS2
+#define EXC_KSCRATCH_MASK		(1 << 0 | 1 << 1 | 1 << 2)
+
 /* Timer registers */
 #define LOONGARCH_CSR_TMID		0x40	/* Timer ID */
 
@@ -1117,6 +1123,36 @@ static inline void write_csr_index(unsigned int idx)
 	__csrxchg(idx, CSR_TLBIDX_IDXM, LOONGARCH_CSR_TLBIDX);
 }
 
+static inline void enable_pg(unsigned long val)
+{
+	asm volatile("csrwr %0, 0x0" : : "r"(val));
+}
+
+static inline void write_csr_pgdl(unsigned long val)
+{
+    asm volatile("csrwr %0, 0x19" : : "r" (val));
+}
+
+static inline void write_csr_pgdh(unsigned long val)
+{
+    asm volatile("csrwr %0, 0x1a" : : "r" (val));
+}
+
+static inline void write_csr_pwcl(unsigned long val)
+{
+    asm volatile("csrwr %0, 0x1c" : : "r" (val));
+}
+
+static inline void write_csr_pwch(unsigned long val)
+{
+    asm volatile("csrwr %0, 0x1d" : : "r" (val));
+}
+
+static inline void write_csr_tlbrentry(unsigned long val)
+{
+    asm volatile("csrwr %0, 0x88" : : "r" (val));
+}
+
 static inline unsigned int read_csr_pagesize(void)
 {
 	return (__csrrd(LOONGARCH_CSR_TLBIDX) & CSR_TLBIDX_SIZEM) >> CSR_TLBIDX_SIZE;
@@ -1304,7 +1340,10 @@ __BUILD_CSR_OP(tlbidx)
 #define PS_SHIFT	24
 
 /* Default page size for a given kernel configuration */
-#define PS_DEFAULT_SIZE PS_32M
+#define PS_DEFAULT_SIZE PS_16K
+/*CY 目前暂时只支持最小大页 */
+#define PS_HUGE_TLB_SIZE   PS_16M
+#define PS_HUGE_SIZE   PS_32M
 
 /* Default huge tlb size for a given kernel configuration */
 // #ifdef CONFIG_PAGE_SIZE_4KB
