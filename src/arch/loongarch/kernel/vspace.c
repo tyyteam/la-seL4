@@ -561,9 +561,10 @@ exception_t handleVMFault(tcb_t *thread, vm_fault_type_t vm_faultType)
         case LABoundCheck:          //BCE
 
         case LAPagePrivilegeIllegal://PPI
-
+            printf("unhandled exceptions!\n");
+            return EXCEPTION_FAULT;
         default:
-            fail("not handled exceptions! or Invalid VM fault type\n");
+            fail("Invalid VM fault type\n");
     }
 }
 
