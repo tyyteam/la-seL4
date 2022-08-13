@@ -26,6 +26,7 @@ manual/doxygen-output
 manual/generated
 .vscode
 .history
+.idea
 
 # Emacs backups
 *~
