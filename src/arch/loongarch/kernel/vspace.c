@@ -71,16 +71,16 @@ static exception_t performPageGetAddress(void *vbase_ptr);
 //     return ret;
 // }
 
-// static inline uint64_t PURE
-// pte_ptr_get_ppn(pte_t *pte_ptr) {
-//     uint64_t ret;
-//     ret = (pte_ptr->words[0] & 0x3ffffffffffc00ull) >> 10;
-//     /* Possibly sign extend */
-//     if (__builtin_expect(!!(0 && (ret & (1ull << (38)))), 0)) {
-//         ret |= 0x0;
-//     }
-//     return ret;
-// }
+static inline uint64_t PURE
+pte_ptr_get_ppn(pte_t *pte_ptr) {
+    uint64_t ret;
+    ret = (pte_ptr->words[0] & 0xffffffffc000ull) >> 14;
+    /* Possibly sign extend */
+    // if (__builtin_expect(!!(0 && (ret & (1ull << (36)))), 0)) {
+    //     ret |= 0x0;
+    // }
+    return ret;
+}
 
 // static inline uint64_t PURE
 // pte_ptr_get_execute(pte_t *pte_ptr) {
@@ -604,21 +604,21 @@ void deleteASIDPool(asid_t asid_base, asid_pool_t *pool)
 //     return EXCEPTION_NONE;
 // }
 
-// static exception_t performASIDPoolInvocation(asid_t asid, asid_pool_t *poolPtr, cte_t *vspaceCapSlot)
-// {
-//     cap_t cap = vspaceCapSlot->cap;
-//     word_t *regionBase = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap));
-//     cap = cap_page_table_cap_set_capPTMappedASID(cap, asid);
-//     cap = cap_page_table_cap_set_capPTMappedAddress(cap, 0);
-//     cap = cap_page_table_cap_set_capPTIsMapped(cap, 1);
-//     vspaceCapSlot->cap = cap;
+static exception_t performASIDPoolInvocation(asid_t asid, asid_pool_t *poolPtr, cte_t *vspaceCapSlot)
+{
+    cap_t cap = vspaceCapSlot->cap;
+    pte_t *regionBase = PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap));
+    cap = cap_page_table_cap_set_capPTMappedASID(cap, asid);
+    cap = cap_page_table_cap_set_capPTMappedAddress(cap, 0);
+    cap = cap_page_table_cap_set_capPTIsMapped(cap, 1);
+    vspaceCapSlot->cap = cap;
 
-//     copyGlobalMappings(regionBase);
+    copyGlobalMappings_t(regionBase);
 
-//     poolPtr->array[asid & MASK(asidLowBits)] = regionBase;
+    poolPtr->array[asid & MASK(asidLowBits)] = regionBase;
 
-//     return EXCEPTION_NONE;
-// }
+    return EXCEPTION_NONE;
+}
 
 // void deleteASID(asid_t asid, pte_t *vspace)
 // {
@@ -664,35 +664,35 @@ void unmapPageTable(asid_t asid, vptr_t vptr, pte_t *target_pt)
     // sfence();
 }
 
-// static pte_t pte_pte_invalid_new(void)
-// {
-//     return (pte_t) {
-//         0
-//     };
-// }
+static pte_t pte_pte_invalid_new(void)
+{
+    return (pte_t) {
+        0
+    };
+}
 
-// void unmapPage(vm_page_size_t page_size, asid_t asid, vptr_t vptr, pptr_t pptr)
-// {
-//     findVSpaceForASID_ret_t find_ret;
-//     lookupPTSlot_ret_t  lu_ret;
+void unmapPage(vm_page_size_t page_size, asid_t asid, vptr_t vptr, pptr_t pptr)
+{
+    findVSpaceForASID_ret_t find_ret;
+    lookupPTSlot_ret_t  lu_ret;
 
-//     find_ret = findVSpaceForASID(asid);
-//     if (find_ret.status != EXCEPTION_NONE) {
-//         return;
-//     }
+    find_ret = findVSpaceForASID(asid);
+    if (find_ret.status != EXCEPTION_NONE) {
+        return;
+    }
 
-//     lu_ret = lookupPTSlot(find_ret.vspace_root, vptr);
-//     if (unlikely(lu_ret.ptBitsLeft != pageBitsForSize(page_size))) {
-//         return;
-//     }
-//     if (!pte_ptr_get_valid(lu_ret.ptSlot) || isPTEPageTable(lu_ret.ptSlot)
-//         || (pte_ptr_get_ppn(lu_ret.ptSlot) << seL4_PageBits) != pptr_to_paddr((void *)pptr)) {
-//         return;
-//     }
+    lu_ret = lookupPTSlot(find_ret.vspace_root, vptr);
+    if (unlikely(lu_ret.ptBitsLeft != pageBitsForSize(page_size))) {
+        return;
+    }
+    if (!pte_ptr_get_valid(lu_ret.ptSlot) || isPTEPageTable(lu_ret.ptSlot)
+        || (pte_ptr_get_ppn(lu_ret.ptSlot) << seL4_PageBits) != pptr_to_paddr((void *)pptr)) {
+        return;
+    }
 
-//     lu_ret.ptSlot[0] = pte_pte_invalid_new();
-//     // sfence();
-// }
+    lu_ret.ptSlot[0] = pte_pte_invalid_new();
+    // sfence();
+}
 
 void setVMRoot(tcb_t *tcb)
 {
@@ -996,6 +996,7 @@ static exception_t decodeLOONGARCHFrameInvocation(word_t label, word_t length,
         } else {
             /* check this vaddr isn't already mapped */
             if (unlikely(pte_ptr_get_valid(lu_ret.ptSlot))) {
+                printf("lu_ret.ptSlot: %p", lu_ret.ptSlot);
                 userError("Virtual address already mapped");
                 current_syscall_error.type = seL4_DeleteFirst;
                 return EXCEPTION_SYSCALL_ERROR;
@@ -1043,19 +1044,16 @@ exception_t decodeLOONGARCHMMUInvocation(word_t label, word_t length, cptr_t cpt
                                      cte_t *cte, cap_t cap, word_t *buffer)
 {
     uint64_t tmpvalue=cap_get_capType(cap);
-    printf("%llu",tmpvalue);
+    // printf("%llu",tmpvalue);
     switch (tmpvalue) {
 
     case cap_page_table_cap:
-        printf("cap_page_table_cap!!!!\n");
         return decodeLOONGARCHPageTableInvocation(label, length, cte, cap, buffer);
 
     case cap_frame_cap:
-        printf("cap_frame_cap!!!!\n");
         return decodeLOONGARCHFrameInvocation(label, length, cte, cap, buffer);
 
     case cap_asid_control_cap: 
-        printf("cap_asid_control_cap!!!!");
         assert(0);
 
     
@@ -1134,20 +1132,17 @@ exception_t decodeLOONGARCHMMUInvocation(word_t label, word_t length, cptr_t cpt
     
 
     case cap_asid_pool_cap: {
-        printf("cap_asid_pool_cap!!!!");
-        assert(0);
-
         cap_t        vspaceCap;
         cte_t       *vspaceCapSlot;
-        // asid_pool_t *pool;
-        // word_t i;
-        // asid_t       asid;
+        asid_pool_t *pool;
+        word_t i;
+        asid_t       asid;
 
-        // if (label != LOONGARCHASIDPoolAssign) {
-        //     current_syscall_error.type = seL4_IllegalOperation;
+        if (label != LOONGARCHASIDPoolAssign) {
+            current_syscall_error.type = seL4_IllegalOperation;
 
-        //     return EXCEPTION_SYSCALL_ERROR;
-        // }
+            return EXCEPTION_SYSCALL_ERROR;
+        }
         if (current_extra_caps.excaprefs[0] == NULL) {
             current_syscall_error.type = seL4_TruncatedMessage;
 
@@ -1167,36 +1162,34 @@ exception_t decodeLOONGARCHMMUInvocation(word_t label, word_t length, cptr_t cpt
             return EXCEPTION_SYSCALL_ERROR;
         }
 
-        // pool = riscvKSASIDTable[cap_asid_pool_cap_get_capASIDBase(cap) >> asidLowBits];
-        // if (!pool) {
-        //     current_syscall_error.type = seL4_FailedLookup;
-        //     current_syscall_error.failedLookupWasSource = false;
-        //     current_lookup_fault = lookup_fault_invalid_root_new();
-        //     return EXCEPTION_SYSCALL_ERROR;
-        // }
+        pool = loongarchKSASIDTable[cap_asid_pool_cap_get_capASIDBase(cap) >> asidLowBits];
+        if (!pool) {
+            current_syscall_error.type = seL4_FailedLookup;
+            current_syscall_error.failedLookupWasSource = false;
+            current_lookup_fault = lookup_fault_invalid_root_new();
+            return EXCEPTION_SYSCALL_ERROR;
+        }
 
-        // if (pool != ASID_POOL_PTR(cap_asid_pool_cap_get_capASIDPool(cap))) {
-        //     current_syscall_error.type = seL4_InvalidCapability;
-        //     current_syscall_error.invalidCapNumber = 0;
-        //     return EXCEPTION_SYSCALL_ERROR;
-        // }
+        if (pool != ASID_POOL_PTR(cap_asid_pool_cap_get_capASIDPool(cap))) {
+            current_syscall_error.type = seL4_InvalidCapability;
+            current_syscall_error.invalidCapNumber = 0;
+            return EXCEPTION_SYSCALL_ERROR;
+        }
 
         /* Find first free ASID */
-        // asid = cap_asid_pool_cap_get_capASIDBase(cap);
-        // for (i = 0; i < BIT(asidLowBits) && (asid + i == 0 || pool->array[i]); i++);
+        asid = cap_asid_pool_cap_get_capASIDBase(cap);
+        for (i = 0; i < BIT(asidLowBits) && (asid + i == 0 || pool->array[i]); i++);
 
-        // if (i == BIT(asidLowBits)) {
-        //     current_syscall_error.type = seL4_DeleteFirst;
+        if (i == BIT(asidLowBits)) {
+            current_syscall_error.type = seL4_DeleteFirst;
 
-        //     return EXCEPTION_SYSCALL_ERROR;
-        // }
+            return EXCEPTION_SYSCALL_ERROR;
+        }
 
-        // asid += i;
+        asid += i;
 
-        // setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
-        // return performASIDPoolInvocation(asid, pool, vspaceCapSlot);
-        assert(0);
-        return EXCEPTION_NONE;
+        setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
+        return performASIDPoolInvocation(asid, pool, vspaceCapSlot);
     }
     default:
         fail("Invalid arch cap type");
@@ -1260,19 +1253,19 @@ exception_t performPageInvocationMapPTE(cap_t cap, cte_t *ctSlot,
 
 exception_t performPageInvocationUnmap(cap_t cap, cte_t *ctSlot)
 {
-    // if (cap_frame_cap_get_capFMappedASID(cap) != asidInvalid) {
-    //     unmapPage(cap_frame_cap_get_capFSize(cap),
-    //               cap_frame_cap_get_capFMappedASID(cap),
-    //               cap_frame_cap_get_capFMappedAddress(cap),
-    //               cap_frame_cap_get_capFBasePtr(cap)
-    //              );
-    // }
+    if (cap_frame_cap_get_capFMappedASID(cap) != asidInvalid) {
+        unmapPage(cap_frame_cap_get_capFSize(cap),
+                  cap_frame_cap_get_capFMappedASID(cap),
+                  cap_frame_cap_get_capFMappedAddress(cap),
+                  cap_frame_cap_get_capFBasePtr(cap)
+                 );
+    }
 
-    // cap_t slotCap = ctSlot->cap;
-    // slotCap = cap_frame_cap_set_capFMappedAddress(slotCap, 0);
-    // slotCap = cap_frame_cap_set_capFMappedASID(slotCap, asidInvalid);
-    // ctSlot->cap = slotCap;
-    assert(0);
+    cap_t slotCap = ctSlot->cap;
+    slotCap = cap_frame_cap_set_capFMappedAddress(slotCap, 0);
+    slotCap = cap_frame_cap_set_capFMappedASID(slotCap, asidInvalid);
+    ctSlot->cap = slotCap;
+
     return EXCEPTION_NONE;
 }
 
