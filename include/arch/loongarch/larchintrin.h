@@ -43,7 +43,7 @@ typedef struct rdtime
 } __rdtime_t;
 
 #ifdef __loongarch64
-static inline __drdtime_t 
+extern inline __drdtime_t 
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __builtin_loongarch_rdtime_d(void)
 {
