@@ -34,7 +34,7 @@ typedef struct drdtime
 {
   unsigned long dvalue;
   unsigned long dtimeid;
-} drdtime_t;
+} __drdtime_t;
 
 typedef struct rdtime
 {
@@ -43,11 +43,11 @@ typedef struct rdtime
 } __rdtime_t;
 
 #ifdef __loongarch64
-extern inline drdtime_t 
-//__attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
+static inline __drdtime_t 
+__attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __builtin_loongarch_rdtime_d(void)
 {
-  drdtime_t drdtime;
+  __drdtime_t drdtime;
   __asm__ volatile (
     "rdtime.d\t%[val],%[tid]\n\t"
     : [val]"=&r"(drdtime.dvalue),[tid]"=&r"(drdtime.dtimeid)
