@@ -47,12 +47,12 @@ extern inline drdtime_t
 //__attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __builtin_loongarch_rdtime_d(void)
 {
-	drdtime_t drdtime;
-	__asm__ volatile (
-		"rdtime.d\t%[val],%[tid]\n\t"
-		: [val]"=&r"(drdtime.dvalue),[tid]"=&r"(drdtime.dtimeid)
-		:);
-	return drdtime;
+  drdtime_t drdtime;
+  __asm__ volatile (
+    "rdtime.d\t%[val],%[tid]\n\t"
+    : [val]"=&r"(drdtime.dvalue),[tid]"=&r"(drdtime.dtimeid)
+    );
+  return drdtime;
 }
 #define __rdtime_d __builtin_loongarch_rdtime_d
 #endif
