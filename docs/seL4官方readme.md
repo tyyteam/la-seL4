@@ -79,7 +79,7 @@ software, we ask you to follow our [vulnerability disclosure policy][VDP].
 Manual
 ------
 
-A hosted version of the [manual](manual/) for the most recent release can be found [here][5].
+A hosted version of the [manual](../manual/) for the most recent release can be found [here][5].
 
 A web version of the API can be found [here][8]
 
@@ -112,4 +112,4 @@ A list of releases and current project status can be found under [seL4 releases]
 License
 -------
 
-See the file [LICENSE.md](./LICENSE.md).
+See the file [LICENSE.md](../LICENSE.md).
