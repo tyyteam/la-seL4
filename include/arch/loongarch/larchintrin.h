@@ -2,7 +2,7 @@
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
 
-   SPDX-License-Identifier: GPL-2.0
+   SPDX-License-Identifier: GPL-2.0-only
 
 This file is part of GCC.
 
