@@ -22,7 +22,7 @@ static inline void tlbclr(void)
 
 static inline void tlbflush(void)
 {
-	__asm__ __volatile__("tlbflush");
+	__asm__ volatile("tlbflush");
 }
 
 /*
@@ -30,22 +30,22 @@ static inline void tlbflush(void)
  */
 static inline void tlb_probe(void)
 {
-	__asm__ __volatile__("tlbsrch");
+	__asm__ volatile("tlbsrch");
 }
 
 static inline void tlb_read(void)
 {
-	__asm__ __volatile__("tlbrd");
+	__asm__ volatile("tlbrd");
 }
 
 static inline void tlb_write_indexed(void)
 {
-	__asm__ __volatile__("tlbwr");
+	__asm__ volatile("tlbwr");
 }
 
 static inline void tlb_write_random(void)
 {
-	__asm__ __volatile__("tlbfill");
+	__asm__ volatile("tlbfill");
 }
 
 /*
@@ -53,7 +53,7 @@ static inline void tlb_write_random(void)
  */
 static inline void guest_tlbflush(void)
 {
-	__asm__ __volatile__(
+	__asm__ volatile(
 		".word 0x6482401\n\t");
 }
 
@@ -62,25 +62,25 @@ static inline void guest_tlbflush(void)
  */
 static inline void guest_tlb_probe(void)
 {
-	__asm__ __volatile__(
+	__asm__ volatile(
 		".word 0x6482801\n\t");
 }
 
 static inline void guest_tlb_read(void)
 {
-	__asm__ __volatile__(
+	__asm__ volatile(
 		".word 0x6482c01\n\t");
 }
 
 static inline void guest_tlb_write_indexed(void)
 {
-	__asm__ __volatile__(
+	__asm__ volatile(
 		".word 0x6483001\n\t");
 }
 
 static inline void guest_tlb_write_random(void)
 {
-	__asm__ __volatile__(
+	__asm__ volatile(
 		".word 0x6483401\n\t");
 }
 
@@ -134,45 +134,41 @@ enum invtlb_ops {
  */
 static inline void invtlb(uint32_t op, uint32_t info, uint64_t addr)
 {
-	__asm__ __volatile__(
+	__asm__ volatile(
 		"parse_r addr,%0\n\t"
 		"parse_r info,%1\n\t"
 		".word ((0x6498000) | (addr << 10) | (info << 5) | %2)\n\t"
 		:
 		: "r"(addr), "r"(info), "i"(op)
-		:
 		);
 }
 
 static inline void invtlb_addr(uint32_t op, uint32_t info, uint64_t addr)
 {
-	__asm__ __volatile__(
+	__asm__ volatile(
 		"parse_r addr,%0\n\t"
 		".word ((0x6498000) | (addr << 10) | (0 << 5) | %1)\n\t"
 		:
 		: "r"(addr), "i"(op)
-		:
 		);
 }
 
 static inline void invtlb_info(uint32_t op, uint32_t info, uint64_t addr)
 {
-	__asm__ __volatile__(
+	__asm__ volatile(
 		"parse_r info,%0\n\t"
 		".word ((0x6498000) | (0 << 10) | (info << 5) | %1)\n\t"
 		:
 		: "r"(info), "i"(op)
-		:
 		);
 }
 
 static inline void invtlb_all(uint32_t op, uint32_t info, uint64_t addr)
 {
-	__asm__ __volatile__(
+	__asm__ volatile(
 		".word ((0x6498000) | (0 << 10) | (0 << 5) | %0)\n\t"
 		:
 		: "i"(op)
-		:
 		);
 }
 
