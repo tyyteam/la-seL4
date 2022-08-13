@@ -30,7 +30,7 @@ trap_entry:
 #ifdef ENABLE_SMP_SUPPORT
     //TODO
 #else
-    csrwr $t0, LOONGARCH_CSR_KS3 //exchange the value of t0 and LOONGARCH_CSR_KS0
+    csrwr $t0, LOONGARCH_CSR_KS3 //exchange the value of t0 and LOONGARCH_CSR_KS3
 #endif
     st.d $ra, $t0, 0*REGBYTES
     st.d $tp, $t0, 1*REGBYTES
