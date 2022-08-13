@@ -45,7 +45,7 @@ typedef struct rdtime
 #ifdef __loongarch64
 extern inline __drdtime_t 
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__)) 
-builtin_loongarch_rdtime_d (void)
+builtin_loongarch_rdtime_d(void)
 {
   __drdtime_t drdtime;
   __asm__ volatile (
