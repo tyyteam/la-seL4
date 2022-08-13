@@ -25,6 +25,7 @@ manual/stage
 manual/doxygen-output
 manual/generated
 .vscode
+.history
 
 # Emacs backups
 *~
