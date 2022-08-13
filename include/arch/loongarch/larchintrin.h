@@ -42,20 +42,14 @@ typedef struct rdtime
   unsigned int timeid;
 } __rdtime_t;
 
-#ifdef __loongarch64
-extern inline drdtime_t 
-//__attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
-builtin_loongarch_rdtime_d (void)
+
+extern inline drdtime_t builtin_loongarch_rdtime_d (void)
 {
   drdtime_t drdtime;
-  __asm__ volatile (
-    "rdtime.d\t%[val],%[tid]\n\t"
-    : [val]"=&r"(drdtime.dvalue),[tid]"=&r"(drdtime.dtimeid)
-    );
   return drdtime;
 }
 #define __rdtime_d builtin_loongarch_rdtime_d
-#endif
+
 
 extern inline __rdtime_t
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
