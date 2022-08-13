@@ -248,8 +248,6 @@ static inline void ackInterrupt(irq_t irq)
 #ifndef CONFIG_KERNEL_MCS
 void resetTimer(void)
 {
-    printf("LoongArch timer interrupt\n");
-
     /* ack */
     w_csr_ticlr(r_csr_ticlr() | CSR_TINTCLR_TI);
 }
