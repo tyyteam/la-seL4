@@ -43,10 +43,10 @@ typedef struct rdtime
 } __rdtime_t;
 
 
-extern inline drdtime_t builtin_loongarch_rdtime_d (void)
+extern inline int builtin_loongarch_rdtime_d (void)
 {
-  drdtime_t drdtime;
-  return drdtime;
+  int a;
+  return a;
 }
 #define __rdtime_d builtin_loongarch_rdtime_d
 
