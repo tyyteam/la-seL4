@@ -17,7 +17,7 @@ void setup_tlb_handler(void);
  */
 static inline void tlbclr(void)
 {
-	__asm__ __volatile__("tlbclr");
+	__asm__ volatile("tlbclr");
 }
 
 static inline void tlbflush(void)
