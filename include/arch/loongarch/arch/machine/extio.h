@@ -1,8 +1,6 @@
 /*
- *
- * SPDX-License-Identifier: GPL-2.0-only
- * 
- * This file will be updated later to support extend io interrupt.
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn 
  */
 
 #pragma once
