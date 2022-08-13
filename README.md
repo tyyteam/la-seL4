@@ -15,7 +15,7 @@ qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
 
 * 展示文档
 
-  * 2022.05.30，初赛**项目调研，设计和展示**文档：[初赛文档-la-seL4-项目调研\_设计\_展示文档](./docs/la-seL4-初赛项目调研_设计_展示文档.pdf)。
+  * 2022.05.30，初赛**项目调研，设计和展示**文档：[初赛文档-la-seL4-项目调研\_设计\_展示文档](https://github.com/tyyteam/competition-pdfdoc-videos/blob/main/la-seL4-%E5%88%9D%E8%B5%9B%E9%A1%B9%E7%9B%AE%E8%B0%83%E7%A0%94_%E8%AE%BE%E8%AE%A1_%E5%B1%95%E7%A4%BA%E6%96%87%E6%A1%A3.pdf)。
   * 2022.05.15，初赛中期检查文档：[初赛中期-设计和展示文档](./docs/初赛中期-设计和展示文档.md)。
 
   * 2022.05.15，初赛中期演示视频：[初赛中期-演示视频及文字说明](https://pan.baidu.com/s/1c8KKPdG0Ri_AbR2taWWPSw?pwd=2qdg)。
