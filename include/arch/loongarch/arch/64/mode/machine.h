@@ -19,7 +19,7 @@ static inline uint64_t loongarch_read_time(void)
     int rID = 0;
 	uint64_t val = 0;
 
-	__asm__ __volatile__(
+	__asm__ volatile(
 		"rdtime.d %0, %1 \n\t"
 		: "=r"(val), "=r"(rID)
 		:
@@ -32,7 +32,7 @@ static inline uint64_t loongarch_read_cycle(void)
     int rID = 0;
 	uint64_t val = 0;
 
-	__asm__ __volatile__(
+	__asm__ volatile(
 		"rdtime.d %0, %1 \n\t"
 		: "=r"(val), "=r"(rID)
 		:
