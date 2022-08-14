@@ -137,8 +137,7 @@ static inline void csr_writel(uint32_t val, uint32_t reg)
 
 static inline void csr_writeq(uint64_t val, uint32_t reg)
 {
-	__dcsrwr(val, reg);
-	UNREACHABLE();
+	if(__dcsrwr(val, reg)) return;
 }
 
 static inline uint32_t csr_xchgl(uint32_t val, uint32_t mask, uint32_t reg)
@@ -1121,7 +1120,7 @@ static inline unsigned int read_csr_excode(void)
 
 static inline void write_csr_index(unsigned int idx)
 {
-	__csrxchg(idx, CSR_TLBIDX_IDXM, LOONGARCH_CSR_TLBIDX);
+	if(__csrxchg(idx, CSR_TLBIDX_IDXM, LOONGARCH_CSR_TLBIDX)) return;
 }
 
 static inline void enable_pg(unsigned long val)
@@ -1161,7 +1160,7 @@ static inline unsigned int read_csr_pagesize(void)
 
 static inline void write_csr_pagesize(unsigned int size)
 {
-	__csrxchg(size << CSR_TLBIDX_SIZE, CSR_TLBIDX_SIZEM, LOONGARCH_CSR_TLBIDX);
+	if(__csrxchg(size << CSR_TLBIDX_SIZE, CSR_TLBIDX_SIZEM, LOONGARCH_CSR_TLBIDX)) return;
 }
 
 static inline unsigned int read_csr_tlbrefill_pagesize(void)
@@ -1171,7 +1170,7 @@ static inline unsigned int read_csr_tlbrefill_pagesize(void)
 
 static inline void write_csr_tlbrefill_pagesize(unsigned int size)
 {
-	__dcsrxchg(size << CSR_TLBREHI_PS_SHIFT, CSR_TLBREHI_PS, LOONGARCH_CSR_TLBREHI);
+	if(__dcsrxchg(size << CSR_TLBREHI_PS_SHIFT, CSR_TLBREHI_PS, LOONGARCH_CSR_TLBREHI)) return;
 }
 
 static inline unsigned int r_csr_ticlr(void)
@@ -1274,7 +1273,7 @@ set_##name(unsigned long set)					\
 								\
 	res = read_##name();					\
 	new = res | set;					\
-	write_##name(new);					\
+	if(write_##name(new));					\
 								\
 	return res;						\
 }								\
@@ -1286,7 +1285,7 @@ clear_##name(unsigned long clear)				\
 								\
 	res = read_##name();					\
 	new = res & ~clear;					\
-	write_##name(new);					\
+	if(write_##name(new));					\
 								\
 	return res;						\
 }								\
@@ -1299,7 +1298,7 @@ change_##name(unsigned long change, unsigned long val)		\
 	res = read_##name();					\
 	new = res & ~change;					\
 	new |= (val & change);					\
-	write_##name(new);					\
+	if(write_##name(new));					\
 								\
 	return res;						\
 }
@@ -1427,9 +1426,9 @@ void setNextPC(tcb_t *thread, word_t v);
 static inline void setVSpaceRoot(paddr_t addr, asid_t asid)
 {
     /*CY 设置页表寄存器PGDH */
-    csr_writeq(addr, LOONGARCH_CSR_PGDH);
+    if(csr_writeq(addr, LOONGARCH_CSR_PGDH));
     /*CY 设置ASID */
-    write_csr_asid(asid);
+    if(write_csr_asid(asid));
     /*CY TODO 刷新TLB？ */
 }
 
