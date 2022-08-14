@@ -1435,9 +1435,9 @@ static inline void setVSpaceRoot(paddr_t addr, asid_t asid)
 static inline void setUserVSpaceRoot(paddr_t addr, asid_t asid)
 {
     /*CY 设置页表寄存器PGDH */
-    csr_writeq(addr, LOONGARCH_CSR_PGDL);
+    if(csr_writeq(addr, LOONGARCH_CSR_PGDL)) ;
     /*CY 设置ASID */
-    write_csr_asid(asid);
+    if(write_csr_asid(asid));
     /*CY TODO 刷新TLB？ */
 }
 
