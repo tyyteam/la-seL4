@@ -30,7 +30,7 @@
  * cases depending on toolchain support.
  *
  * Simple usage example:
- * __asm__ __volatile__("parse_r addr, %0\n\t"
+ * __asm__ volatile("parse_r addr, %0\n\t"
  *			"#invtlb op, 0, %0\n\t"
  *			".word ((0x6498000) | (addr << 10) | (0 << 5) | op)"
  *			: "=r" (status);
@@ -1090,7 +1090,7 @@ static inline uint64_t drdtime(void)
 	int rID = 0;
 	uint64_t val = 0;
 
-	__asm__ __volatile__(
+	__asm__ volatile(
 		"rdtime.d %0, %1 \n\t"
 		: "=r"(val), "=r"(rID)
 		:
@@ -1459,7 +1459,7 @@ static inline void traps_off(void)
 {
 	/*clear CSR_CRMD_IE*/
 	uint32_t flags = 0;
-	__asm__ __volatile__(
+	__asm__ volatile(
 		"csrxchg %[val], %[mask], %[reg]\n\t"
 		: [val] "+r" (flags)
 		: [mask] "r" (CSR_CRMD_IE), [reg] "i" (LOONGARCH_CSR_CRMD)
@@ -1470,7 +1470,7 @@ static inline void traps_on(void)
 {
 	/*set CSR_CRMD_IE*/
 	uint32_t flags = CSR_CRMD_IE;
-	__asm__ __volatile__(
+	__asm__ volatile(
 		"csrxchg %[val], %[mask], %[reg]\n\t"
 		: [val] "+r" (flags)
 		: [mask] "r" (CSR_CRMD_IE), [reg] "i" (LOONGARCH_CSR_CRMD)
