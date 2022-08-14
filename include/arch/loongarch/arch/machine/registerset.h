@@ -82,7 +82,7 @@ typedef uint8_t register_t;
 enum messageSizes {
     n_msgRegisters = 4,
     n_frameRegisters = 13,
-    n_gpRegisters = 16,
+    n_gpRegisters = 18,
     n_exceptionMessage = 2,
     n_syscallMessage = 10,
 #ifdef CONFIG_KERNEL_MCS

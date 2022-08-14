@@ -31,13 +31,13 @@
 // #define SATP_MODE_SV39 8
 // #define SATP_MODE_SV48 9
 
-#ifndef __ASSEMBLER__
+// #ifndef __ASSEMBLER__
 
-#include <config.h>
-#include <linker.h>
+// #include <config.h>
+// #include <linker.h>
 
-#include <arch/types.h>
-#include <sel4/sel4_arch/constants.h>
+// #include <arch/types.h>
+// #include <sel4/sel4_arch/constants.h>
 
 /* The size is for HiFive Unleashed */
 #define L1_CACHE_LINE_SIZE_BITS     6
@@ -46,6 +46,11 @@
 #define PAGE_BITS seL4_PageBits
 
 /* MMU Loongarch related definitions. */
+
+#ifdef __ASSEMBLER__
+#define PT_INDEX_BITS 11
+#define PTRS_PER_PGD (UL_CONST(1) << PT_INDEX_BITS)
+#endif /*__ASSEMBLER__*/
 
 #define PT_LEVEL_1 1
 #define PT_LEVEL_2 2
@@ -77,6 +82,62 @@
 #define LA_GET_PT_INDEX(addr, n)  (((addr) >> (((PT_INDEX_BITS) * ((CONFIG_PT_LEVELS) - (n))) + seL4_PageBits)) & MASK(PT_INDEX_BITS))
 #define LA_GET_LVL_PGSIZE_BITS(n) (((PT_INDEX_BITS) * ((CONFIG_PT_LEVELS) - (n))) + seL4_PageBits)
 #define LA_GET_LVL_PGSIZE(n)      BIT(LA_GET_LVL_PGSIZE_BITS((n)))
+
+/* Page table bits */
+
+#define	_PAGE_VALID_SHIFT	0
+#define	_PAGE_ACCESSED_SHIFT	0  /* Reuse Valid for Accessed */
+#define	_PAGE_DIRTY_SHIFT	1
+#define	_PAGE_PLV_SHIFT		2  /* 2~3, two bits */
+#define	_CACHE_SHIFT		4  /* 4~5, two bits */
+#define	_PAGE_GLOBAL_SHIFT	6
+#define	_PAGE_HUGE_SHIFT	6  /* HUGE is a PMD bit */
+#define	_PAGE_PRESENT_SHIFT	7
+#define	_PAGE_WRITE_SHIFT	8
+#define	_PAGE_MODIFIED_SHIFT	9
+#define	_PAGE_PROTNONE_SHIFT	10
+#define	_PAGE_SPECIAL_SHIFT	11
+#define	_PAGE_HGLOBAL_SHIFT	12 /* HGlobal is a PMD bit */
+#define	_PAGE_PFN_SHIFT		12
+#define	_PAGE_PFN_END_SHIFT	48
+#define	_PAGE_NO_READ_SHIFT	61
+#define	_PAGE_NO_EXEC_SHIFT	62
+#define	_PAGE_RPLV_SHIFT	63
+
+/* Used only by software */
+#define _PAGE_PRESENT		(UL_CONST(1) << _PAGE_PRESENT_SHIFT)
+#define _PAGE_WRITE		(UL_CONST(1) << _PAGE_WRITE_SHIFT)
+#define _PAGE_ACCESSED		(UL_CONST(1) << _PAGE_ACCESSED_SHIFT)
+#define _PAGE_MODIFIED		(UL_CONST(1) << _PAGE_MODIFIED_SHIFT)
+#define _PAGE_PROTNONE		(UL_CONST(1) << _PAGE_PROTNONE_SHIFT)
+#define _PAGE_SPECIAL		(UL_CONST(1) << _PAGE_SPECIAL_SHIFT)
+
+/* Used by TLB hardware (placed in EntryLo*) */
+#define _PAGE_VALID		(UL_CONST(1) << _PAGE_VALID_SHIFT)
+#define _PAGE_DIRTY		(UL_CONST(1) << _PAGE_DIRTY_SHIFT)
+#define _PAGE_PLV		(UL_CONST(3) << _PAGE_PLV_SHIFT)
+#define _PAGE_GLOBAL		(UL_CONST(1) << _PAGE_GLOBAL_SHIFT)
+#define _PAGE_HUGE		(UL_CONST(1) << _PAGE_HUGE_SHIFT)
+#define _PAGE_HGLOBAL		(UL_CONST(1) << _PAGE_HGLOBAL_SHIFT)
+#define _PAGE_NO_READ		(UL_CONST(1) << _PAGE_NO_READ_SHIFT)
+#define _PAGE_NO_EXEC		(UL_CONST(1) << _PAGE_NO_EXEC_SHIFT)
+#define _PAGE_RPLV		(UL_CONST(1) << _PAGE_RPLV_SHIFT)
+#define _CACHE_MASK		(UL_CONST(3) << _CACHE_SHIFT)
+#define _PFN_SHIFT		(PAGE_SHIFT - 12 + _PAGE_PFN_SHIFT)
+
+#define _PAGE_USER	(PLV_USER << _PAGE_PLV_SHIFT)
+#define _PAGE_KERN	(PLV_KERN << _PAGE_PLV_SHIFT)
+
+#define _PFN_MASK (~((UL_CONST(1) << (_PFN_SHIFT)) - 1) & \
+		  ((UL_CONST(1) << (_PAGE_PFN_END_SHIFT)) - 1))
+
+#ifndef __ASSEMBLER__
+#include <config.h>
+#include <linker.h>
+
+#include <arch/types.h>
+#include <sel4/sel4_arch/constants.h>
+          
 /*CY 待修改 */
 /*
  * These values are defined in LoongArch Reference Manual Volume 1: Basic Architecture version 1.00,

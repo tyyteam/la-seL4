@@ -45,25 +45,26 @@ typedef struct rdtime
 } __rdtime_t;
 
 #ifdef __loongarch64
-extern __inline __drdtime_t
+extern inline __drdtime_t 
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
-__builtin_loongarch_rdtime_d (void)
+__builtin_loongarch_rdtime_d(void)
 {
   __drdtime_t drdtime;
   __asm__ volatile (
     "rdtime.d\t%[val],%[tid]\n\t"
     : [val]"=&r"(drdtime.dvalue),[tid]"=&r"(drdtime.dtimeid)
-    :);
+    );
   return drdtime;
 }
 #define __rdtime_d __builtin_loongarch_rdtime_d
 #endif
 
-extern __inline __rdtime_t
+
+extern inline __rdtime_t
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __builtin_loongarch_rdtimeh_w (void)
 {
-  __rdtime_t rdtime;
+	__rdtime_t rdtime;
   __asm__ volatile (
     "rdtimeh.w\t%[val],%[tid]\n\t"
     : [val]"=&r"(rdtime.value),[tid]"=&r"(rdtime.timeid)
@@ -72,7 +73,7 @@ __builtin_loongarch_rdtimeh_w (void)
 }
 #define __rdtimel_w __builtin_loongarch_rdtimel_w
 
-extern __inline __rdtime_t
+extern inline __rdtime_t
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __builtin_loongarch_rdtimel_w (void)
 {
@@ -105,7 +106,7 @@ __builtin_loongarch_rdtimel_w (void)
 
 /* Assembly instruction format:	rd, rj.  */
 /* Data types in instruction templates:  USI, USI.  */
-extern __inline unsigned int
+extern inline unsigned int
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __cpucfg (unsigned int _1)
 {
@@ -115,7 +116,7 @@ __cpucfg (unsigned int _1)
 #ifdef __loongarch64
 /* Assembly instruction format:	rd, rj.  */
 /* Data types in instruction templates:  DI, DI.  */
-extern __inline void
+extern inline void
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __asrtle_d (long int _1, long int _2)
 {
@@ -124,7 +125,7 @@ __asrtle_d (long int _1, long int _2)
 
 /* Assembly instruction format:	rd, rj.  */
 /* Data types in instruction templates:  DI, DI.  */
-extern __inline void
+extern inline void
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __asrtgt_d (long int _1, long int _2)
 {
@@ -152,7 +153,7 @@ __asrtgt_d (long int _1, long int _2)
 
 /* Assembly instruction format:	rd, rj, rk.  */
 /* Data types in instruction templates:  SI, QI, SI.  */
-extern __inline int
+extern inline int
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __crc_w_b_w (char _1, int _2)
 {
@@ -161,7 +162,7 @@ __crc_w_b_w (char _1, int _2)
 
 /* Assembly instruction format:	rd, rj, rk.  */
 /* Data types in instruction templates:  SI, HI, SI.  */
-extern __inline int
+extern inline int
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __crc_w_h_w (short _1, int _2)
 {
@@ -170,7 +171,7 @@ __crc_w_h_w (short _1, int _2)
 
 /* Assembly instruction format:	rd, rj, rk.  */
 /* Data types in instruction templates:  SI, SI, SI.  */
-extern __inline int
+extern inline int
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __crc_w_w_w (int _1, int _2)
 {
@@ -180,7 +181,7 @@ __crc_w_w_w (int _1, int _2)
 #ifdef __loongarch64
 /* Assembly instruction format:	rd, rj, rk.  */
 /* Data types in instruction templates:  SI, DI, SI.  */
-extern __inline int
+extern inline int
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __crc_w_d_w (long int _1, int _2)
 {
@@ -190,7 +191,7 @@ __crc_w_d_w (long int _1, int _2)
 
 /* Assembly instruction format:	rd, rj, rk.  */
 /* Data types in instruction templates:  SI, QI, SI.  */
-extern __inline int
+extern inline int
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __crcc_w_b_w (char _1, int _2)
 {
@@ -199,7 +200,7 @@ __crcc_w_b_w (char _1, int _2)
 
 /* Assembly instruction format:	rd, rj, rk.  */
 /* Data types in instruction templates:  SI, HI, SI.  */
-extern __inline int
+extern inline int
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __crcc_w_h_w (short _1, int _2)
 {
@@ -208,7 +209,7 @@ __crcc_w_h_w (short _1, int _2)
 
 /* Assembly instruction format:	rd, rj, rk.  */
 /* Data types in instruction templates:  SI, SI, SI.  */
-extern __inline int
+extern inline int
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __crcc_w_w_w (int _1, int _2)
 {
@@ -218,7 +219,7 @@ __crcc_w_w_w (int _1, int _2)
 #ifdef __loongarch64
 /* Assembly instruction format:	rd, rj, rk.  */
 /* Data types in instruction templates:  SI, DI, SI.  */
-extern __inline int
+extern inline int
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __crcc_w_d_w (long int _1, int _2)
 {
@@ -263,7 +264,7 @@ __crcc_w_d_w (long int _1, int _2)
 
 /* Assembly instruction format:	rd, rj.  */
 /* Data types in instruction templates:  UQI, USI.  */
-extern __inline unsigned char
+extern inline unsigned char
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __iocsrrd_b (unsigned int _1)
 {
@@ -272,7 +273,7 @@ __iocsrrd_b (unsigned int _1)
 
 /* Assembly instruction format:	rd, rj.  */
 /* Data types in instruction templates:  UHI, USI.  */
-extern __inline unsigned char
+extern inline unsigned char
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __iocsrrd_h (unsigned int _1)
 {
@@ -281,7 +282,7 @@ __iocsrrd_h (unsigned int _1)
 
 /* Assembly instruction format:	rd, rj.  */
 /* Data types in instruction templates:  USI, USI.  */
-extern __inline unsigned int
+extern inline unsigned int
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __iocsrrd_w (unsigned int _1)
 {
@@ -291,7 +292,7 @@ __iocsrrd_w (unsigned int _1)
 #ifdef __loongarch64
 /* Assembly instruction format:	rd, rj.  */
 /* Data types in instruction templates:  UDI, USI.  */
-extern __inline unsigned long int
+extern inline unsigned long int
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __iocsrrd_d (unsigned int _1)
 {
@@ -301,7 +302,7 @@ __iocsrrd_d (unsigned int _1)
 
 /* Assembly instruction format:	rd, rj.  */
 /* Data types in instruction templates:  VOID, UQI, USI.  */
-extern __inline void
+extern inline void
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __iocsrwr_b (unsigned char _1, unsigned int _2)
 {
@@ -311,7 +312,7 @@ __iocsrwr_b (unsigned char _1, unsigned int _2)
 
 /* Assembly instruction format:	rd, rj.  */
 /* Data types in instruction templates:  VOID, UHI, USI.  */
-extern __inline void
+extern inline void
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __iocsrwr_h (unsigned short _1, unsigned int _2)
 {
@@ -321,7 +322,7 @@ __iocsrwr_h (unsigned short _1, unsigned int _2)
 
 /* Assembly instruction format:	rd, rj.  */
 /* Data types in instruction templates:  VOID, USI, USI.  */
-extern __inline void
+extern inline void
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __iocsrwr_w (unsigned int _1, unsigned int _2)
 {
@@ -332,7 +333,7 @@ __iocsrwr_w (unsigned int _1, unsigned int _2)
 #ifdef __loongarch64
 /* Assembly instruction format:	rd, rj.  */
 /* Data types in instruction templates:  VOID, UDI, USI.  */
-extern __inline void
+extern inline void
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __iocsrwr_d (unsigned long int _1, unsigned int _2)
 {
@@ -361,7 +362,7 @@ __iocsrwr_d (unsigned long int _1, unsigned int _2)
   }
 #define __break __builtin_loongarch_break
 
-extern __inline void
+extern inline void
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __builtin_loongarch_tlbsrch (void)
 {
@@ -369,7 +370,7 @@ __builtin_loongarch_tlbsrch (void)
 }
 #define __tlbsrch __builtin_loongarch_tlbsrch
 
-extern __inline void
+extern inline void
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __builtin_loongarch_tlbrd (void)
 {
@@ -377,7 +378,7 @@ __builtin_loongarch_tlbrd (void)
 }
 #define __tlbrd __builtin_loongarch_tlbrd
 
-extern __inline void
+extern inline void
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __builtin_loongarch_tlbwr (void)
 {
@@ -385,7 +386,7 @@ __builtin_loongarch_tlbwr (void)
 }
 #define __tlbwr __builtin_loongarch_tlbwr
 
-extern __inline void
+extern inline void
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __builtin_loongarch_tlbfill (void)
 {
@@ -393,7 +394,7 @@ __builtin_loongarch_tlbfill (void)
 }
 #define __tlbfill __builtin_loongarch_tlbfill
 
-extern __inline void
+extern inline void
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __builtin_loongarch_tlbclr (void)
 {
@@ -401,7 +402,7 @@ __builtin_loongarch_tlbclr (void)
 }
 #define __tlbclr __builtin_loongarch_tlbclr
 
-extern __inline void
+extern inline void
 __attribute__ ((__gnu_inline__, __always_inline__, __artificial__))
 __builtin_loongarch_tlbflush (void)
 {

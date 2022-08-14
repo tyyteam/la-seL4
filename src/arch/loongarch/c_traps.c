@@ -23,6 +23,8 @@
 #include <benchmark/benchmark_track.h>
 #include <benchmark/benchmark_utilisation.h>
 
+extern void handle_tlb_store(void);
+
 /** DONT_TRANSLATE */
 void VISIBLE NORETURN restore_user_context(void)
 {
@@ -86,9 +88,9 @@ void VISIBLE NORETURN restore_user_context(void)
         "add.d $tp, $t1, $r0    \n"
 
 #ifndef ENABLE_SMP_SUPPORT
-        /* Write back LOONGARCH_CSR_KS0 with cur_thread_reg to get it back on the next trap entry */
+        /* Write back LOONGARCH_CSR_KS3 with cur_thread_reg to get it back on the next trap entry */
         "move $t1, $t0          \n"
-        "csrwr $t0, 0x30        \n"
+        "csrwr $t0, 0x33        \n"
         "move $t0, $t1          \n"
 #endif
         //load [38*%[REGSIZE]+$t0] to LOONGARCH_CSR_ERA instead of 31*%[REGSIZE]
@@ -142,18 +144,27 @@ void VISIBLE NORETURN c_handle_exception(void)
     c_entry_hook();
 
     word_t excode = read_csr_excode();
-    printf("excode:%lu\n",excode);
     switch (excode)
     {
         case LAAddrError:               //ADEF or ADEM
+            break;
         case LAAddrAlignFault:          //ALE
+            break;
         case LABoundCheck:              //BCE
+            break;
         case LALoadPageInvalid:         //PIL
+            break;
         case LAStorePageInvalid:        //PIS
+            handle_tlb_store();
+            break;
         case LAFetchPageInvalid:        //PIF
+            break;
         case LAPageModException:        //PME
+            break;
         case LAPageNoReadable:          //PNR
+            break;
         case LAPageNoExecutable:        //PNX
+            break;
         case LAPagePrivilegeIllegal:    //PPI
             handleVMFaultEvent(excode); //LoongArch records the bad vaddr in CSR.BADV
             break;

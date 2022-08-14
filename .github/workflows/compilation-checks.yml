@@ -28,6 +28,7 @@ jobs:
           # llvm Loongarch64 compilation is not currently supported
           - arch: Loongarch64
             compiler: llvm
+
     steps:
     - uses: actions/checkout@v2
     - uses: tyyteam/la-seL4-ci-actions/standalone-kernel@master
