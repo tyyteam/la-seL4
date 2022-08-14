@@ -10,7 +10,6 @@
  */
 
 #include <config.h>
-#include <arch/sbi.h>
 
 void idle_thread(void)
 {
