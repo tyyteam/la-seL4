@@ -20,7 +20,6 @@
 #define UART0_IRQ 2
 #define KEYBOARD_IRQ 3
 
-static inline irq_t extio_get_claim(void);
 static inline irq_t extio_get_claim(void)
 {
     printf("no PLIC present, can't claim any interrupt\n");
