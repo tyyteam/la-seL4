@@ -132,9 +132,7 @@ static inline uint64_t csr_readq(uint32_t reg)
 
 static inline void csr_writel(uint32_t val, uint32_t reg)
 {
-	__csrwr(val, reg);
-	return;
-	UNREACHABLE();
+	if(__csrwr(val, reg)) return;
 }
 
 static inline void csr_writeq(uint64_t val, uint32_t reg)
