@@ -53,7 +53,7 @@ static inline void extioi_init_hart(void)
 
     /* This is an example, seL4 do not handle externel interrupts.
      * The code enable 2~4 extend io interrupt*/
-    iocsr_writeq((0x1UL << UART0_IRQ) | (0x1UL << KEYBOARD_IRQ), LOONGARCH_IOCSR_EXTIOI_EN_BASE);
+    iocsr_writeq(((0x1UL << UART0_IRQ) | (0x1UL << KEYBOARD_IRQ)), LOONGARCH_IOCSR_EXTIOI_EN_BASE);
 
     /* extioi[31:0] map to cpu irq pin INT1, other to INT0 */
     iocsr_writeq(0x01UL,LOONGARCH_IOCSR_EXTIOI_IPMAP_BASE);
