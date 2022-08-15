@@ -30,7 +30,7 @@
 * 技术文档等资源
 
   * **项目构建、编译、调试方法和调试脚本**：[项目构建、编译、调试方法和调试脚本](./docs/技术文档-项目构建、编译和调试方法.md)。
-  * **用于自动化测试的龙芯版本docker镜像**：镜像功能见[项目资源](# 项目资源)，现构建出：[la-seL4](https://hub.docker.com/repository/docker/gootal/la-sel4)，[la-l4v](https://hub.docker.com/repository/docker/gootal/la-l4v)，[la-cparser-builder](https://hub.docker.com/repository/docker/gootal/la-cparser-builder)，[la-cparser-run](https://hub.docker.com/r/gootal/la-cparser-run)。
+  * **用于自动化测试的龙芯版本docker镜像**：镜像功能见[项目资源](#项目资源)，现构建出：[la-seL4](https://hub.docker.com/repository/docker/gootal/la-sel4)，[la-l4v](https://hub.docker.com/repository/docker/gootal/la-l4v)，[la-cparser-builder](https://hub.docker.com/repository/docker/gootal/la-cparser-builder)，[la-cparser-run](https://hub.docker.com/r/gootal/la-cparser-run)。
   * cmake框架分析图：[cmake框架分析图](./docs/cmake框架分析图.md)。
   * seL4源码结构图：[seL4源码结构图](./docs/seL4源码结构图.md)。
   * seL4-comments，团队的seL4内核源码仓库**注释仓库**：[seL4-comments](https://github.com/tyyteam/seL4-comments)。
@@ -44,7 +44,7 @@
 * **决赛进展**：
   * 内核移植完成，完善内存管理、中断与例外模块，正常引导用户空间程序。
   * 进入sel4test测试程序，通过15个测试样例。
-  * 构建[龙芯版本docker](# 项目资源)，移植自动化测试程序(github workflow)：通过Compile workflow、C Parser workflow、CI workflow和RefMan workflow检查。
+  * 构建[龙芯版本docker](#项目资源)，移植自动化测试程序(github workflow)：通过Compile workflow、C Parser workflow、CI workflow和RefMan workflow检查。
 * **初赛进展**：
   * cmake文件中，关于LoongArch的部分。
   * 完成elfloader移植的移植，引导微内核启动。
