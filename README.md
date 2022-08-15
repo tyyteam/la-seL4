@@ -78,7 +78,7 @@
 
 * **团队资源**
   * [tyyteam org](https://github.com/tyyteam)：15个git仓库，含移植笔记、代码注释、CI仓库、docker仓库等。
-  * 龙芯版docker hub镜像：
+  * 龙芯版docker镜像：
     * [la-seL4:latest](https://hub.docker.com/r/gootal/la-sel4)：该镜像包含单独编译内核的所有依赖（包括龙芯交叉编译工具），支持编译龙芯版seL4内核。
     * [la-l4v:latest](https://hub.docker.com/repository/docker/gootal/la-l4v)：该镜像包含构建l4v的所有工具和依赖（包括龙芯版本脚本），也是构建la-cparser-builder镜像、形式化验证等工作的基础镜像。
     * [la-cparser-builder:latest](https://hub.docker.com/repository/docker/gootal/la-cparser-builder)：该镜像包含cparser源码编译分析工具（包括龙芯版本），也是la-cparser-run等镜像的基础镜像。
