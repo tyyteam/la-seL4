@@ -1426,18 +1426,18 @@ void setNextPC(tcb_t *thread, word_t v);
 static inline void setVSpaceRoot(paddr_t addr, asid_t asid)
 {
     /*CY 设置页表寄存器PGDH */
-    if(csr_writeq(addr, LOONGARCH_CSR_PGDH));
+    csr_writeq(addr, LOONGARCH_CSR_PGDH);
     /*CY 设置ASID */
-    if(write_csr_asid(asid));
+    write_csr_asid(asid);
     /*CY TODO 刷新TLB？ */
 }
 
 static inline void setUserVSpaceRoot(paddr_t addr, asid_t asid)
 {
     /*CY 设置页表寄存器PGDH */
-    if(csr_writeq(addr, LOONGARCH_CSR_PGDL)) ;
+    csr_writeq(addr, LOONGARCH_CSR_PGDL);
     /*CY 设置ASID */
-    if(write_csr_asid(asid));
+    write_csr_asid(asid);
     /*CY TODO 刷新TLB？ */
 }
 

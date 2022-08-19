@@ -53,16 +53,16 @@ static inline void extioi_init_hart(void)
 
     /* This is an example, seL4 do not handle externel interrupts.
      * The code enable 2~4 extend io interrupt*/
-    if(iocsr_writeq((0x1UL << UART0_IRQ) | (0x1UL << KEYBOARD_IRQ), LOONGARCH_IOCSR_EXTIOI_EN_BASE));
+    iocsr_writeq((0x1UL << UART0_IRQ) | (0x1UL << KEYBOARD_IRQ), LOONGARCH_IOCSR_EXTIOI_EN_BASE);
 
     /* extioi[31:0] map to cpu irq pin INT1, other to INT0 */
-    if(iocsr_writeq(0x01UL,LOONGARCH_IOCSR_EXTIOI_IPMAP_BASE));
+    iocsr_writeq(0x01UL,LOONGARCH_IOCSR_EXTIOI_IPMAP_BASE);
 
     /* extioi IRQ 0-7 route to core 0, use node type 0 */
-    if(iocsr_writeq(0x0UL,LOONGARCH_IOCSR_EXTIOI_ROUTE_BASE));
+    iocsr_writeq(0x0UL,LOONGARCH_IOCSR_EXTIOI_ROUTE_BASE);
 
     /* nodetype0 set to 1, always trigger at node 0 */
-    if(iocsr_writeq(0x1,LOONGARCH_IOCSR_EXTIOI_NODEMAP_BASE));
+    iocsr_writeq(0x1,LOONGARCH_IOCSR_EXTIOI_NODEMAP_BASE);
 }
 
 static inline void ls7a_intc_init(void)
