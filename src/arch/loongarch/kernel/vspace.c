@@ -121,7 +121,7 @@ pte_ptr_get_valid(pte_t *pte_ptr) {
 static inline uint64_t PURE
 pte_ptr_is_leaf(pte_t *pte_ptr) {
     uint64_t ret;
-    ret = (pte_ptr->words[0] & 0x40ull);
+    ret = (pte_ptr->words[0] & 0x200ull);
     return ret;
 }
 
@@ -169,6 +169,28 @@ static pte_t pte_next(word_t phys_addr, bool_t is_leaf, enum PTE_TYPE pte_type)
         }
         else {
             pte.words[0] = PTE_CREATE_L1_LEAF(phys_addr);
+        }
+    }
+
+    return pte;
+}
+
+static pte_t user_pte_next(word_t phys_addr, bool_t is_leaf, enum PTE_TYPE pte_type)
+{
+    pte_t pte;
+
+    if (!is_leaf) {
+        pte.words[0] = PTE_CREATE_NEXT(phys_addr);
+    }
+    else {
+        if (pte_type == PTE_L3) {
+            pte.words[0] = USER_PTE_CREATE_L3_LEAF(phys_addr);
+        }
+        else if (pte_type == PTE_L2) {
+            pte.words[0] = USER_PTE_CREATE_L2_LEAF(phys_addr);
+        }
+        else {
+            pte.words[0] = USER_PTE_CREATE_L1_LEAF(phys_addr);
         }
     }
 
@@ -294,7 +316,7 @@ BOOT_CODE void map_it_pt_cap(cap_t vspace_cap, cap_t pt_cap)
     // } else {
     //     *targetSlot = pte_next(addrFromPPtr(pt), false, PTE_NONE);
     // }
-    *targetSlot = pte_next(addrFromPPtr(pt), false, PTE_NONE);
+    *targetSlot = user_pte_next(addrFromPPtr(pt), false, PTE_NONE);
 
     // sfence();//TODO 虚拟内存屏障指令
 }
@@ -311,7 +333,7 @@ BOOT_CODE void map_it_frame_cap(cap_t vspace_cap, cap_t frame_cap)
 
     pte_t *targetSlot = lu_ret.ptSlot;
 
-    *targetSlot = pte_next(addrFromPPtr(frame_pptr), true, PTE_L3);
+    *targetSlot = user_pte_next(addrFromPPtr(frame_pptr), true, PTE_L3);
 
     // sfence();
 }
@@ -455,7 +477,7 @@ void copyGlobalMappings_t(pte_t *newLvl1pt)
     unsigned long i;
 
     for (i = LA_GET_PT_INDEX(0ull, 1); i < BIT(PT_INDEX_BITS); i++) {
-        newLvl1pt[i].words[0] = PTE_CREATE_NEXT(0x40ull);
+        newLvl1pt[i].words[0] = PTE_CREATE_NEXT(0x200ull);
     }
 }
 
@@ -692,6 +714,8 @@ void unmapPage(vm_page_size_t page_size, asid_t asid, vptr_t vptr, pptr_t pptr)
 
     lu_ret.ptSlot[0] = pte_pte_invalid_new();
     // sfence();
+    // asm volatile("invtlb 0x1, $r0, $r0" :::);
+    invtlb(0x5, asid, vptr);
 }
 
 void setVMRoot(tcb_t *tcb)
@@ -788,7 +812,7 @@ static pte_t CONST makeUserPTE(paddr_t paddr/*, bool_t executable, vm_rights_t v
     //                1 /* valid */
     //            );
     // }
-    return pte_next(paddr, true, PTE_L3);
+    return user_pte_next(paddr, true, PTE_L3);
 }
 
 static inline bool_t CONST checkVPAlignment(vm_page_size_t sz, word_t w)
@@ -894,7 +918,7 @@ static exception_t decodeLOONGARCHPageTableInvocation(word_t label, word_t lengt
 
     paddr_t paddr = addrFromPPtr(
                         PTE_PTR(cap_page_table_cap_get_capPTBasePtr(cap)));
-    pte_t pte = pte_next(paddr, false, PTE_NONE);
+    pte_t pte = user_pte_next(paddr, false, PTE_NONE);
 
     cap = cap_page_table_cap_set_capPTIsMapped(cap, 1);
     cap = cap_page_table_cap_set_capPTMappedASID(cap, asid);
@@ -1241,6 +1265,7 @@ static exception_t updatePTE(pte_t pte, pte_t *base)
 {
     *base = pte;
     // sfence();
+    asm volatile("dbar 0" ::: "memory");
     return EXCEPTION_NONE;
 }
 
