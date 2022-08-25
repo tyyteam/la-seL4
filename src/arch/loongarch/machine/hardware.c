@@ -279,7 +279,7 @@ BOOT_CODE void initLocalIRQController(void)
 
 BOOT_CODE void initIRQController(void)
 {
-    printf("Initializing loongson 7a1000 interrupt controller...\n");
+    printf("Initializing loongson 7A1000 interrupt controller...\n");
 
     /* Initialize active_irq[] properly to stick to the semantics and play safe.
      * Effectively this is not needed if irqInvalid is zero (which is currently
