@@ -129,7 +129,7 @@ typedef enum {
 #endif /* __ASSEMBLER__ */
 
 /* First address in the virtual address space that is not accessible to user level */
-#define seL4_UserTop 0x0000003ffffff000
+#define seL4_UserTop 0x0000800000000000
 
 #ifdef CONFIG_ENABLE_BENCHMARKS
 /* size of kernel log buffer in bytes */
