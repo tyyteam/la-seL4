@@ -31,7 +31,7 @@
 
 /* The physical memory address to use for mapping the kernel ELF */
 /* This represents the physical address that the kernel image will be linked to. This needs to
- * be on a 1gb boundary as we curr9999999999ently require being able to creating a mapping to this address
+ * be on a 1gb boundary as we currently require being able to creating a mapping to this address
  * as the largest frame size */
 
 #define KERNEL_ELF_PADDR_BASE (physBase + UL_CONST(0x0))
