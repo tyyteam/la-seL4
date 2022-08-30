@@ -642,17 +642,18 @@ static exception_t performASIDPoolInvocation(asid_t asid, asid_pool_t *poolPtr, 
     return EXCEPTION_NONE;
 }
 
-// void deleteASID(asid_t asid, pte_t *vspace)
-// {
-//     asid_pool_t *poolPtr;
+void deleteASID(asid_t asid, pte_t *vspace)
+{
+    asid_pool_t *poolPtr;
 
-//     poolPtr = riscvKSASIDTable[asid >> asidLowBits];
-//     if (poolPtr != NULL && poolPtr->array[asid & MASK(asidLowBits)] == vspace) {
-//         hwASIDFlush(asid);
-//         poolPtr->array[asid & MASK(asidLowBits)] = NULL;
-//         setVMRoot(NODE_STATE(ksCurThread));
-//     }
-// }
+    poolPtr = loongarchKSASIDTable[asid >> asidLowBits];
+    if (poolPtr != NULL && poolPtr->array[asid & MASK(asidLowBits)] == vspace) {
+        // hwASIDFlush(asid);
+        invtlb_info(0x4, asid, 0);
+        poolPtr->array[asid & MASK(asidLowBits)] = NULL;
+        setVMRoot(NODE_STATE(ksCurThread));
+    }
+}
 
 void unmapPageTable(asid_t asid, vptr_t vptr, pte_t *target_pt)
 {
@@ -672,8 +673,7 @@ void unmapPageTable(asid_t asid, vptr_t vptr, pte_t *target_pt)
             /* couldn't find it */
             return;
         }
-        assert(0);//TODO: getPPtrFromHWPTE
-        // pt = getPPtrFromHWPTE(ptSlot);
+        pt = PTE_PTR(paddr_to_pptr(ptSlot->words[0]));
     }
 
     if (pt != target_pt) {
@@ -684,6 +684,7 @@ void unmapPageTable(asid_t asid, vptr_t vptr, pte_t *target_pt)
     assert(ptSlot != NULL);
     (*ptSlot).words[0] = 0ull;
     // sfence();
+    // invtlb(0x5, asid, vptr);
 }
 
 static pte_t pte_pte_invalid_new(void)
@@ -713,8 +714,6 @@ void unmapPage(vm_page_size_t page_size, asid_t asid, vptr_t vptr, pptr_t pptr)
     }
 
     lu_ret.ptSlot[0] = pte_pte_invalid_new();
-    // sfence();
-    // asm volatile("invtlb 0x1, $r0, $r0" :::);
     invtlb(0x5, asid, vptr);
 }
 
