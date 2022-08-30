@@ -82,7 +82,7 @@
 
   memory@90000000 {
     device_type = "memory";
-    reg = <0x00 0x90000000 0x00 0xefffffff>;       
+    reg = <0x00 0x90000000 0x00 0xf0000000>;       
   };
 
 };
