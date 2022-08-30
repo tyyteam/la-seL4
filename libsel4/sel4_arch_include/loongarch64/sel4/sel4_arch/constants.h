@@ -49,7 +49,7 @@
 
 /* Untyped size limits */
 #define seL4_MinUntypedBits     4
-#define seL4_MaxUntypedBits     38
+#define seL4_MaxUntypedBits     46
 #ifndef __ASSEMBLER__
 
 typedef enum {
