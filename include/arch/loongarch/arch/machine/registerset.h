@@ -60,7 +60,7 @@ enum _register {
     s6=27,
     s7=28,
     s8=29,
-    s9=30,
+    fp=30,
 
     /* End of GP registers, the following are additional kernel-saved state. */
 
@@ -125,6 +125,9 @@ static inline void Arch_initContext(user_context_t *context)
 {
     /* Enable interrupts */
     context->registers[csr_prmd] = CSR_PRMD_PIE;
+    context->registers[csr_ecfg] = (0U << 16)|(1<<11);//set vs=0 and enable timer interrupt before dropping into user mode
+    context->registers[csr_euen] = 0x1;
+    context->registers[csr_estat] = 0;
 }
 
 static inline word_t CONST sanitiseRegister(register_t reg, word_t v, bool_t archInfo)

@@ -249,6 +249,7 @@ static inline void ackInterrupt(irq_t irq)
 void resetTimer(void)
 {
     /* ack */
+    // printf("=====reset timer!!!=====\n");
     w_csr_ticlr(r_csr_ticlr() | CSR_TINTCLR_TI);
 }
 
@@ -257,7 +258,7 @@ void resetTimer(void)
  */
 BOOT_CODE void initTimer(void)
 {
-    unsigned long tcfg = 0x10000000UL | CSR_TCFG_EN | CSR_TCFG_PERIOD;
+    unsigned long tcfg = RESET_CYCLES | CSR_TCFG_EN | CSR_TCFG_PERIOD;
     w_csr_tcfg(tcfg);
 }
 #endif /* !CONFIG_KERNEL_MCS */
@@ -271,7 +272,8 @@ BOOT_CODE void initLocalIRQController(void)
 
     /* Enable SoftWare Interrupt, Performance Monitor Counter Overflow Interrupt,
      * Timer Interrupt. If SMP is enabled, then enable the ECFG_IPI. */
-    set_csr_ecfg(SWI_VEC|HWI_VEC|BIT(ECFG_PMC)|BIT(ECFG_TIMER)|SMP_TERNARY(BIT(ECFG_IPI), 0));
+    // set_csr_ecfg(SWI_VEC|HWI_VEC|BIT(ECFG_PMC)|BIT(ECFG_TIMER)|SMP_TERNARY(BIT(ECFG_IPI), 0));
+    // set_csr_ecfg(BIT(ECFG_TIMER));
 
     /* map extend io interrupt to HW1 of node 0, core 0.*/
     extioi_init_hart();

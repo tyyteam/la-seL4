@@ -138,8 +138,9 @@ BOOT_CODE static void init_cpu(void)
     init_tlb();
     
     /* set vs=0 of LOONGARCH_CSR_ECFG, all traps goes to the same trap_entry in traps.S*/
-    csr_xchgl(0<<CSR_ECFG_VS_SHIFT, CSR_ECFG_VS, LOONGARCH_CSR_ECFG);
-    
+    unsigned int ecfg = (0U << CSR_ECFG_VS_SHIFT) | BIT(ECFG_TIMER);
+    write_csr_ecfg(ecfg);
+
     /* set the entry for traps.
      * tlbrefill entry is set in elfloader, we used page table in elfloader and may cause tlb missing.
      * machine error entry is not set yet.
@@ -153,9 +154,10 @@ BOOT_CODE static void init_cpu(void)
     initTimer();
 #endif
 
-    /* disable FPU access*/
-    clear_csr_euen(BIT(CSR_EUEN_FPEN));
+    /* enable FPU access*/
+    write_csr_euen(0x1);
 
+    printf("euen: %u\n",read_csr_euen());
 #ifdef CONFIG_HAVE_FPU
     //TODO
 #endif
@@ -314,9 +316,6 @@ static BOOT_CODE bool_t try_init_kernel(
 
     /* initialise the IRQ states and provide the IRQ control cap */
     init_irqs(root_cnode_cap);
-
-    /*enable traps*/
-    traps_on();
 
     /* create the bootinfo frame */
     populate_bi_frame(0, CONFIG_MAX_NUM_NODES, ipcbuf_vptr, extra_bi_size);

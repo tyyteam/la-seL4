@@ -16,6 +16,7 @@
 
 #ifndef __ASSEMBLER__
 #include <larchintrin.h>
+#include <arch/machine/tlb.h>
 /*
  * parse_r var, r - Helper assembler macro for parsing register names.
  *
@@ -1118,6 +1119,11 @@ static inline unsigned int read_csr_excode(void)
 	return (csr_readl(LOONGARCH_CSR_ESTAT) & CSR_ESTAT_EXC) >> CSR_ESTAT_EXC_SHIFT;
 }
 
+static inline unsigned int read_csr_is(void)
+{
+	return (csr_readl(LOONGARCH_CSR_ESTAT) & CSR_ESTAT_IS);
+}
+
 static inline void write_csr_index(unsigned int idx)
 {
 	if(__csrxchg(idx, CSR_TLBIDX_IDXM, LOONGARCH_CSR_TLBIDX)) return;
@@ -1438,7 +1444,8 @@ static inline void setUserVSpaceRoot(paddr_t addr, asid_t asid)
     csr_writeq(addr, LOONGARCH_CSR_PGDL);
     /*CY 设置ASID */
     write_csr_asid(asid);
-    /*CY TODO 刷新TLB？ */
+    /*QT we only need to invalid the tlb terms of certain asid */
+	invtlb_info(0x4, asid, 0);
 }
 
 void map_kernel_devices(void);

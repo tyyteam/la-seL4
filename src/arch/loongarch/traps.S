@@ -89,8 +89,8 @@ trap_entry:
     csrrd $t8, LOONGARCH_CSR_ECFG  // save csr_ecfg
     st.d $t8, $t0, 36*REGBYTES
 
-    csrrd $s0, LOONGARCH_CSR_ESTAT // save csr_estat to s0
-    st.d $s0, $t0, 37*REGBYTES
+    csrrd $s0, LOONGARCH_CSR_ESTAT // read csr_estat to s0
+    // We do not store estat here, due to the different handling of interrupts and syscall/exception. 
 
 
 #ifdef ENABLE_SMP_SUPPORT
@@ -103,49 +103,59 @@ trap_entry:
 	add.d $sp, $sp, $t8
 #endif
     
-    /* Get the ecode of estat at [21:16]*/
+    /* Get the is of estat at [21:16]*/
     bstrpick.d $s1, $s0, 21, 16
 
-    /* Check if it's an interrupt */
-    li.d $s2, 64
-    bge $s1, $s2, interrupt
+    li.d $s2, 11
+    beq $s1, $s2, handle_syscall
 
-    /* 0xB for SYS ecode*/
-    li.d $s3, 11
-    bne $s1, $s3, exception
+
+    /* Get the is of estat at [12:0]*/
+    bstrpick.d $s1, $s0, 12, 0
+
+    /* Check if it's an timer interrupt */
+    li.d $s3, 0
+    bne $s1, $s3, interrupt
+
+
+exception:
+    st.d $s0, $t0, 37*REGBYTES
+    /* Save NextIP*/
+    st.d $ra, $t0, 38*REGBYTES    
+    b c_handle_exception
+
 
 handle_syscall:
+    /* Mask syscall(currently only timer interrupt), save ecode to user stack */
+    # li.d $t1, 0
+    # bstrins.d $s0, $t1, 17, 16
+    # bstrins.d $s0, $t1, 19, 19
+    st.d $s0, $t0, 37*REGBYTES
     /* Set the return address to era + 4 in the case of a system call */
     addi.d $ra, $ra, 4
     /* Save NextIP*/
     st.d $ra, $t0, 38*REGBYTES
 
 #ifdef CONFIG_FASTPATH
-//TODO call c_handle_fastpath_call
+//Not tested yet, may triger a problem
+    li.d $t3, SYSCALL_CALL
+    beq $a7, $t3, c_handle_fastpath_call
+
+    li.d $t3, SYSCALL_REPLY_RECV
 #ifdef CONFIG_KERNEL_MCS
 //TODO
 #endif
-//TODO call c_handle_fastpath_reply_recv
+//Not tested yet, may triger a problem
+    beq $a7, $t3, c_handle_fastpath_reply_recv
 #endif
     /* move syscall number to 3rd argument */
     move $a2, $a7
     b c_handle_syscall
 
-
-
-exception:
-    /* Save NextIP*/
-    st.d $ra, $t0, 38*REGBYTES
-
-	# csrwr	$t0, EXCEPTION_KS0
-	# csrwr	$t1, EXCEPTION_KS1
-	# csrwr	$ra, EXCEPTION_KS2
-    
-    b c_handle_exception
-
-    
-
 interrupt:
-    /* Save NextIP*/
+    # li.d $t1, 0
+    # bstrins.d $s0, $t1, 12, 0
+    st.d $s0, $t0, 37*REGBYTES
+    /* Save NextIP */
     st.d $ra, $t0, 38*REGBYTES
     b c_handle_interrupt

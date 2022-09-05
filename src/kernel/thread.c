@@ -40,9 +40,9 @@ void activateThread(void)
         assert(thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState) == ThreadState_Running);
     }
 #endif
-    // int debugvalue=thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState);
-    // printf("%d\n",debugvalue);
-    // switch (debugvalue) {
+    // int state=thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState);
+    // printf("==================[Func activateThread] ksCurThread->tcbState: %d\n",state);
+    // switch (state) {
     switch (thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState)) {
     case ThreadState_Running:
         // printf("ThreadState_Running: %d\n",ThreadState_Running);
@@ -437,6 +437,7 @@ void chooseThread(void)
         assert(refill_ready(thread->tcbSchedContext));
 #endif
         switchToThread(thread);
+        // printf("======================[Func chooseThread] hit!\n");
     } else {
         switchToIdleThread();
     }
@@ -457,6 +458,7 @@ void switchToThread(tcb_t *thread)
     Arch_switchToThread(thread);
     tcbSchedDequeue(thread);
     NODE_STATE(ksCurThread) = thread;
+    // printf("new thread`s tcb state: %llu\n",thread->tcbState.words[0]);
 }
 
 void switchToIdleThread(void)
@@ -634,6 +636,8 @@ void endTimeslice(bool_t can_timeout_fault)
 
 void timerTick(void)
 {
+    // int state = thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState);
+    // printf("[Func timerTick] ksCurThread->tcbState: %d\n",state);
     if (likely(thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState) ==
                ThreadState_Running)
 #ifdef CONFIG_VTX
@@ -643,7 +647,9 @@ void timerTick(void)
        ) {
         if (NODE_STATE(ksCurThread)->tcbTimeSlice > 1) {
             NODE_STATE(ksCurThread)->tcbTimeSlice--;
+            // printf("tcbTimeSlice: %lu\n",NODE_STATE(ksCurThread)->tcbTimeSlice);
         } else {
+            // printf("tcbTimeSlice: %lu\n",NODE_STATE(ksCurThread)->tcbTimeSlice);
             NODE_STATE(ksCurThread)->tcbTimeSlice = CONFIG_TIME_SLICE;
             SCHED_APPEND_CURRENT_TCB;
             rescheduleRequired();

@@ -116,60 +116,81 @@ static inline void NORETURN FORCE_INLINE fastpath_restore(word_t badge, word_t m
     set_tcb_fs_state(NODE_STATE(ksCurThread), isFpuEnable());
 #endif
 
-    register word_t badge_reg asm("$a0") = badge;
-    register word_t msgInfo_reg asm("$a1") = msgInfo;
-    register word_t cur_thread_reg asm("$t0") = TCB_REF(cur_thread);
+    register word_t badge_reg asm("a0") = badge;
+    register word_t msgInfo_reg asm("a1") = msgInfo;
+    register word_t cur_thread_reg asm("t0") = TCB_REF(cur_thread);
 
     asm volatile(
-        "ld.d  $ra, $t0, 0*%[REGSIZE]  \n"
-        "ld.d  $sp, $t0, 1*%[REGSIZE]  \n"
-        /* loongarch doesn't have gp register*/
-        //"ld.d  $gp, $t0, 2*%[REGSIZE]  \n"
+        "ld.d  $ra, $t0, 0*%[REGSIZE]   \n"
         /* skip tp */
-        /* skip x5/$t0 */
-        "ld.d  $t2, $t0, 6*%[REGSIZE]  \n"
-        "ld.d  $s1, $t0, 7*%[REGSIZE]  \n"
-        "ld.d  $s0, $t0, 8*%[REGSIZE]  \n"
-        "ld.d  $a2, $t0, 11*%[REGSIZE] \n"
-        "ld.d  $a3, $t0, 12*%[REGSIZE] \n"
-        "ld.d  $a4, $t0, 13*%[REGSIZE] \n"
-        "ld.d  $a5, $t0, 14*%[REGSIZE] \n"
-        "ld.d  $a6, $t0, 15*%[REGSIZE] \n"
-        "ld.d  $a7, $t0, 16*%[REGSIZE] \n"
-        "ld.d  $s1, $t0, 17*%[REGSIZE] \n"
-        "ld.d  $s2, $t0, 18*%[REGSIZE] \n"
-        "ld.d  $s3, $t0, 19*%[REGSIZE] \n"
-        "ld.d  $s4, $t0, 20*%[REGSIZE] \n"
-        "ld.d  $s5, $t0, 21*%[REGSIZE] \n"
-        "ld.d  $s6, $t0, 22*%[REGSIZE] \n"
-        "ld.d  $s7, $t0, 23*%[REGSIZE] \n"
-        "ld.d  $s8, $t0, 24*%[REGSIZE] \n"
-        "ld.d  $t7, $t0, 25*%[REGSIZE]\n"
-        "ld.d  $t8, $t0, 26*%[REGSIZE]\n"
-        "ld.d  $t3, $t0, 27*%[REGSIZE] \n"
-        "ld.d  $t4, $t0, 28*%[REGSIZE] \n"
-        "ld.d  $t5, $t0, 29*%[REGSIZE] \n"
-        "ld.d  $t6, $t0, 30*%[REGSIZE] \n"
-        /* Get next restored tp */
-        "ld.d  $t1, $t0, 3*%[REGSIZE]  \n"
-        /* get restored tp */
-        "add.d $tp, $t1, $r0  \n"
-        /* get badv */  //it is sepc in riscv
-        "ld.d  $t1, $t0, 34*%[REGSIZE]\n"
-        "csrwr  $t1, 0x7  \n"
-#ifndef ENABLE_SMP_SUPPORT
-        /* Write back LOONGARCH_CSR_KS0 with cur_thread_reg to get it back on the next trap entry */
-        "csrwr $t0, 0x30\n"
-#endif
-        "ld.d  $t1, $t0, 32*%[REGSIZE] \n"
-        "csrwr $t1, 0x4 \n" //ECFG
+        "ld.d  $sp, $t0, 2*%[REGSIZE]   \n"
+        // "ld.d  $a0, $t0, 3*%[REGSIZE]   \n"
+        // "ld.d  $a1, $t0, 4*%[REGSIZE]   \n"
+        "ld.d  $a2, $t0, 5*%[REGSIZE]   \n"
+        "ld.d  $a3, $t0, 6*%[REGSIZE]   \n"
+        "ld.d  $a4, $t0, 7*%[REGSIZE]   \n"
+        "ld.d  $a5, $t0, 8*%[REGSIZE]   \n"
+        "ld.d  $a6, $t0, 9*%[REGSIZE]   \n"
+        "ld.d  $a7, $t0, 10*%[REGSIZE]  \n"
+        /* skip $r12/$t0 */
+        /* skip $r13/$t1 */
+        "ld.d  $t2, $t0, 13*%[REGSIZE]  \n"
+        "ld.d  $t3, $t0, 14*%[REGSIZE]  \n"
+        "ld.d  $t4, $t0, 15*%[REGSIZE]  \n"
+        "ld.d  $t5, $t0, 16*%[REGSIZE]  \n"
+        "ld.d  $t6, $t0, 17*%[REGSIZE]  \n"
+        "ld.d  $t7, $t0, 18*%[REGSIZE]  \n"
+        "ld.d  $t8, $t0, 19*%[REGSIZE]  \n"
+        "ld.d  $r21, $t0, 20*%[REGSIZE] \n"
+        "ld.d  $s0, $t0, 21*%[REGSIZE]  \n"
+        "ld.d  $s1, $t0, 22*%[REGSIZE]  \n"
+        "ld.d  $s2, $t0, 23*%[REGSIZE]  \n"
+        "ld.d  $s3, $t0, 24*%[REGSIZE]  \n"
+        "ld.d  $s4, $t0, 25*%[REGSIZE]  \n"
+        "ld.d  $s5, $t0, 26*%[REGSIZE]  \n"
+        "ld.d  $s6, $t0, 27*%[REGSIZE]  \n"
+        "ld.d  $s7, $t0, 28*%[REGSIZE]  \n"
+        "ld.d  $s8, $t0, 29*%[REGSIZE]  \n"
+        "ld.d  $fp, $t0, 30*%[REGSIZE]  \n"
 
-        "ld.d  $t1, $t0, 5*%[REGSIZE] \n"
-        "ld.d  $t0, $t0, 4*%[REGSIZE] \n"
+        /* Get next restored tp */
+        "ld.d  $t1, $t0, 1*%[REGSIZE]   \n"
+        /* get restored tp */
+        "add.d $tp, $t1, $r0    \n"
+
+#ifndef ENABLE_SMP_SUPPORT
+        /* Write back LOONGARCH_CSR_KS3 with cur_thread_reg to get it back on the next trap entry */
+        "move $t1, $t0          \n"
+        "csrwr $t0, 0x33        \n"
+        "move $t0, $t1          \n"
+#endif
+        //load [38*%[REGSIZE]+$t0] to LOONGARCH_CSR_ERA instead of 31*%[REGSIZE]
+
+        "ld.d  $t1, $t0, 32*%[REGSIZE]  \n" //load LOONGARCH_CSR_BADV
+        "csrwr $t1, 0x7  \n"
+
+        "ld.d  $t1, $t0, 34*%[REGSIZE]  \n" //load LOONGARCH_CSR_PRMD
+        "csrwr $t1, 0x1  \n"        
+
+        "ld.d  $t1, $t0, 35*%[REGSIZE]  \n" //load LOONGARCH_CSR_EUEN
+        "csrwr $t1, 0x2  \n"
+
+        "ld.d  $t1, $t0, 36*%[REGSIZE]  \n" //load LOONGARCH_CSR_ECFG
+        "csrwr $t1, 0x4  \n"
+
+        "ld.d  $t1, $t0, 37*%[REGSIZE]  \n" //load LOONGARCH_CSR_ESTAT
+        "csrwr $t1, 0x5 \n"
+
+        "ld.d  $t1, $t0, 38*%[REGSIZE]  \n" //load nextIP to LOONGARCH_CSR_ERA
+        "csrwr $t1, 0x6   \n"
+
+        "ld.d  $t1, $t0, 12*%[REGSIZE]  \n"
+        "ld.d  $t0, $t0, 11*%[REGSIZE]  \n"
+
         "ertn"
         : /* no output */
-        : "r"(cur_thread_reg),
-        [REGSIZE] "i"(sizeof(word_t)),
+        : [REGSIZE] "i"(sizeof(word_t)),
+        [cur_thread] "r"(cur_thread_reg),
         "r"(badge_reg),
         "r"(msgInfo_reg)
         : "memory"

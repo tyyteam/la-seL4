@@ -128,6 +128,9 @@ void VISIBLE NORETURN restore_user_context(void)
 
 void VISIBLE NORETURN c_handle_interrupt(void)
 {
+    // word_t excode = read_csr_excode();
+    // word_t is = read_csr_is();
+    // printf("[Func c_handle_interrupt] excode=%lu, is=%lu\n",excode,is);
     NODE_LOCK_IRQ_IF(getActiveIRQ() != INTERRUPT_IPI);
 
     c_entry_hook();
@@ -144,28 +147,39 @@ void VISIBLE NORETURN c_handle_exception(void)
     c_entry_hook();
 
     word_t excode = read_csr_excode();
+    // word_t is = read_csr_is();
+    // printf("[Func c_handle_exception] excode=%lu, is=%lu\n",excode,is);
     switch (excode)
     {
         case LAAddrError:               //ADEF or ADEM
+            assert(0);
             break;
         case LAAddrAlignFault:          //ALE
+            assert(0);
             break;
         case LABoundCheck:              //BCE
+            assert(0);
             break;
         case LALoadPageInvalid:         //PIL
+            assert(0);
             break;
         case LAStorePageInvalid:        //PIS
             handle_tlb_store();
             break;
         case LAFetchPageInvalid:        //PIF
+            assert(0);
             break;
         case LAPageModException:        //PME
+            assert(0);
             break;
         case LAPageNoReadable:          //PNR
+            assert(0);
             break;
         case LAPageNoExecutable:        //PNX
+            assert(0);
             break;
         case LAPagePrivilegeIllegal:    //PPI
+            assert(0);
             handleVMFaultEvent(excode); //LoongArch records the bad vaddr in CSR.BADV
             break;
 
@@ -252,6 +266,9 @@ void VISIBLE NORETURN c_handle_syscall(word_t cptr, word_t msgInfo, syscall_t sy
     NODE_LOCK_SYS;
 
     c_entry_hook();
+    // word_t excode = read_csr_excode();
+    // word_t is = read_csr_is();
+    // printf("[Func c_handle_syscall] excode=%lu, is=%lu\n",excode,is);
 #ifdef TRACK_KERNEL_ENTRIES //loongarch enabled this macro
     benchmark_debug_syscall_start(cptr, msgInfo, syscall);
     ksKernelEntry.is_fastpath = 0;

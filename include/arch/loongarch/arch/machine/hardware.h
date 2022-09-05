@@ -18,6 +18,7 @@
 
 /* Privileged CSR definitions */
 #define CSR_PRMD_PIE   0x00000004
+#define CSR_PRMD_PPLV3 0X00000003
 // #define SSTATUS_SPIE  0x00000020
 // #define SSTATUS_SPP   0x00000100
 // #define SSTATUS_FS    0x00006000
