@@ -562,16 +562,24 @@ exception_t handleVMFault(tcb_t *thread, vm_fault_type_t vm_faultType)
     switch (vm_faultType)
     {
         case LALoadPageInvalid:     //PIL
-        case LAPageNoReadable:      //PNR
             current_fault = seL4_Fault_VMFault_new(addr, LALoadPageInvalid, false);
             return EXCEPTION_FAULT;
-
-        case LAStorePageInvalid:    //PIS
-        case LAPageModException:    //PME
-            current_fault = seL4_Fault_VMFault_new(addr, LAStorePageInvalid, false);
+        case LAPageNoReadable:      //PNR
+            current_fault = seL4_Fault_VMFault_new(addr, LAPageNoReadable, false);
             return EXCEPTION_FAULT;
-
+        case LAStorePageInvalid:    //PIS
+            if (handle_tlb_store()) {
+                current_fault = seL4_Fault_VMFault_new(addr, LAStorePageInvalid, false);
+                return EXCEPTION_FAULT;
+            } else {
+                return EXCEPTION_NONE;
+            }
+        case LAPageModException:    //PME
+            current_fault = seL4_Fault_VMFault_new(addr, LAPageModException, false);
+            return EXCEPTION_FAULT;
         case LAFetchPageInvalid:    //PIF
+            current_fault = seL4_Fault_VMFault_new(addr, LAFetchPageInvalid, false);
+            return EXCEPTION_FAULT;
         case LAPageNoExecutable:    //PNX
             current_fault = seL4_Fault_VMFault_new(addr, LAFetchPageInvalid, true);
             return EXCEPTION_FAULT;

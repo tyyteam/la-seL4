@@ -121,15 +121,15 @@ handle_syscall:
 
 #ifdef CONFIG_FASTPATH
 //Not tested yet, may triger a problem
-    li.d $t3, SYSCALL_CALL
-    beq $a7, $t3, c_handle_fastpath_call
+    # li.d $t3, SYSCALL_CALL
+    # beq $a7, $t3, c_handle_fastpath_call
 
-    li.d $t3, SYSCALL_REPLY_RECV
+    # li.d $t3, SYSCALL_REPLY_RECV
 #ifdef CONFIG_KERNEL_MCS
 //TODO
 #endif
 //Not tested yet, may triger a problem
-    beq $a7, $t3, c_handle_fastpath_reply_recv
+    # beq $a7, $t3, c_handle_fastpath_reply_recv
 #endif
     /* move syscall number to 3rd argument */
     move $a2, $a7
