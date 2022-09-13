@@ -78,7 +78,6 @@ finaliseCap_ret_t Arch_finaliseCap(cap_t cap, bool_t final)
 
     switch (cap_get_capType(cap)) {
     case cap_frame_cap:
-
         if (cap_frame_cap_get_capFMappedASID(cap)) {
             unmapPage(cap_frame_cap_get_capFSize(cap),
                       cap_frame_cap_get_capFMappedASID(cap),
