@@ -112,6 +112,7 @@ leave_store:
 	csrrd	$t0, EXCEPTION_KS0
 	csrrd	$t1, EXCEPTION_KS1
 	csrrd	$ra, EXCEPTION_KS2
+	move	$a0, $r0
 	jirl	$zero, $ra, 0
 	# ertn
 #ifdef CONFIG_64BIT
@@ -193,13 +194,20 @@ tlb_huge_update_store:
 	csrxchg		$t1, $t0, LOONGARCH_CSR_TLBIDX
 
 nopage_tlb_store:
-	dbar	0
+	# dbar	0
+	# csrrd	$ra, EXCEPTION_KS2
+	# # la.abs	$t0, tlb_do_page_fault_1
+	# jirl	$r0, $t0, 0
+
+	csrrd	$t0, EXCEPTION_KS0
+	csrrd	$t1, EXCEPTION_KS1
 	csrrd	$ra, EXCEPTION_KS2
-	# la.abs	$t0, tlb_do_page_fault_1
-	jirl	$r0, $t0, 0
+	addi.d	$a0, $r0, 1
+	jirl	$zero, $ra, 0
 
  handle_tlb_refill:
 	csrwr	$t0, LOONGARCH_CSR_TLBRSAVE
+	csrrd	$t0, LOONGARCH_CSR_ASID
 	csrrd	$t0, LOONGARCH_CSR_PGD
 	lddir	$t0, $t0, 3
 	lddir	$t0, $t0, 1

@@ -23,8 +23,6 @@
 #include <benchmark/benchmark_track.h>
 #include <benchmark/benchmark_utilisation.h>
 
-extern void handle_tlb_store(void);
-
 /** DONT_TRANSLATE */
 void VISIBLE NORETURN restore_user_context(void)
 {
@@ -152,37 +150,17 @@ void VISIBLE NORETURN c_handle_exception(void)
     switch (excode)
     {
         case LAAddrError:               //ADEF or ADEM
-            assert(0);
-            break;
         case LAAddrAlignFault:          //ALE
-            assert(0);
-            break;
         case LABoundCheck:              //BCE
-            assert(0);
-            break;
         case LALoadPageInvalid:         //PIL
-            assert(0);
-            break;
         case LAStorePageInvalid:        //PIS
-            handle_tlb_store();
-            break;
         case LAFetchPageInvalid:        //PIF
-            assert(0);
-            break;
         case LAPageModException:        //PME
-            assert(0);
-            break;
         case LAPageNoReadable:          //PNR
-            assert(0);
-            break;
         case LAPageNoExecutable:        //PNX
-            assert(0);
-            break;
         case LAPagePrivilegeIllegal:    //PPI
-            assert(0);
             handleVMFaultEvent(excode); //LoongArch records the bad vaddr in CSR.BADV
             break;
-
         default:
 #ifdef CONFIG_HAVE_FPU
         if (!isFpuEnable()) {
