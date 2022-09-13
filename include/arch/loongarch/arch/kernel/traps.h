@@ -21,14 +21,12 @@ static inline void arch_c_entry_hook(void)
 {
     //check CSR_PRMD_PPLV 
     if((r_csr_prmd() & CSR_PRMD_PPLV) != 0){
-        printf("kerneltrap: not from privilege 0\n");
-        UNREACHABLE();
+        fail("Trap should be handled under privilege 0!\n");
     }
 
     //check CSR_CRMD_IE
     if(intr_get() != 0){
-        printf("kerneltrap: interrupts enabled\n");
-        UNREACHABLE();
+        fail("Interrupts should be disabled in trap!\n");
     }
 }
 

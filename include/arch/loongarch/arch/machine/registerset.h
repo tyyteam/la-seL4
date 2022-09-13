@@ -66,15 +66,13 @@ enum _register {
 
     csr_era=31,FaultIP=31,
     csr_badvaddr=32,
-    // csr_crmd=33,
-    csr_prmd=34,
-    csr_euen=35,
-    csr_ecfg=36,
-    csr_estat=37,
+    csr_prmd=33,
+    csr_euen=34,
+    csr_ecfg=35,
 
-    NextIP=38,
+    NextIP=36,
 
-    n_contextRegisters = 39
+    n_contextRegisters = 37
 };
 
 typedef uint8_t register_t;
@@ -126,8 +124,7 @@ static inline void Arch_initContext(user_context_t *context)
     /* Enable interrupts */
     context->registers[csr_prmd] = CSR_PRMD_PIE;
     context->registers[csr_ecfg] = (0U << 16)|(1<<11);//set vs=0 and enable timer interrupt before dropping into user mode
-    context->registers[csr_euen] = 0x1;
-    context->registers[csr_estat] = 0;
+    context->registers[csr_euen] = 0x0;
 }
 
 static inline word_t CONST sanitiseRegister(register_t reg, word_t v, bool_t archInfo)

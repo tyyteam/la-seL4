@@ -81,17 +81,15 @@ trap_entry:
     st.d $t8, $t0, 32*REGBYTES
 
     csrrd $t8, LOONGARCH_CSR_PRMD  // save csr_prmd, we don`t need to save csr_crmd
-    st.d $t8, $t0, 34*REGBYTES
+    st.d $t8, $t0, 33*REGBYTES
 
     csrrd $t8, LOONGARCH_CSR_EUEN  // save csr_euen
-    st.d $t8, $t0, 35*REGBYTES
+    st.d $t8, $t0, 34*REGBYTES
 
     csrrd $t8, LOONGARCH_CSR_ECFG  // save csr_ecfg
-    st.d $t8, $t0, 36*REGBYTES
+    st.d $t8, $t0, 35*REGBYTES
 
     csrrd $s0, LOONGARCH_CSR_ESTAT // read csr_estat to s0
-    // We do not store estat here, due to the different handling of interrupts and syscall/exception. 
-
 
 #ifdef ENABLE_SMP_SUPPORT
     //TODO
@@ -103,38 +101,23 @@ trap_entry:
 	add.d $sp, $sp, $t8
 #endif
     
-    /* Get the is of estat at [21:16]*/
-    bstrpick.d $s1, $s0, 21, 16
-
-    li.d $s2, 11
-    beq $s1, $s2, handle_syscall
-
-
     /* Get the is of estat at [12:0]*/
     bstrpick.d $s1, $s0, 12, 0
 
     /* Check if it's an timer interrupt */
-    li.d $s3, 0
-    bne $s1, $s3, interrupt
+    bnez $s1, interrupt
 
+    /* Get the excode of estat at [21:16]*/
+    bstrpick.d $s1, $s0, 21, 16
 
-exception:
-    st.d $s0, $t0, 37*REGBYTES
-    /* Save NextIP*/
-    st.d $ra, $t0, 38*REGBYTES    
-    b c_handle_exception
-
+    li.d $s2, 11
+    bne $s1, $s2, exception
 
 handle_syscall:
-    /* Mask syscall(currently only timer interrupt), save ecode to user stack */
-    # li.d $t1, 0
-    # bstrins.d $s0, $t1, 17, 16
-    # bstrins.d $s0, $t1, 19, 19
-    st.d $s0, $t0, 37*REGBYTES
     /* Set the return address to era + 4 in the case of a system call */
     addi.d $ra, $ra, 4
     /* Save NextIP*/
-    st.d $ra, $t0, 38*REGBYTES
+    st.d $ra, $t0, 36*REGBYTES
 
 #ifdef CONFIG_FASTPATH
 //Not tested yet, may triger a problem
@@ -152,10 +135,13 @@ handle_syscall:
     move $a2, $a7
     b c_handle_syscall
 
+exception:
+    /* Save NextIP*/
+    st.d $ra, $t0, 36*REGBYTES    
+    b c_handle_exception
+
+
 interrupt:
-    # li.d $t1, 0
-    # bstrins.d $s0, $t1, 12, 0
-    st.d $s0, $t0, 37*REGBYTES
     /* Save NextIP */
-    st.d $ra, $t0, 38*REGBYTES
+    st.d $ra, $t0, 36*REGBYTES
     b c_handle_interrupt

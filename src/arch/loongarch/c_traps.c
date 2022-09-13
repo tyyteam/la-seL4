@@ -98,19 +98,19 @@ void VISIBLE NORETURN restore_user_context(void)
         "ld.d  $t1, $t0, 32*%[REGSIZE]  \n" //load LOONGARCH_CSR_BADV
         "csrwr $t1, 0x7  \n"
 
-        "ld.d  $t1, $t0, 34*%[REGSIZE]  \n" //load LOONGARCH_CSR_PRMD
+        "ld.d  $t1, $t0, 33*%[REGSIZE]  \n" //load LOONGARCH_CSR_PRMD
         "csrwr $t1, 0x1  \n"        
 
-        "ld.d  $t1, $t0, 35*%[REGSIZE]  \n" //load LOONGARCH_CSR_EUEN
+        "ld.d  $t1, $t0, 34*%[REGSIZE]  \n" //load LOONGARCH_CSR_EUEN
         "csrwr $t1, 0x2  \n"
 
-        "ld.d  $t1, $t0, 36*%[REGSIZE]  \n" //load LOONGARCH_CSR_ECFG
+        "ld.d  $t1, $t0, 35*%[REGSIZE]  \n" //load LOONGARCH_CSR_ECFG
         "csrwr $t1, 0x4  \n"
 
-        "ld.d  $t1, $t0, 37*%[REGSIZE]  \n" //load LOONGARCH_CSR_ESTAT
-        "csrwr $t1, 0x5 \n"
+        // "ld.d  $t1, $t0, 37*%[REGSIZE]  \n" //load LOONGARCH_CSR_ESTAT
+        // "csrwr $t1, 0x5 \n"
 
-        "ld.d  $t1, $t0, 38*%[REGSIZE]  \n" //load nextIP to LOONGARCH_CSR_ERA
+        "ld.d  $t1, $t0, 36*%[REGSIZE]  \n" //load nextIP to LOONGARCH_CSR_ERA
         "csrwr $t1, 0x6   \n"
 
         "ld.d  $t1, $t0, 12*%[REGSIZE]  \n"
@@ -222,7 +222,7 @@ void VISIBLE NORETURN slowpath(syscall_t syscall)
 }
 
 #ifdef CONFIG_FASTPATH
-ALIGN(L1_CACHE_LINE_SIZE)
+//TODO: ALIGN(L1_CACHE_LINE_SIZE), reading cpucfg could get the size of it.
 #ifdef CONFIG_KERNEL_MCS
 void VISIBLE c_handle_fastpath_reply_recv(word_t cptr, word_t msgInfo, word_t reply)
 #else
@@ -244,7 +244,7 @@ void VISIBLE c_handle_fastpath_reply_recv(word_t cptr, word_t msgInfo)
     UNREACHABLE();
 }
 
-ALIGN(L1_CACHE_LINE_SIZE)
+//TODO: ALIGN(L1_CACHE_LINE_SIZE), reading cpucfg could get the size of it.
 void VISIBLE c_handle_fastpath_call(word_t cptr, word_t msgInfo)
 {
     NODE_LOCK_SYS;

@@ -138,8 +138,7 @@ BOOT_CODE static void init_cpu(void)
     init_tlb();
     
     /* set vs=0 of LOONGARCH_CSR_ECFG, all traps goes to the same trap_entry in traps.S*/
-    unsigned int ecfg = (0U << CSR_ECFG_VS_SHIFT) | BIT(ECFG_TIMER);
-    write_csr_ecfg(ecfg);
+    set_csr_ecfg(0U << CSR_ECFG_VS_SHIFT);
 
     /* set the entry for traps.
      * tlbrefill entry is set in elfloader, we used page table in elfloader and may cause tlb missing.
@@ -154,12 +153,12 @@ BOOT_CODE static void init_cpu(void)
     initTimer();
 #endif
 
-    /* enable FPU access*/
-    write_csr_euen(0x1);
+    /* disable FPU access*/
+    write_csr_euen(0x0);
 
     printf("euen: %u\n",read_csr_euen());
 #ifdef CONFIG_HAVE_FPU
-    //TODO
+    write_csr_euen(0x1);
 #endif
 }
 

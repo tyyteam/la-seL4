@@ -267,16 +267,14 @@ BOOT_CODE void initLocalIRQController(void)
 {
     printf("Initializing local IRQ and extend io interrupt controller...\n");
 
-    /* clear the interrupt stat */
-    clear_csr_estat(ESTAT_IS);
-
-    /* Enable SoftWare Interrupt, Performance Monitor Counter Overflow Interrupt,
-     * Timer Interrupt. If SMP is enabled, then enable the ECFG_IPI. */
-    // set_csr_ecfg(SWI_VEC|HWI_VEC|BIT(ECFG_PMC)|BIT(ECFG_TIMER)|SMP_TERNARY(BIT(ECFG_IPI), 0));
-    // set_csr_ecfg(BIT(ECFG_TIMER));
+    /* Currently only enabled timer Interrupt */
+    set_csr_ecfg(BIT(ECFG_TIMER));
 
     /* map extend io interrupt to HW1 of node 0, core 0.*/
     extioi_init_hart();
+
+    /* clear the interrupt stat */
+    write_csr_estat(0x0);
 }
 
 BOOT_CODE void initIRQController(void)

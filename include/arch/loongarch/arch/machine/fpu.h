@@ -35,21 +35,25 @@ extern bool_t isFPUEnabledCached[CONFIG_MAX_NUM_NODES];
 
 static inline void set_fs_clean(void)
 {
+    assert(0);
     // asm volatile("csrs sstatus, %0" :: "rK"(SSTATUS_FS_CLEAN));
 }
 
 static inline void set_fs_initial(void)
 {
+    assert(0);
     // asm volatile("csrs sstatus, %0" :: "rK"(SSTATUS_FS_INITIAL));
 }
 
 static inline void set_fs_dirty(void)
 {
+    assert(0);
     // asm volatile("csrs sstatus, %0" :: "rK"(SSTATUS_FS_DIRTY));
 }
 
 static inline word_t read_sstatus_fs(void)
 {
+    assert(0);
     // return (read_sstatus() & SSTATUS_FS);
 }
 
@@ -61,6 +65,7 @@ static inline word_t read_sstatus_fs(void)
  */
 static inline void saveFpuState(user_fpu_state_t *dest)
 {
+    assert(0);
     set_fs_clean();
 
     asm volatile(
@@ -106,6 +111,7 @@ static inline void saveFpuState(user_fpu_state_t *dest)
 
 static inline void loadFpuState(user_fpu_state_t *src)
 {
+    assert(0);
     set_fs_clean();
 
     asm volatile(
@@ -150,21 +156,25 @@ static inline void loadFpuState(user_fpu_state_t *src)
 
 static inline void enableFpu(void)
 {
+    assert(0);
     isFPUEnabledCached[CURRENT_CPU_INDEX()] = true;
 }
 
 static inline void disableFpu(void)
 {
+    assert(0);
     isFPUEnabledCached[CURRENT_CPU_INDEX()] = false;
 }
 
 static inline bool_t isFpuEnable(void)
 {
+    assert(0);
     return isFPUEnabledCached[CURRENT_CPU_INDEX()];
 }
 
 static inline void set_tcb_fs_state(tcb_t *tcb, bool_t enabled)
 {
+    assert(0);
     // word_t sstatus = getRegister(tcb, SSTATUS);
     // sstatus &= ~SSTATUS_FS;
     // if (enabled) {
