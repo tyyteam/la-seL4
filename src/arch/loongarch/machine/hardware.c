@@ -249,7 +249,6 @@ static inline void ackInterrupt(irq_t irq)
 void resetTimer(void)
 {
     /* ack */
-    // printf("=====reset timer!!!=====\n");
     w_csr_ticlr(r_csr_ticlr() | CSR_TINTCLR_TI);
 }
 

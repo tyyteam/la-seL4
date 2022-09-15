@@ -32,7 +32,7 @@ enum IRQConstants {
     KERNEL_SW_IRQ0=0,
     KERNEL_SW_IRQ1=1,
 
-    HW_IRQ_OFFSET = 1,//?
+    HW_IRQ_OFFSET = 1,
     HW_IRQ0=2,
     HW_IRQ1=3,
     HW_IRQ2=4,

@@ -522,8 +522,6 @@ lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
     word_t level = CONFIG_PT_LEVELS - 1;
     pte_t *pt = lvl1pt;
     pte_t *save_ptSlot = lvl1pt;
-    // printf("pt: %p\n", pt);
-    // printf("save_ptSlot: %p\n", save_ptSlot);
 
     /* this is how many bits we potentially have left to decode. Initially we have the
      * full address space to decode, and every time we walk this will be reduced. The
@@ -532,24 +530,19 @@ lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
      * the loop: */
     ret.ptBitsLeft = PT_INDEX_BITS * level + seL4_PageBits;
     save_ptSlot = pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
-    // printf("ret.ptBitsLeft: %lu\n", ret.ptBitsLeft);
-    // printf("save_ptSlot: %p\n", save_ptSlot);
 
     while (isPTEPageTable((pte_t *)save_ptSlot) && likely(0 < level)) {
         level--;
         ret.ptBitsLeft -= PT_INDEX_BITS;
         pt = PTE_PTR(paddr_to_pptr(save_ptSlot->words[0]));
         save_ptSlot = pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
-        // printf("ret.ptBitsLeft: %lu\n", ret.ptBitsLeft);
-        // printf("pt: %p\n", pt);
-        // printf("save_ptSlot: %p\n", save_ptSlot);
     }
 
     ret.ptSlot = (pte_t *)save_ptSlot;
     ret.ptLevel = level;
-    // if (!isPTEPageTable((pte_t *)save_ptSlot)) {
-    //     ret.ptSlot = (pte_t *)save_ptSlot;
-    // }
+    if (!isPTEPageTable((pte_t *)save_ptSlot)) {
+        ret.ptSlot = (pte_t *)save_ptSlot;
+    }
 
     return ret;
 }
@@ -800,25 +793,6 @@ vm_rights_t CONST maskVMRights(vm_rights_t vm_rights, seL4_CapRights_t cap_right
 
 static pte_t CONST makeUserPTE(paddr_t paddr/*, bool_t executable, vm_rights_t vm_rights*/)
 {
-    // assert(0);
-    // word_t write = LOONGARCHGetWriteFromVMRights(vm_rights);
-    // word_t read = LOONGARCHGetReadFromVMRights(vm_rights);
-    // if (unlikely(!read && !write && !executable)) {
-    //     return pte_pte_invalid_new();
-    // } else {
-    //     return pte_new(
-    //                paddr >> seL4_PageBits,
-    //                0, /* sw */
-    //                1, /* dirty */
-    //                1, /* accessed */
-    //                0, /* global */
-    //                1, /* user */
-    //                executable, /* execute */
-    //                RISCVGetWriteFromVMRights(vm_rights), /* write */
-    //                RISCVGetReadFromVMRights(vm_rights), /* read */
-    //                1 /* valid */
-    //            );
-    // }
     return user_pte_next(paddr, true, PTE_L3);
 }
 

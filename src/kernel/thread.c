@@ -40,19 +40,14 @@ void activateThread(void)
         assert(thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState) == ThreadState_Running);
     }
 #endif
-    // int state=thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState);
-    // printf("==================[Func activateThread] ksCurThread->tcbState: %d\n",state);
-    // switch (state) {
     switch (thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState)) {
     case ThreadState_Running:
-        // printf("ThreadState_Running: %d\n",ThreadState_Running);
 #ifdef CONFIG_VTX
     case ThreadState_RunningVM:
 #endif
         break;
 
     case ThreadState_Restart: {
-        // printf("ThreadState_Restart: %d\n",ThreadState_Restart);
         word_t pc;
 
         pc = getRestartPC(NODE_STATE(ksCurThread));
@@ -636,8 +631,6 @@ void endTimeslice(bool_t can_timeout_fault)
 
 void timerTick(void)
 {
-    // int state = thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState);
-    // printf("[Func timerTick] ksCurThread->tcbState: %d\n",state);
     if (likely(thread_state_get_tsType(NODE_STATE(ksCurThread)->tcbState) ==
                ThreadState_Running)
 #ifdef CONFIG_VTX
@@ -647,9 +640,7 @@ void timerTick(void)
        ) {
         if (NODE_STATE(ksCurThread)->tcbTimeSlice > 1) {
             NODE_STATE(ksCurThread)->tcbTimeSlice--;
-            // printf("tcbTimeSlice: %lu\n",NODE_STATE(ksCurThread)->tcbTimeSlice);
         } else {
-            // printf("tcbTimeSlice: %lu\n",NODE_STATE(ksCurThread)->tcbTimeSlice);
             NODE_STATE(ksCurThread)->tcbTimeSlice = CONFIG_TIME_SLICE;
             SCHED_APPEND_CURRENT_TCB;
             rescheduleRequired();
