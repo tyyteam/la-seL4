@@ -43,7 +43,7 @@
 #define seL4_PageTableBits     14
 #define seL4_VSpaceBits        seL4_PageTableBits  /*CY ? */
 
-#define seL4_NumASIDPoolsBits   7
+#define seL4_NumASIDPoolsBits   5
 #define seL4_ASIDPoolIndexBits  11
 #define seL4_ASIDPoolBits       14
 

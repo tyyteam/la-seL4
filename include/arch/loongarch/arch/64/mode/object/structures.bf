@@ -49,22 +49,22 @@ block page_table_cap {
     field_high capPTMappedAddress    48
 }
 
--- Cap to the table of 2^6 ASID pools
+-- Cap to the table of 2^5 ASID pools
 block asid_control_cap {
-    padding 64
+    padding                          64
 
-    field   capType     5
-    padding             59
+    field capType                    5
+    padding                          59
 }
 
--- Cap to a pool of 2^10 ASIDs
+-- Cap to a pool of 2^11 ASIDs
 block asid_pool_cap {
-    padding 64
+    padding                         64
 
-    field       capType         5
-    field       capASIDBase     16
-    padding                     6
-    field_high  capASIDPool     37
+    field capType                   5
+    field capASIDBase               16
+    padding                         6
+    field_high capASIDPool          37
 }
 
 -- NB: odd numbers are arch caps (see isArchCap())
