@@ -29,7 +29,6 @@ typedef struct seL4_UserContext_ {
     seL4_Word pc;
     seL4_Word ra;
     seL4_Word sp;
-    //seL4_Word gp;
     
     seL4_Word s0;
     seL4_Word s1;
