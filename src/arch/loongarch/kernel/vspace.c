@@ -609,30 +609,30 @@ void deleteASIDPool(asid_t asid_base, asid_pool_t *pool)
     }
 }
 
-// static exception_t performASIDControlInvocation(void *frame, cte_t *slot, cte_t *parent, asid_t asid_base)
-// {
-//     /** AUXUPD: "(True, typ_region_bytes (ptr_val \<acute>frame) 12)" */
-//     /** GHOSTUPD: "(True, gs_clear_region (ptr_val \<acute>frame) 12)" */
-//     cap_untyped_cap_ptr_set_capFreeIndex(&(parent->cap),
-//                                          MAX_FREE_INDEX(cap_untyped_cap_get_capBlockSize(parent->cap)));
+static exception_t performASIDControlInvocation(void *frame, cte_t *slot, cte_t *parent, asid_t asid_base)
+{
+    /** AUXUPD: "(True, typ_region_bytes (ptr_val \<acute>frame) 12)" */
+    /** GHOSTUPD: "(True, gs_clear_region (ptr_val \<acute>frame) 12)" */
+    cap_untyped_cap_ptr_set_capFreeIndex(&(parent->cap),
+                                         MAX_FREE_INDEX(cap_untyped_cap_get_capBlockSize(parent->cap)));
 
-//     memzero(frame, BIT(pageBitsForSize(LOONGARCH_16K_Page)));
-//     /** AUXUPD: "(True, ptr_retyps 1 (Ptr (ptr_val \<acute>frame) :: asid_pool_C ptr))" */
+    memzero(frame, BIT(pageBitsForSize(LOONGARCH_16K_Page)));
+    /** AUXUPD: "(True, ptr_retyps 1 (Ptr (ptr_val \<acute>frame) :: asid_pool_C ptr))" */
 
-//     cteInsert(
-//         cap_asid_pool_cap_new(
-//             asid_base,          /* capASIDBase  */
-//             WORD_REF(frame)     /* capASIDPool  */
-//         ),
-//         parent,
-//         slot
-//     );
-//     /* Haskell error: "ASID pool's base must be aligned" */
-//     assert((asid_base & MASK(asidLowBits)) == 0);
-//     riscvKSASIDTable[asid_base >> asidLowBits] = (asid_pool_t *)frame;
+    cteInsert(
+        cap_asid_pool_cap_new(
+            asid_base,          /* capASIDBase  */
+            WORD_REF(frame)     /* capASIDPool  */
+        ),
+        parent,
+        slot
+    );
+    /* Haskell error: "ASID pool's base must be aligned" */
+    assert((asid_base & MASK(asidLowBits)) == 0);
+    loongarchKSASIDTable[asid_base >> asidLowBits] = (asid_pool_t *)frame;
 
-//     return EXCEPTION_NONE;
-// }
+    return EXCEPTION_NONE;
+}
 
 static exception_t performASIDPoolInvocation(asid_t asid, asid_pool_t *poolPtr, cte_t *vspaceCapSlot)
 {
@@ -1084,12 +1084,9 @@ exception_t decodeLOONGARCHMMUInvocation(word_t label, word_t length, cptr_t cpt
     case cap_frame_cap:
         return decodeLOONGARCHFrameInvocation(label, length, cte, cap, buffer);
 
-    case cap_asid_control_cap: 
-        assert(0);
-
-    
-        // word_t     i;
-        // asid_t           asid_base;
+    case cap_asid_control_cap: {
+        word_t     i;
+        asid_t           asid_base;
         word_t           index;
         word_t           depth;
         cap_t            untyped;
@@ -1097,14 +1094,14 @@ exception_t decodeLOONGARCHMMUInvocation(word_t label, word_t length, cptr_t cpt
         cte_t           *parentSlot;
         cte_t           *destSlot;
         lookupSlot_ret_t lu_ret;
-        // void            *frame;
+        void            *frame;
         exception_t      status;
 
-        // if (label != LOONGARCHASIDControlMakePool) {
-        //     current_syscall_error.type = seL4_IllegalOperation;
+        if (label != LOONGARCHASIDControlMakePool) {
+            current_syscall_error.type = seL4_IllegalOperation;
 
-        //     return EXCEPTION_SYSCALL_ERROR;
-        // }
+            return EXCEPTION_SYSCALL_ERROR;
+        }
 
         if (length < 2 || current_extra_caps.excaprefs[0] == NULL
             || current_extra_caps.excaprefs[1] == NULL) {
@@ -1119,16 +1116,16 @@ exception_t decodeLOONGARCHMMUInvocation(word_t label, word_t length, cptr_t cpt
         root = current_extra_caps.excaprefs[1]->cap;
 
         /* Find first free pool */
-        // for (i = 0; i < nASIDPools && riscvKSASIDTable[i]; i++);
+        for (i = 0; i < nASIDPools && loongarchKSASIDTable[i]; i++);
 
-        // if (i == nASIDPools) {
-        //     /* no unallocated pool is found */
-        //     current_syscall_error.type = seL4_DeleteFirst;
+        if (i == nASIDPools) {
+            /* no unallocated pool is found */
+            current_syscall_error.type = seL4_DeleteFirst;
 
-        //     return EXCEPTION_SYSCALL_ERROR;
-        // }
+            return EXCEPTION_SYSCALL_ERROR;
+        }
 
-        // asid_base = i << asidLowBits;
+        asid_base = i << asidLowBits;
 
         if (cap_get_capType(untyped) != cap_untyped_cap ||
             cap_untyped_cap_get_capBlockSize(untyped) != seL4_ASIDPoolBits ||
@@ -1144,7 +1141,7 @@ exception_t decodeLOONGARCHMMUInvocation(word_t label, word_t length, cptr_t cpt
             return status;
         }
 
-        // frame = WORD_PTR(cap_untyped_cap_get_capPtr(untyped));
+        frame = WORD_PTR(cap_untyped_cap_get_capPtr(untyped));
 
         lu_ret = lookupTargetSlot(root, index, depth);
         if (lu_ret.status != EXCEPTION_NONE) {
@@ -1158,9 +1155,8 @@ exception_t decodeLOONGARCHMMUInvocation(word_t label, word_t length, cptr_t cpt
         }
 
         setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
-        // return performASIDControlInvocation(frame, destSlot, parentSlot, asid_base);
-        return EXCEPTION_NONE;
-    
+        return performASIDControlInvocation(frame, destSlot, parentSlot, asid_base);
+    }
 
     case cap_asid_pool_cap: {
         cap_t        vspaceCap;
