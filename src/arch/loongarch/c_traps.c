@@ -91,7 +91,7 @@ void VISIBLE NORETURN restore_user_context(void)
         "csrwr $t0, 0x33        \n"
         "move $t0, $t1          \n"
 #endif
-        //load [38*%[REGSIZE]+$t0] to LOONGARCH_CSR_ERA instead of 31*%[REGSIZE]
+        //load [36*%[REGSIZE]+$t0] to LOONGARCH_CSR_ERA instead of 31*%[REGSIZE]
 
         "ld.d  $t1, $t0, 32*%[REGSIZE]  \n" //load LOONGARCH_CSR_BADV
         "csrwr $t1, 0x7  \n"
@@ -104,9 +104,6 @@ void VISIBLE NORETURN restore_user_context(void)
 
         "ld.d  $t1, $t0, 35*%[REGSIZE]  \n" //load LOONGARCH_CSR_ECFG
         "csrwr $t1, 0x4  \n"
-
-        // "ld.d  $t1, $t0, 37*%[REGSIZE]  \n" //load LOONGARCH_CSR_ESTAT
-        // "csrwr $t1, 0x5 \n"
 
         "ld.d  $t1, $t0, 36*%[REGSIZE]  \n" //load nextIP to LOONGARCH_CSR_ERA
         "csrwr $t1, 0x6   \n"
