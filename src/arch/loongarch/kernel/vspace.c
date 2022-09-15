@@ -741,7 +741,7 @@ void setVMRoot(tcb_t *tcb)
         return;
     }
 
-    setUserVSpaceRoot(addrFromPPtr(lvl1pt), asid);
+    setVSpaceRoot(addrFromPPtr(lvl1pt), asid);
 }
 
 bool_t CONST isValidVTableRoot(cap_t cap)

@@ -1431,21 +1431,15 @@ void setNextPC(tcb_t *thread, word_t v);
 
 static inline void setVSpaceRoot(paddr_t addr, asid_t asid)
 {
-    /*CY 设置页表寄存器PGDH */
-    csr_writeq(addr, LOONGARCH_CSR_PGDH);
-    /*CY 设置ASID */
-    write_csr_asid(asid);
-    /*CY TODO 刷新TLB？ */
-}
-
-static inline void setUserVSpaceRoot(paddr_t addr, asid_t asid)
-{
-    /*CY 设置页表寄存器PGDL */
-    csr_writeq(addr, LOONGARCH_CSR_PGDL);
-    /*CY 设置ASID */
-    write_csr_asid(asid);
-    /*QT we only need to invalid the tlb terms of certain asid */
-	invtlb_info(0x4, asid, 0);
+	/*asid == 0 stands for kernel thread, others for user thread*/
+	if(asid==0){
+		csr_writeq(addr, LOONGARCH_CSR_PGDH);
+		write_csr_asid(asid);
+	}else{
+		csr_writeq(addr, LOONGARCH_CSR_PGDL);
+		write_csr_asid(asid);
+		invtlb_info(0x4, asid, 0);
+	}
 }
 
 void map_kernel_devices(void);

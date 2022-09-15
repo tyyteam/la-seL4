@@ -44,7 +44,7 @@ static inline void FORCE_INLINE switchToThread_fp(tcb_t *thread, pte_t *vroot, p
 {
     asid_t asid = (asid_t)(stored_hw_asid.words[0]);
 
-    setUserVSpaceRoot(addrFromPPtr(vroot), asid);
+    setVSpaceRoot(addrFromPPtr(vroot), asid);
 
     NODE_STATE(ksCurThread) = thread;
 }
