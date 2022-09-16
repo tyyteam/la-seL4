@@ -20,13 +20,14 @@
 # 文档和演示
 
 * 展示文档
-
+  * 2022.09.16，龙芯版seL4微内核通过所有sel4test测试用例，[视频](https://www.bilibili.com/video/BV1Mt4y1j7Gx?vd_source=c0ebc331ee63978f26b2050109cc5826)。
   * 2022.**08**.15，[**决赛项目文档**](https://github.com/tyyteam/OS-comp-pdfdoc-videos/blob/main/proj97-la-seL4-tyyteam-%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%96%87%E6%A1%A3.pdf)。**建议下载**阅读，github在线阅读pdf可能有问题。
   * 2022.**08**.15，决赛演示视频：[**百度网盘链接**](https://pan.baidu.com/s/16f4EYctBe0jwXw0sC8CLPg?pwd=6p4k)或[**github链接**](https://raw.githubusercontent.com/tyyteam/OS-comp-pdfdoc-videos/main/la-seL4-%E5%86%B3%E8%B5%9B%E9%A1%B9%E7%9B%AE%E6%BC%94%E7%A4%BA%E8%A7%86%E9%A2%91.mp4)。
   * 2022.**08**.07，**项目分享会（8月7日第十场）**：[分享会视频](https://www.bilibili.com/video/BV1PW4y1Y7zj?spm_id_from=333.999.0.0&vd_source=c0ebc331ee63978f26b2050109cc5826)和[分享会PPT](https://os.educg.net/2022CSCC?op=5)。
   * （初赛）2022.05.30，[初赛文档-la-seL4-项目调研\_设计\_展示文档](https://github.com/tyyteam/OS-comp-pdfdoc-videos/blob/main/la-seL4-%E5%88%9D%E8%B5%9B%E9%A1%B9%E7%9B%AE%E8%B0%83%E7%A0%94_%E8%AE%BE%E8%AE%A1_%E5%B1%95%E7%A4%BA%E6%96%87%E6%A1%A3.pdf)。
   * （初赛）2022.05.15，[初赛中期-设计和展示文档](./docs/初赛中期-设计和展示文档.md)。
   * （初赛）2022.05.15，[初赛中期-演示视频及文字说明](https://pan.baidu.com/s/1c8KKPdG0Ri_AbR2taWWPSw?pwd=2qdg)。
+
 * 技术文档等资源
 
   * **项目构建、编译、调试方法和调试脚本**：[项目构建、编译、调试方法和调试脚本](./docs/技术文档-项目构建、编译和调试方法.md)。
