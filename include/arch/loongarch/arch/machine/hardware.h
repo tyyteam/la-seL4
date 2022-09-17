@@ -19,19 +19,6 @@
 /* Privileged CSR definitions */
 #define CSR_PRMD_PIE   0x00000004
 #define CSR_PRMD_PPLV3 0X00000003
-// #define SSTATUS_SPIE  0x00000020
-// #define SSTATUS_SPP   0x00000100
-// #define SSTATUS_FS    0x00006000
-
-// #define SSTATUS_FS_CLEAN    0x00004000
-// #define SSTATUS_FS_INITIAL  0x00002000
-// #define SSTATUS_FS_DIRTY    0x00006000
-
-// #define SATP_MODE_OFF  0
-// #define SATP_MODE_SV32 1
-// #define SATP_MODE_SV39 8
-// #define SATP_MODE_SV48 9
-
 // #ifndef __ASSEMBLER__
 
 // #include <config.h>
@@ -40,7 +27,7 @@
 // #include <arch/types.h>
 // #include <sel4/sel4_arch/constants.h>
 
-/* The size is for HiFive Unleashed */
+/* The size is for Loongson 3A5000`s cache line size, which is recorded in cpucfg.11.Linesize-log2[bit30:24] */
 #define L1_CACHE_LINE_SIZE_BITS     6
 #define L1_CACHE_LINE_SIZE          BIT(L1_CACHE_LINE_SIZE_BITS)
 

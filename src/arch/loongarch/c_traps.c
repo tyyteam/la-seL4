@@ -123,9 +123,6 @@ void VISIBLE NORETURN restore_user_context(void)
 
 void VISIBLE NORETURN c_handle_interrupt(void)
 {
-    // word_t excode = read_csr_excode();
-    // word_t is = read_csr_is();
-    // printf("[Func c_handle_interrupt] excode=%lu, is=%lu\n",excode,is);
     NODE_LOCK_IRQ_IF(getActiveIRQ() != INTERRUPT_IPI);
 
     c_entry_hook();
@@ -140,10 +137,9 @@ void VISIBLE NORETURN c_handle_exception(void)
     NODE_LOCK_SYS;
 
     c_entry_hook();
-
+    
     word_t excode = read_csr_excode();
-    // word_t is = read_csr_is();
-    // printf("[Func c_handle_exception] excode=%lu, is=%lu\n",excode,is);
+
     switch (excode)
     {
         case LAAddrError:               //ADEF or ADEM
@@ -197,7 +193,7 @@ void VISIBLE NORETURN slowpath(syscall_t syscall)
 }
 
 #ifdef CONFIG_FASTPATH
-//TODO: ALIGN(L1_CACHE_LINE_SIZE), reading cpucfg could get the size of it.
+ALIGN(L1_CACHE_LINE_SIZE)
 #ifdef CONFIG_KERNEL_MCS
 void VISIBLE c_handle_fastpath_reply_recv(word_t cptr, word_t msgInfo, word_t reply)
 #else
@@ -219,7 +215,7 @@ void VISIBLE c_handle_fastpath_reply_recv(word_t cptr, word_t msgInfo)
     UNREACHABLE();
 }
 
-//TODO: ALIGN(L1_CACHE_LINE_SIZE), reading cpucfg could get the size of it.
+ALIGN(L1_CACHE_LINE_SIZE)
 void VISIBLE c_handle_fastpath_call(word_t cptr, word_t msgInfo)
 {
     NODE_LOCK_SYS;
@@ -241,10 +237,8 @@ void VISIBLE NORETURN c_handle_syscall(word_t cptr, word_t msgInfo, syscall_t sy
     NODE_LOCK_SYS;
 
     c_entry_hook();
-    // word_t excode = read_csr_excode();
-    // word_t is = read_csr_is();
-    // printf("[Func c_handle_syscall] excode=%lu, is=%lu\n",excode,is);
-#ifdef TRACK_KERNEL_ENTRIES //loongarch enabled this macro
+
+#ifdef TRACK_KERNEL_ENTRIES 
     benchmark_debug_syscall_start(cptr, msgInfo, syscall);
     ksKernelEntry.is_fastpath = 0;
 #endif /* DEBUG */

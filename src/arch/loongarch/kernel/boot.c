@@ -156,6 +156,10 @@ BOOT_CODE static void init_cpu(void)
     /* disable FPU access*/
     write_csr_euen(0x0);
 
+    unsigned int cpucfg17 = read_cpucfg(0x11);
+    printf("loongarch cpucfg17: 0x%x\n",cpucfg17);
+    printf("l1 cache line size: 2^%x Bytes\n", ((cpucfg17 >> 24) & 0x7f));
+
     printf("euen: %u\n",read_csr_euen());
 #ifdef CONFIG_HAVE_FPU
     write_csr_euen(0x1);
