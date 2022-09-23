@@ -122,7 +122,7 @@ typedef struct user_context user_context_t;
 static inline void Arch_initContext(user_context_t *context)
 {
     /* Enable interrupts */
-    context->registers[csr_prmd] = CSR_PRMD_PIE;
+    context->registers[csr_prmd] = CSR_PRMD_PIE|CSR_PRMD_PPLV3;
     context->registers[csr_ecfg] = (0U << 16)|(1<<11);//set vs=0 and enable timer interrupt before dropping into user mode
     context->registers[csr_euen] = 0x0;
 }

@@ -19,8 +19,13 @@
 
 static inline void arch_c_entry_hook(void)
 {
-    //check CSR_PRMD_PPLV 
-    if((r_csr_prmd() & CSR_PRMD_PPLV) != 0){
+    //check CSR_PRMD_PPLV
+    if ((r_csr_prmd() & CSR_PRMD_PPLV) != 3){
+        fail("User images should run under privilege 3!\n");
+    }
+
+    //check CSR_CRMD_PLV 
+    if((r_csr_crmd() & CSR_CRMD_PLV) != 0){
         fail("Trap should be handled under privilege 0!\n");
     }
 
