@@ -249,7 +249,7 @@ static inline void ackInterrupt(irq_t irq)
 void resetTimer(void)
 {
     /* ack */
-    w_csr_ticlr(r_csr_ticlr() | CSR_TINTCLR_TI);
+    w_csr_ticlr(CSR_TINTCLR_TI);
 }
 
 /**
@@ -267,13 +267,14 @@ BOOT_CODE void initLocalIRQController(void)
     printf("Initializing local IRQ and extend io interrupt controller...\n");
 
     /* Currently only enabled timer Interrupt */
-    set_csr_ecfg(BIT(ECFG_TIMER));
+    // set_csr_ecfg(BIT(ECFG_TIMER));
 
     /* map extend io interrupt to HW1 of node 0, core 0.*/
     extioi_init_hart();
 
-    /* clear the interrupt stat */
+    /* clear the interrupt stat , clear timer seperately*/
     write_csr_estat(0x0);
+    w_csr_ticlr(CSR_TINTCLR_TI);
 }
 
 BOOT_CODE void initIRQController(void)

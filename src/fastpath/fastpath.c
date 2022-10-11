@@ -42,6 +42,7 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
      * saved fault. */
     if (unlikely(fastpath_mi_check(msgInfo) ||
                  fault_type != seL4_Fault_NullFault)) {
+        printf("entered slowpath(Check there's no extra caps, the length is ok and there's no saved fault)\n");
         slowpath(SysCall);
     }
 
@@ -72,7 +73,7 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
         slowpath(SysCall);
     }
 #endif
-
+    printf("Getting destination thread\n");
     /* Get destination thread.*/
     newVTable = TCB_PTR_CTE_PTR(dest, tcbVTable)->cap;
 

@@ -97,27 +97,27 @@
 /*
  * How to add/sub/load/store/shift C long variables.
  */
-#if (_LOONGARCH_SZLONG == 32)
-#define LONG_ADDU	add.w
-#define LONG_ADDIU	addi.w
-#define LONG_SUBU	sub.w
-#define LONG_L		ld.w
-#define LONG_S		st.w
-#define LONG_SP		swp
-#define LONG_SLL	slli.w
-#define LONG_SLLV	sll.w
-#define LONG_SRL	srli.w
-#define LONG_SRLV	srl.w
-#define LONG_SRA	srai.w
-#define LONG_SRAV	sra.w
+// #if (_LOONGARCH_SZLONG == 32)
+// #define LONG_ADDU	add.w
+// #define LONG_ADDIU	addi.w
+// #define LONG_SUBU	sub.w
+// #define LONG_L		ld.w
+// #define LONG_S		st.w
+// #define LONG_SP		swp
+// #define LONG_SLL	slli.w
+// #define LONG_SLLV	sll.w
+// #define LONG_SRL	srli.w
+// #define LONG_SRLV	srl.w
+// #define LONG_SRA	srai.w
+// #define LONG_SRAV	sra.w
 
-#ifdef __ASSEMBLER__
-#define LONG		.word
-#endif
-#define LONGSIZE	4
-#define LONGMASK	3
-#define LONGLOG		2
-#endif
+// #ifdef __ASSEMBLER__
+// #define LONG		.word
+// #endif
+// #define LONGSIZE	4
+// #define LONGMASK	3
+// #define LONGLOG		2
+// #endif
 
 #if (_LOONGARCH_SZLONG == 64)
 #define LONG_ADDU	add.d

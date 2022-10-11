@@ -205,8 +205,10 @@ BOOT_CODE void map_kernel_frame(paddr_t paddr, pptr_t vaddr, vm_rights_t vm_righ
     /* Map devices in 2nd-level page table */
         paddr = ROUND_DOWN(paddr, LA_GET_LVL_PGSIZE_BITS(2));
         assert((paddr % LA_GET_LVL_PGSIZE(2)) == 0);
-        kernel_devices_pt[LA_GET_PT_INDEX(vaddr, 2)] = pte_next(paddr, true, PTE_L2);
-    } 
+        pte_t pte_dev_uncache_plv0;
+        pte_dev_uncache_plv0.words[0]=(word_t)(PTE_L2_PA(paddr) | PTE_H_GSRWXV_UNCACHE_PLV0);
+        kernel_devices_pt[LA_GET_PT_INDEX(vaddr, 2)] = pte_dev_uncache_plv0;
+    }
     else {
         paddr = ROUND_DOWN(paddr, LA_GET_LVL_PGSIZE_BITS(1));
         assert((paddr % LA_GET_LVL_PGSIZE(1)) == 0);

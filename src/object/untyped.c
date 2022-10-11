@@ -40,6 +40,7 @@ exception_t decodeUntypedInvocation(word_t invLabel, word_t length, cte_t *slot,
     bool_t deviceMemory;
     bool_t reset;
 
+    printf("entered decodeUntypedInvocation\n");
     /* Ensure operation is valid. */
     if (invLabel != UntypedRetype) {
         userError("Untyped cap: Illegal operation attempted.");
@@ -73,6 +74,7 @@ exception_t decodeUntypedInvocation(word_t invLabel, word_t length, cte_t *slot,
     }
 
     objectSize = getObjectSize(newType, userObjSize);
+    printf("objectSize: %lu\n",objectSize);
 
     /* Exclude impossibly large object sizes. getObjectSize can overflow if userObjSize
        is close to 2^wordBits, which is nonsensical in any case, so we check that this
@@ -133,6 +135,7 @@ exception_t decodeUntypedInvocation(word_t invLabel, word_t length, cte_t *slot,
     }
 
     /* Is the region where the user wants to put the caps valid? */
+    printf("Is the region where the user wants to put the caps valid?\n");
     nodeSize = 1ul << cap_cnode_cap_get_capCNodeRadix(nodeCap);
     if (nodeOffset > nodeSize - 1) {
         userError("Untyped Retype: Destination node offset #%d too large.",
@@ -181,6 +184,7 @@ exception_t decodeUntypedInvocation(word_t invLabel, word_t length, cte_t *slot,
      * recorded in the cap.
      */
     status = ensureNoChildren(slot);
+    printf("status = ensureNoChildren(slot): %lu\n",status);
     if (status != EXCEPTION_NONE) {
         freeIndex = cap_untyped_cap_get_capFreeIndex(cap);
         reset = false;
@@ -224,6 +228,7 @@ exception_t decodeUntypedInvocation(word_t invLabel, word_t length, cte_t *slot,
     /* Align up the free region so that it is aligned to the target object's
      * size. */
     alignedFreeRef = alignUp(freeRef, objectSize);
+    printf("alignedFreeRef: %lu\n",alignedFreeRef);
 
     /* Perform the retype. */
     setThreadState(NODE_STATE(ksCurThread), ThreadState_Restart);
@@ -234,14 +239,18 @@ exception_t decodeUntypedInvocation(word_t invLabel, word_t length, cte_t *slot,
 
 static exception_t resetUntypedCap(cte_t *srcSlot)
 {
+    printf("entered resetUntypedCap\n");
     cap_t prev_cap = srcSlot->cap;
     word_t block_size = cap_untyped_cap_get_capBlockSize(prev_cap);
+    printf("block_size: %lu\n", block_size);
     void *regionBase = WORD_PTR(cap_untyped_cap_get_capPtr(prev_cap));
     int chunk = CONFIG_RESET_CHUNK_BITS;
     word_t offset = FREE_INDEX_TO_OFFSET(cap_untyped_cap_get_capFreeIndex(prev_cap));
+    printf("offset: %lu\n", offset);
     exception_t status;
     bool_t deviceMemory = cap_untyped_cap_get_capIsDevice(prev_cap);
-
+    printf("offsdeviceMemoryet: %lu\n", deviceMemory);
+    
     if (offset == 0) {
         return EXCEPTION_NONE;
     }
@@ -257,12 +266,47 @@ static exception_t resetUntypedCap(cte_t *srcSlot)
         }
         srcSlot->cap = cap_untyped_cap_set_capFreeIndex(prev_cap, 0);
     } else {
+        printf("srcSlot->cap: %llu\n",srcSlot->cap.words[0]);
+        printf("not deviceMemory || block_size < chunk\n");
+        printf("chunk: %d\n",chunk);
+        printf("regionBase=%p\n",regionBase);
+        printf("============test the addr===============\n");
+        printf("===trying to access 0x900000017d100400\n");
+        asm volatile(
+            "csrwr  $t0, 0x34  \n"
+            "csrwr  $t1, 0x35  \n"
+            "li.d   $t0, 0x900000017d100400 \n"
+            "ld.d   $t1, $t0, 0             \n"
+            "csrwr  $t0, 0x34  \n"
+            "csrwr  $t1, 0x35  \n");
+        printf("===ok to access 0x900000017d100400\n");
+
+        printf("===trying to access 0x900000017d1003c0\n");
+        asm volatile(
+            "csrwr  $t0, 0x34  \n"
+            "csrwr  $t1, 0x35  \n"
+            "li.d   $t0, 0x900000017d1003c0 \n"
+            "ld.d   $t1, $t0, 0             \n"
+            "csrwr  $t0, 0x34  \n"
+            "csrwr  $t1, 0x35  \n");
+        printf("===ok to access 0x900000017d1003c0\n");
+        printf("============test addr done===============\n");
+
+
         for (offset = ROUND_DOWN(offset - 1, chunk);
              offset != - BIT(chunk); offset -= BIT(chunk)) {
+            if(offset<=0x1100200){
+                printf("offset=0x%lx\n", offset);
+            }
             clearMemory(GET_OFFSET_FREE_PTR(regionBase, offset), chunk);
+            if (offset <= 0x1100400 && offset >= 0x1100000)
+            {
+                printf("cleared Memory! \n");
+            }            
             srcSlot->cap = cap_untyped_cap_set_capFreeIndex(prev_cap, OFFSET_TO_FREE_INDEX(offset));
             status = preemptionPoint();
             if (status != EXCEPTION_NONE) {
+                printf("status: %lu\n",status);
                 return status;
             }
         }
@@ -276,13 +320,16 @@ exception_t invokeUntyped_Retype(cte_t *srcSlot,
                                  cte_t *destCNode, word_t destOffset, word_t destLength,
                                  bool_t deviceMemory)
 {
+    printf("entered invokeUntyped_Retype\n");
     word_t freeRef;
     word_t totalObjectSize;
     void *regionBase = WORD_PTR(cap_untyped_cap_get_capPtr(srcSlot->cap));
     exception_t status;
 
+    printf("reset: %lu\n",reset);
     if (reset) {
         status = resetUntypedCap(srcSlot);
+        printf("status: %lu\n",status);
         if (status != EXCEPTION_NONE) {
             return status;
         }
@@ -298,6 +345,9 @@ exception_t invokeUntyped_Retype(cte_t *srcSlot,
     srcSlot->cap = cap_untyped_cap_set_capFreeIndex(srcSlot->cap,
                                                     GET_FREE_INDEX(regionBase, freeRef));
 
+    printf("totalObjectSize: %lu\n",totalObjectSize);
+    printf("freeRef: %lu\n",freeRef);
+    printf("srcSlot->cap: %llu\n",srcSlot->cap.words[0]);
     /* Create new objects and caps. */
     createNewObjects(newType, srcSlot, destCNode, destOffset, destLength,
                      retypeBase, userSize, deviceMemory);

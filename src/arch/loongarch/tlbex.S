@@ -14,7 +14,6 @@
 
 
  .section .text
- .global handle_tlb_refill
  .global handle_tlb_store
 
 handle_tlb_store:
@@ -204,18 +203,3 @@ nopage_tlb_store:
 	csrrd	$ra, EXCEPTION_KS2
 	addi.d	$a0, $r0, 1
 	jirl	$zero, $ra, 0
-
- handle_tlb_refill:
-	csrwr	$t0, LOONGARCH_CSR_TLBRSAVE
-	csrrd	$t0, LOONGARCH_CSR_ASID
-	csrrd	$t0, LOONGARCH_CSR_PGD
-	lddir	$t0, $t0, 3
-	lddir	$t0, $t0, 1
-	ldpte	$t0, 0
-	ldpte	$t0, 1
-	tlbfill
-	csrrd   $t0, LOONGARCH_CSR_TLBREHI
-	csrrd   $t0, LOONGARCH_CSR_TLBRELO0
-	csrrd   $t0, LOONGARCH_CSR_TLBRELO1
-	csrrd	$t0, LOONGARCH_CSR_TLBRSAVE
-	ertn

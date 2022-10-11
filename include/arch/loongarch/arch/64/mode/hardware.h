@@ -38,7 +38,8 @@
 
 /* The base address in virtual memory to use for the kernel ELF mapping */
 
-#define KERNEL_ELF_BASE (PPTR_TOP + (KERNEL_ELF_PADDR_BASE & MASK(30)))
+/*#define KERNEL_ELF_BASE (PPTR_TOP + (KERNEL_ELF_PADDR_BASE & MASK(30)))*/
+#define KERNEL_ELF_BASE (PPTR_TOP)
 /* The base address in virtual memory to use for the kernel device
  * mapping region. These are mapped in the kernel page table. */
 #define KDEV_BASE UL_CONST(0xFFFF81101FE00000)

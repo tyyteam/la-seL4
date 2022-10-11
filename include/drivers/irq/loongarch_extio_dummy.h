@@ -51,7 +51,7 @@ static inline void extioi_init_hart(void)
 {
     // printf("no extio present, skip hart specific initialisation\n");
 
-    /* This is an example, seL4 do not handle externel interrupts.
+    /* This is an example, seL4 kernel do not handle externel interrupts.
      * The code enable 2~4 extend io interrupt*/
     iocsr_writeq((0x1UL << UART0_IRQ) | (0x1UL << KEYBOARD_IRQ), LOONGARCH_IOCSR_EXTIOI_EN_BASE);
 

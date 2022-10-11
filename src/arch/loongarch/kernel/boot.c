@@ -150,7 +150,8 @@ BOOT_CODE static void init_cpu(void)
     initLocalIRQController();
 
 #ifndef CONFIG_KERNEL_MCS
-    initTimer();
+    // initTimer();
+    w_csr_tcfg(0x0);
 #endif
 
     /* disable FPU access*/
@@ -160,7 +161,9 @@ BOOT_CODE static void init_cpu(void)
     printf("loongarch cpucfg17: 0x%x\n",cpucfg17);
     printf("l1 cache line size: 2^%x Bytes\n", ((cpucfg17 >> 24) & 0x7f));
 
-    printf("euen: %u\n",read_csr_euen());
+    printf("euen: %x\n",read_csr_euen());
+    printf("ecfg: %x\n",read_csr_ecfg());
+    printf("estat: %x\n",read_csr_estat());
 #ifdef CONFIG_HAVE_FPU
     write_csr_euen(0x1);
 #endif
@@ -242,7 +245,7 @@ static BOOT_CODE bool_t try_init_kernel(
     
     map_kernel_window();
 
-    /* disable traps and do necessary setups, then enable them*/
+    /* disable traps and do necessary setups, then enable under plv3 */
     traps_off();
 
     /* initialise the CPU */

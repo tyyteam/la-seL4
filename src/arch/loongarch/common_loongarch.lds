@@ -37,23 +37,24 @@ SECTIONS
     {
         *(.boot.data)
     }
-    . = ALIGN(16K);
+    . = ALIGN(16k);
 
     ki_boot_end = .;
 
     .text . : AT(ADDR(.text) - KERNEL_OFFSET)
     {
-        . = ALIGN(16K);
+        . = ALIGN(16k);
         /* Standard kernel */
         *(.text)
-        . = ALIGN(16K);
-        _k_tlbrefill_entry = .;
-        *(k_tlbrefill_entry)
-        . = ALIGN(16K);
+        . = ALIGN(16k);
+        kernel_tlbrefillentry = .;
+        *(kernel_tlbrefillentry)
+        . = ALIGN(16k);
         _k_eentry = .;
         *(k_eentry)
     }
-
+    
+    . = ALIGN(16k);
     /* Start of data section */
     _sdata = .;
     .sdata : {
