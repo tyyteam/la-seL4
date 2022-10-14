@@ -437,7 +437,7 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 #define LOONGARCH_CSR_KS0		0x30
 #define LOONGARCH_CSR_KS1		0x31
 #define LOONGARCH_CSR_KS2		0x32
-#define LOONGARCH_CSR_KS3		0x33
+#define LOONGARCH_CSR_KS3		0x33 /* used for trap */
 #define LOONGARCH_CSR_KS4		0x34
 #define LOONGARCH_CSR_KS5		0x35
 #define LOONGARCH_CSR_KS6		0x36

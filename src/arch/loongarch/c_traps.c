@@ -32,7 +32,7 @@ void VISIBLE NORETURN restore_user_context(void)
 
 #ifdef ENABLE_SMP_SUPPORT
     word_t sp;
-    asm volatile("csrrd %0, LOONGARCH_CSR_KS0" : "=r"(sp));//using LOONGARCH_CSR_KS0
+    asm volatile("csrrd %0, LOONGARCH_CSR_KS3" : "=r"(sp));
     sp -= sizeof(word_t);
     *((word_t *)sp) = cur_thread_reg;
 #endif

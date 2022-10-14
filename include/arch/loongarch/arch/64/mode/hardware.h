@@ -36,13 +36,13 @@
 
 #define KERNEL_ELF_PADDR_BASE (physBase + UL_CONST(0x0))
 
-/* The base address in virtual memory to use for the kernel ELF mapping */
+/* The base address in virtual memory to use for the kernel ELF mapping, MASK(25) for 32MB page, MASK(36) for 64GB page*/
+#define KERNEL_ELF_BASE (PPTR_TOP + (KERNEL_ELF_PADDR_BASE & MASK(25)))
 
-/*#define KERNEL_ELF_BASE (PPTR_TOP + (KERNEL_ELF_PADDR_BASE & MASK(30)))*/
-#define KERNEL_ELF_BASE (PPTR_TOP)
 /* The base address in virtual memory to use for the kernel device
  * mapping region. These are mapped in the kernel page table. */
 #define KDEV_BASE UL_CONST(0xFFFF81101FE00000)
+/*#define KDEV_BASE UL_CONST(0xFFFF81101E000000)*/
 
 /* Place the kernel log buffer at the end of the kernel device page table */
 #define KS_LOG_PPTR UL_CONST(0xFFFF80000F000000)
