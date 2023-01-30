@@ -34,14 +34,7 @@ void memzero(void *s, unsigned long n)
 
     /* Write out words. */
     while (n != 0) {
-        if ((ulong_alias)p == 0xffff80017d100200)
-        {
-            printf("trying to access ptr=%p\n", p);
-        }
         *(ulong_alias *)p = 0;
-        if((ulong_alias)p == 0xffff80017d100200){
-            printf("ok to access ptr=%p\n", p);
-        }
         p += sizeof(ulong_alias);
         n -= sizeof(ulong_alias);
     }

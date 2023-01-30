@@ -50,6 +50,7 @@ vmalloc_done_store:
 #if CONFIG_PT_LEVELS > 2
 	csrrd	$t0, LOONGARCH_CSR_BADV
 	ld.d	$t1, $t1, 0
+	beq		$t1, $r0, nopage_tlb_store
 	srli.d	$t0, $t0, LOONGARCH_L2PGSHIFT
 	andi	$t0, $t0, (PTRS_PER_PGD - 1)
 	slli.d	$t0, $t0, 3
@@ -59,6 +60,7 @@ vmalloc_done_store:
 	add.d 	$t1, $t1, $t0
 #endif
 	ld.d	$ra, $t1, 0
+	beq		$ra, $r0, nopage_tlb_store
 
 	/*
 	 * For huge tlb entries, pmde doesn't contain an address but
@@ -85,6 +87,8 @@ smp_pgtable_change_store:
 #else
 	ld.d	$t0, $t1, 0
 #endif
+	beq		$t0, $r0, nopage_tlb_store
+	
 	tlbsrch
 
 	srli.d	$ra, $t0, _PAGE_PRESENT_SHIFT

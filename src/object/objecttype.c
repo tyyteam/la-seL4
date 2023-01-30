@@ -627,7 +627,6 @@ exception_t decodeInvocation(word_t invLabel, word_t length,
                              word_t *buffer)
 #endif
 {
-    printf("entered decodeInvocation\n");
     if (isArchCap(cap)) {
         return Arch_decodeInvocation(invLabel, length, capIndex,
                                      slot, cap, call, buffer);
@@ -743,7 +742,6 @@ exception_t decodeInvocation(word_t invLabel, word_t length,
         return decodeCNodeInvocation(invLabel, length, cap, buffer);
 
     case cap_untyped_cap:
-        printf("cap_untyped_cap\n");
         return decodeUntypedInvocation(invLabel, length, slot, cap, call, buffer);
 
     case cap_irq_control_cap:

@@ -19,7 +19,9 @@ handle_tlb_refill:
 	csrrd	$t0, LOONGARCH_CSR_ASID
 	csrrd	$t0, LOONGARCH_CSR_PGD
 	lddir	$t0, $t0, 3
+	beq     $t0, $r0, refill_unmap
 	lddir	$t0, $t0, 1
+	beq     $t0, $r0, refill_unmap
 	ldpte	$t0, 0
 	ldpte	$t0, 1
 	tlbfill
@@ -28,3 +30,10 @@ handle_tlb_refill:
 	csrrd   $t0, LOONGARCH_CSR_TLBRELO1
 	csrrd	$t0, LOONGARCH_CSR_TLBRSAVE
 	ertn
+refill_unmap:
+	csrwr	$r0, LOONGARCH_CSR_TLBRELO0
+	csrwr	$r0, LOONGARCH_CSR_TLBRELO1
+	tlbfill
+	csrrd	$t0, LOONGARCH_CSR_TLBRSAVE
+	ertn
+	

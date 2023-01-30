@@ -264,7 +264,6 @@ static exception_t handleInvocation(bool_t isCall, bool_t isBlocking, bool_t can
 static exception_t handleInvocation(bool_t isCall, bool_t isBlocking)
 #endif
 {
-    printf("entered handleInvocation\n");
     seL4_MessageInfo_t info;
     lookupCapAndSlot_ret_t lu_ret;
     word_t *buffer;
@@ -281,7 +280,6 @@ static exception_t handleInvocation(bool_t isCall, bool_t isBlocking)
 
     /* faulting section */
     lu_ret = lookupCapAndSlot(thread, cptr);
-    printf("got lu_ret\n");
 
     if (unlikely(lu_ret.status != EXCEPTION_NONE)) {
         userError("Invocation of invalid cap #%lu.", cptr);
@@ -311,12 +309,6 @@ static exception_t handleInvocation(bool_t isCall, bool_t isBlocking)
     if (unlikely(length > n_msgRegisters && !buffer)) {
         length = n_msgRegisters;
     }
-    printf("seL4_MessageInfo_get_label(info): %llu\n",seL4_MessageInfo_get_label(info));
-    printf("length: %lu\n",length);
-    printf("cptr: %lu\n",cptr);
-    printf("isBlocking: %lu\n",isBlocking);
-    printf("isCall: %lu\n",isCall);
-    printf("buffer: %p\n",buffer);
 #ifdef CONFIG_KERNEL_MCS
     status = decodeInvocation(seL4_MessageInfo_get_label(info), length,
                               cptr, lu_ret.slot, lu_ret.cap,
@@ -327,7 +319,6 @@ static exception_t handleInvocation(bool_t isCall, bool_t isBlocking)
                               cptr, lu_ret.slot, lu_ret.cap,
                               isBlocking, isCall, buffer);
 #endif
-    printf("status==%lu\n",status);
 
     if (unlikely(status == EXCEPTION_PREEMPTED)) {
         return status;
@@ -343,11 +334,9 @@ static exception_t handleInvocation(bool_t isCall, bool_t isBlocking)
     if (unlikely(
             thread_state_get_tsType(thread->tcbState) == ThreadState_Restart)) {
         if (isCall) {
-            printf("isCall");
             replyFromKernel_success_empty(thread);
         }
         setThreadState(thread, ThreadState_Running);
-        printf("setThreadState\n");
     }
 
     return EXCEPTION_NONE;

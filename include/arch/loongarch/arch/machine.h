@@ -1070,7 +1070,7 @@ static inline void iocsr_writeq(uint64_t val, uint32_t reg)
 
 
 /* ============== LS7A registers =============== */
-#define LS7A_PCH_REG_BASE       0x9000000010000000UL
+#define LS7A_PCH_REG_BASE       0x6000000010000000UL
   
 #define LS7A_INT_MASK_REG       LS7A_PCH_REG_BASE + 0x020
 #define LS7A_INT_EDGE_REG       LS7A_PCH_REG_BASE + 0x060
@@ -1432,13 +1432,14 @@ void setNextPC(tcb_t *thread, word_t v);
 static inline void setVSpaceRoot(paddr_t addr, asid_t asid)
 {
 	/*asid == 0 stands for kernel thread, others for user thread*/
-	if(asid==0){
-		csr_writeq(addr, LOONGARCH_CSR_PGDH);
-		write_csr_asid(asid);
-	}else{
+	if (asid) {
 		csr_writeq(addr, LOONGARCH_CSR_PGDL);
 		write_csr_asid(asid);
 		invtlb_info(0x4, asid, 0);
+	} else {
+		csr_writeq(addr, LOONGARCH_CSR_PGDH);
+		write_csr_asid(asid);
+		invtlb_all(INVTLB_CURRENT_GTRUE, 0, 0);
 	}
 }
 

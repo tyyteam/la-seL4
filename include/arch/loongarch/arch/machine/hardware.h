@@ -18,6 +18,7 @@
 
 /* Privileged CSR definitions */
 #define CSR_PRMD_PIE   0x00000004
+#define CSR_PRMD_PPLV0 0X00000000
 #define CSR_PRMD_PPLV3 0X00000003
 // #ifndef __ASSEMBLER__
 

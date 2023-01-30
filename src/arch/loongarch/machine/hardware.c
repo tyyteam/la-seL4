@@ -41,7 +41,7 @@ BOOT_CODE void map_kernel_devices(void)
      * but have to use NUM_KERNEL_DEVICE_FRAMES that is defined accordingly.
      */
     for (int i = 0; i < NUM_KERNEL_DEVICE_FRAMES; i++) {
-        const kernel_frame_t *frame = &kernel_device_frames[i];
+        const kernel_frame_t *frame = &kernel_device_frames[i]; 
         map_kernel_frame(frame->paddr, frame->pptr, VMKernelOnly);
         if (!frame->userAvailable) {
             reserve_region((p_region_t) {
@@ -267,7 +267,7 @@ BOOT_CODE void initLocalIRQController(void)
     printf("Initializing local IRQ and extend io interrupt controller...\n");
 
     /* Currently only enabled timer Interrupt */
-    // set_csr_ecfg(BIT(ECFG_TIMER));
+    set_csr_ecfg(BIT(ECFG_TIMER));
 
     /* map extend io interrupt to HW1 of node 0, core 0.*/
     extioi_init_hart();

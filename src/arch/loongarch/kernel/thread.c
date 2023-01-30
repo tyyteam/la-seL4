@@ -28,8 +28,8 @@ BOOT_CODE void Arch_configureIdleThread(tcb_t *tcb)
 {
     setRegister(tcb, NextIP, (word_t)&idle_thread);
 
-    /* Enable interrupts and keep working in plv 3 mode */
-    setRegister(tcb, csr_prmd, (word_t) CSR_PRMD_PIE|CSR_PRMD_PPLV3);
+    /* Enable interrupts and keep working in plv 0 mode */
+    setRegister(tcb, csr_prmd, (word_t) CSR_PRMD_PIE | CSR_PRMD_PPLV0);
 #ifdef ENABLE_SMP_SUPPORT
     for (int i = 0; i < CONFIG_MAX_NUM_NODES; i++) {
         if (NODE_STATE_ON_CORE(ksIdleThread, i) == tcb) {

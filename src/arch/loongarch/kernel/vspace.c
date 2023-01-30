@@ -126,7 +126,14 @@ pte_ptr_is_leaf(pte_t *pte_ptr) {
 }
 
 static inline uint64_t PURE
-pte_ptr_is_initial(pte_t *pte_ptr) {
+pte_ptr_is_huge(pte_t *pte_ptr) {
+    uint64_t ret;
+    ret = (pte_ptr->words[0] & 0x1000ull);
+    return ret;
+}
+
+static inline uint64_t PURE
+pte_ptr_is_not_initial(pte_t *pte_ptr) {
     uint64_t ret;
     ret = pte_ptr->words[0];
     return ret;
@@ -134,7 +141,7 @@ pte_ptr_is_initial(pte_t *pte_ptr) {
 
 static inline bool_t isPTEPageTable(pte_t *pte)
 {
-    if (pte_ptr_is_leaf(pte) || pte_ptr_is_initial(pte) == 0) {
+    if (pte_ptr_is_leaf(pte) || !pte_ptr_is_not_initial(pte)) {
         return 0;
     }
     else {
@@ -276,8 +283,8 @@ BOOT_CODE VISIBLE void map_kernel_window(void)
     assert(pptr == PPTR_TOP);
 
     /* now we should be mapping the 1GiB kernel base */
-    pptr = ROUND_DOWN(KERNEL_ELF_BASE, 30);
-    paddr = ROUND_DOWN(KERNEL_ELF_PADDR_BASE, 30);
+    pptr = ROUND_DOWN(KERNEL_ELF_BASE, 25);
+    paddr = ROUND_DOWN(KERNEL_ELF_PADDR_BASE, 25);
 
     /* The kernel image is mapped twice */
     kernel_l1pt[LA_GET_PT_INDEX(pptr, 1)] =
@@ -385,7 +392,7 @@ BOOT_CODE cap_t create_it_address_space(cap_t root_cnode_cap, v_region_t it_v_re
     cap_t      lvl1pt_cap;
     vptr_t     pt_vptr;
 
-    // copyGlobalMappings_t(PTE_PTR(rootserver.vspace));
+    copyGlobalMappings_t(PTE_PTR(rootserver.vspace));
 
     lvl1pt_cap =
         cap_page_table_cap_new(
@@ -479,7 +486,7 @@ void copyGlobalMappings_t(pte_t *newLvl1pt)
     unsigned long i;
 
     for (i = LA_GET_PT_INDEX(0ull, 1); i < BIT(PT_INDEX_BITS); i++) {
-        newLvl1pt[i].words[0] = PTE_CREATE_NEXT(0x200ull);
+        newLvl1pt[i].words[0] = PTE_CREATE_NEXT(0x0ull);
     }
 }
 
@@ -533,7 +540,7 @@ lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
     ret.ptBitsLeft = PT_INDEX_BITS * level + seL4_PageBits;
     save_ptSlot = pt + ((vptr >> ret.ptBitsLeft) & MASK(PT_INDEX_BITS));
 
-    while (isPTEPageTable((pte_t *)save_ptSlot) && likely(0 < level)) {
+    while (likely(0 < level) && isPTEPageTable((pte_t *)save_ptSlot)) {
         level--;
         ret.ptBitsLeft -= PT_INDEX_BITS;
         pt = PTE_PTR(paddr_to_pptr(save_ptSlot->words[0]));
@@ -542,9 +549,6 @@ lookupPTSlot_ret_t lookupPTSlot(pte_t *lvl1pt, vptr_t vptr)
 
     ret.ptSlot = (pte_t *)save_ptSlot;
     ret.ptLevel = level;
-    if (!isPTEPageTable((pte_t *)save_ptSlot)) {
-        ret.ptSlot = (pte_t *)save_ptSlot;
-    }
 
     return ret;
 }
@@ -559,9 +563,6 @@ exception_t handleVMFault(tcb_t *thread, vm_fault_type_t vm_faultType)
         case LALoadPageInvalid:     //PIL
             current_fault = seL4_Fault_VMFault_new(addr, LALoadPageInvalid, false);
             return EXCEPTION_FAULT;
-        case LAPageNoReadable:      //PNR
-            current_fault = seL4_Fault_VMFault_new(addr, LAPageNoReadable, false);
-            return EXCEPTION_FAULT;
         case LAStorePageInvalid:    //PIS
             if (handle_tlb_store()) {
                 current_fault = seL4_Fault_VMFault_new(addr, LAStorePageInvalid, false);
@@ -569,24 +570,29 @@ exception_t handleVMFault(tcb_t *thread, vm_fault_type_t vm_faultType)
             } else {
                 return EXCEPTION_NONE;
             }
-        case LAPageModException:    //PME
-            current_fault = seL4_Fault_VMFault_new(addr, LAPageModException, false);
-            return EXCEPTION_FAULT;
         case LAFetchPageInvalid:    //PIF
             current_fault = seL4_Fault_VMFault_new(addr, LAFetchPageInvalid, false);
             return EXCEPTION_FAULT;
-        case LAPageNoExecutable:    //PNX
-            current_fault = seL4_Fault_VMFault_new(addr, LAFetchPageInvalid, true);
+        case LAPageModException:    //PME
+            current_fault = seL4_Fault_VMFault_new(addr, LAPageModException, false);
             return EXCEPTION_FAULT;
-
-        case LAAddrError:           //ADEF or ADEM
-
-        case LAAddrAlignFault:      //ALE
-
-        case LABoundCheck:          //BCE
-
+        case LAPageNoReadable:      //PNR
+            current_fault = seL4_Fault_VMFault_new(addr, LAPageNoReadable, false);
+            return EXCEPTION_FAULT;
+        case LAPageNoExecutable:    //PNX
+            current_fault = seL4_Fault_VMFault_new(addr, LAFetchPageInvalid, false);
+            return EXCEPTION_FAULT;
         case LAPagePrivilegeIllegal://PPI
-            printf("unhandled exceptions!\n");
+            current_fault = seL4_Fault_VMFault_new(addr, LAPagePrivilegeIllegal, false);
+            return EXCEPTION_FAULT;
+        case LAAddrError:           //ADEF or ADEM
+            current_fault = seL4_Fault_VMFault_new(addr, LAAddrError, false);
+            return EXCEPTION_FAULT;
+        case LAAddrAlignFault:      //ALE
+            current_fault = seL4_Fault_VMFault_new(addr, LAAddrAlignFault, false);
+            return EXCEPTION_FAULT;
+        case LABoundCheck:          //BCE
+            current_fault = seL4_Fault_VMFault_new(addr, LABoundCheck, false);
             return EXCEPTION_FAULT;
         default:
             fail("Invalid VM fault type\n");
@@ -730,7 +736,6 @@ void setVMRoot(tcb_t *tcb)
     threadRoot = TCB_PTR_CTE_PTR(tcb, tcbVTable)->cap;
 
     if (cap_get_capType(threadRoot) != cap_page_table_cap) {
-        setVSpaceRoot(kpptr_to_paddr(&kernel_l1pt), 0);
         return;
     }
 
@@ -739,7 +744,6 @@ void setVMRoot(tcb_t *tcb)
     asid = cap_page_table_cap_get_capPTMappedASID(threadRoot);
     find_ret = findVSpaceForASID(asid);
     if (unlikely(find_ret.status != EXCEPTION_NONE || find_ret.vspace_root != lvl1pt)) {
-        setVSpaceRoot(kpptr_to_paddr(&kernel_l1pt), 0);
         return;
     }
 

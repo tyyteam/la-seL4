@@ -130,12 +130,12 @@ BOOT_CODE static void init_fpu(void)
 
 BOOT_CODE static void init_cpu(void)
 {
-
-    activate_kernel_vspace();
     // setup_pw();
 
     /* init tlb */
     init_tlb();
+
+    activate_kernel_vspace();
     
     /* set vs=0 of LOONGARCH_CSR_ECFG, all traps goes to the same trap_entry in traps.S*/
     set_csr_ecfg(0U << CSR_ECFG_VS_SHIFT);
@@ -150,8 +150,8 @@ BOOT_CODE static void init_cpu(void)
     initLocalIRQController();
 
 #ifndef CONFIG_KERNEL_MCS
-    // initTimer();
-    w_csr_tcfg(0x0);
+    initTimer();
+    // w_csr_tcfg(0x0);
 #endif
 
     /* disable FPU access*/

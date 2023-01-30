@@ -127,15 +127,12 @@ void VISIBLE NORETURN c_handle_interrupt(void)
 
     c_entry_hook();
 
-    printf("==================================================\n");
-    printf("estat: 0x%x\n",read_csr_estat());
-    printf("==================================================\n");
-
     handleInterruptEntry();
 
     restore_user_context();
     UNREACHABLE();
 }
+
 void VISIBLE NORETURN c_handle_exception(void)
 {
     NODE_LOCK_SYS;
@@ -143,10 +140,6 @@ void VISIBLE NORETURN c_handle_exception(void)
     c_entry_hook();
 
     word_t excode = read_csr_excode();
-
-    printf("==================================================\n");
-    printf("exception!: 0x%lx\n",excode);
-    printf("==================================================\n");
 
     switch (excode)
     {
@@ -229,11 +222,6 @@ void VISIBLE c_handle_fastpath_call(word_t cptr, word_t msgInfo)
     NODE_LOCK_SYS;
 
     c_entry_hook();
-    printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    printf("estat: 0x%x\n", read_csr_estat());
-    if(msgInfo==0b1000010000110){
-        printf("fastpath_call: performing UntypedRetype\n");
-    }
     
 #ifdef TRACK_KERNEL_ENTRIES
     benchmark_debug_syscall_start(cptr, msgInfo, SysCall);
@@ -249,7 +237,6 @@ void VISIBLE c_handle_fastpath_call(word_t cptr, word_t msgInfo)
 void VISIBLE NORETURN c_handle_syscall(word_t cptr, word_t msgInfo, syscall_t syscall)
 {
     NODE_LOCK_SYS;
-    // printf("entered c_handle_syscall with num: %lu\n",syscall);
 
     c_entry_hook();
 #ifdef TRACK_KERNEL_ENTRIES 
